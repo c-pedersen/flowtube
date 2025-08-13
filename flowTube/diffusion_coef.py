@@ -5,7 +5,7 @@ Handles the calculation of the diffusion coefficient of a binary gas mixture.
 import math
 import molmass as mm
 
-from flowTube import tools
+from . import tools
 
 ## Physical Constants (Appendix B from Reid et al., 1987)
 # Characteristic Lennard-Jones Lengths (Å)

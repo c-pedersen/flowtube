@@ -6,7 +6,7 @@ import numpy as np
 import molmass as mm
 import math
 
-from flowTube import tools
+from . import tools
 
 ## van der Waal's Constants - Chemistry LibreTexts
 a = {'Ar': 1.355, 'He': 0.0346, 'N2': 1.370, 'O2': 1.382} # bar L2 mol-2

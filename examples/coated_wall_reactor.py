@@ -6,7 +6,7 @@ Example usage of flowTube package for flow reactor calculations.
 import sys
 import os
 
-import flowTube
+from flowTube import flowTube
 
 def main():
     """Example flow reactor calculation."""

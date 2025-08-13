@@ -6,7 +6,7 @@ coated wall reactor (CWR) calculations, viscosity/density calculations,
 and binary diffusion coefficients for atmospheric chemistry research.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Corey Pedersen"
 __email__ = "coreyped@gmail.com"
 

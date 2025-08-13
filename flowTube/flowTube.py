@@ -4,7 +4,7 @@ from tabulate import tabulate
 import warnings
 import molmass as mm
 
-from flowTube import tools, diffusion_coef, viscosity_density
+from . import tools, diffusion_coef, viscosity_density
 
 ### Helper Functions ###
 ## Geometery
