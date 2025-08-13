@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flowTube"
+version = "0.1.0"
+authors = [
+  { name = "Corey Pedersen", email = "coreyped@gmail.com" },
+]
+description = "A Python package for transport and diffusion calculations in cylindrical flow reactors"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.7"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+keywords = ["flow reactor", "diffusion", "transport", "coated wall reactor", "aerosol", "atmospheric chemistry"]
+
+dependencies = [
+    "numpy>=1.18.0",
+    "pandas>=1.0.0", 
+    "tabulate>=0.8.0",
+    "molmass>=2019.1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "black",
+    "flake8",
+    "mypy",
+]
+
+[project.urls]
+Homepage = "https://github.com/c-pedersen/flowTube"
+Repository = "https://github.com/c-pedersen/flowTube"
+Documentation = "https://github.com/c-pedersen/flowTube#readme"
+"Bug Tracker" = "https://github.com/c-pedersen/flowTube/issues"
+
+[tool.setuptools]
+packages = ["flowTube"]
