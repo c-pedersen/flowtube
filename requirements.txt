@@ -9,8 +9,3 @@ tabulate>=0.8.0
 
 # Molecular mass calculations
 molmass>=2019.1.1
-
-# Development dependencies (optional)
-# pytest>=6.0
-# black
-# flake8
