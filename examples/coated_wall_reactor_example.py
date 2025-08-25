@@ -14,10 +14,10 @@ def main():
     
     # Create a flow tube reactor instance
     cwr = flowtube.CoatedWallReactor(
-        FT_ID=2.5,              # Flow tube inner diameter (cm)
+        FT_ID=2.6,              # Flow tube inner diameter (cm)
         FT_length=50.0,         # Flow tube length (cm)
-        injector_ID=0.3,        # Injector inner diameter (cm)
-        injector_OD=0.6,        # Injector outer diameter (cm)
+        injector_ID=1,        # Injector inner diameter (cm)
+        injector_OD=1.2,        # Injector outer diameter (cm)
         reactant_gas='HCl',     # Reactant gas formula (options are Ar, He, Air, Br2, Cl2', HBr, HCl, HI, H2O, I2, NO, 
                                 # N2, and O2)
         carrier_gas='N2',       # Carrier gas formula (options are Ar, He, N2, O2)
