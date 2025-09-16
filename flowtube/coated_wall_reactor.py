@@ -1,6 +1,7 @@
 import numpy as np
 import molmass as mm # pyright: ignore[reportMissingImports]
 from numpy.typing import NDArray
+import warnings
 
 from . import tools, diffusion_coef, viscosity_density, flow_calc
 
@@ -149,8 +150,7 @@ class CoatedWallReactor:
                                                 tools.cross_sectional_area(self.injector_OD)) * 60)
         var_names += ['Minimum Carrier Flow Rate']; var += [min_carrier_FR]; var_fmts += ['.1f']; units += ['sccm']
         if carrier_FR < min_carrier_FR:
-            raise UserWarning('Carrier flow rate is below the minimum. ' \
-            'This may affect the flow profile in the flow tube.')
+            warnings.warn('Carrier flow rate is below the minimum. This may affect the flow profile in the flow tube.')
 
         # More Flow Rates
         var_names += ['Carrier Flow Rate']; var += [carrier_FR]; var_fmts += ['.1f']; units += ['sccm']
@@ -209,13 +209,13 @@ class CoatedWallReactor:
         Re_FT = flow_calc.reynolds_number(self, self.total_FR, self.FT_ID)
         var_names += ['Flow Tube Reynolds Number']; var += [Re_FT]; var_fmts += ['.0f']; units += ['unitless']
         if Re_FT > 1800 :
-            raise UserWarning('Re > 1800. Flow in flow tube may not be laminar')
+            warnings.warn('Re > 1800. Flow in flow tube may not be laminar')
 
         if self.insert_length > 0:
             Re_insert = flow_calc.reynolds_number(self, self.total_FR, self.insert_ID)
             var_names += ['Insert Reynolds Number']; var += [Re_insert]; var_fmts += ['.0f']; units += ['unitless']
             if Re_insert > 1800:
-                raise UserWarning('Re > 1800. Flow in insert may not be laminar')
+                warnings.warn('Re > 1800. Flow in insert may not be laminar')
         
         # Entrance length (cm) - see flow_calc.py for details
         length_to_laminar = flow_calc.length_to_laminar(self.FT_ID, Re_FT)
@@ -235,21 +235,21 @@ class CoatedWallReactor:
             var_names += ['Total Pressure Gradient']; var += [total_pressure_gradient * 100]; var_fmts += ['.2f'] 
             units += ['%']
         else:
-            FT_pressure_gradient = flow_calc.conductance(self, self.FT_ID, self.FT_length)
+            FT_pressure_gradient = flow_calc.pressure_gradient(self, FT_conductance, self.total_FR)
             var_names += ['Flow Tube Pressure Gradient']; var += [FT_pressure_gradient * 100]; var_fmts += ['.2f'] 
             units += ['%']
 
         # Buoyancy Parameters - see flow_calc.py for details
         radial_buoyancy = flow_calc.buoyancy_parameters(self, radial_delta_T, self.FT_ID, Re_FT)
         axial_buoyancy = flow_calc.buoyancy_parameters(self, axial_delta_T, self.FT_length, Re_FT)
-        var_names += [f'Radial Buoyancy Parameter ({radial_delta_T:.1f} C)']; var += [radial_buoyancy]
+        var_names += [f'Radial Buoyancy Parameter (ΔT={radial_delta_T:.1f} C)']; var += [radial_buoyancy]
         var_fmts += ['.2f']; units += ['unitless']
-        var_names += [f'Axial Buoyancy Parameter ({radial_delta_T:.1f} C)']; var += [axial_buoyancy]
+        var_names += [f'Axial Buoyancy Parameter (ΔT={axial_delta_T:.1f} C)']; var += [axial_buoyancy]
         var_fmts += ['.2f']; units += ['unitless']
         if radial_buoyancy > 1:
-            raise UserWarning('Radial buoyancy parameter > 1. Flow may be affected by buoyancy effects')
+            warnings.warn('Radial buoyancy parameter > 1. Flow may be affected by buoyancy effects')
         if axial_buoyancy > 1:
-            raise UserWarning('Axial buoyancy parameter > 1. Flow may be affected by buoyancy effects')
+            warnings.warn('Axial buoyancy parameter > 1. Flow may be affected by buoyancy effects')
     
         ### Display Values ###
         if disp == True:
@@ -293,7 +293,7 @@ class CoatedWallReactor:
         Pe = advection_rate / self.reactant_diffusion_rate
         var_names += ['Peclet Number']; var += [self.reactant_diffusion_rate]; var_fmts += ['.4g']; units += ['unitless']
         if Pe < 10:
-            raise UserWarning('Pe < 10. Axial diffusion is non-negligible')
+            warnings.warn('Pe < 10. Axial diffusion is non-negligible')
         
         # Mixing Time (s) - see flow_calc.py for details
         if self.insert_length > 0:
@@ -304,7 +304,7 @@ class CoatedWallReactor:
             var_names += ['Flow Tube Mixing Time']
         var += [mixing_time]; var_fmts += ['.2g']; units += ['s']
         
-        # Mixing Length (cm) - Hanson and  Kosciuch, J. Phys. Chem. A, 2003
+        # Mixing Length (cm)
         if self.insert_length > 0:
             mixing_length = self.insert_flow_velocity * mixing_time
             var_names += ['Insert Mixing Length']
@@ -345,7 +345,7 @@ class CoatedWallReactor:
 
     def reactant_uptake(self, hypothetical_gamma: NDArray[np.float64] | float, gamma_wall: float = 5e-6, 
                         disp: bool = True) -> tuple[NDArray[np.float64] | float, NDArray[np.float64] | float]:
-        ''' Calculates reactant uptake to coated wall insert and loss to flow tube walls.
+        ''' Calculates reactant uptake to coated wall or insert and loss to flow tube walls.
     
         Args:
             hypothetical_gamma (float or numpy.ndarray): Hypothetical uptake coefficient to calculate diffusion 
@@ -355,8 +355,8 @@ class CoatedWallReactor:
             disp (bool): Display calculated values.
     
         Returns:
-            float: Gas phase insert diffusion correction factor (unitless).
-            float: Percent loss in insert (%).
+            float: Gas phase diffusion correction factor (unitless).
+            float: Loss to insert or coated wall as ratio of inital amount (fraction).
         '''
 
         ### Check for valid inputs ###
@@ -371,6 +371,15 @@ class CoatedWallReactor:
         # Lists for displaying values
         var_names: list[str] = []; var: list[NDArray[np.float64] | float] = []; var_fmts: list[str] = []; 
         units: list[str] = []
+
+        # Surface area of coated area
+        if self.insert_length > 0:
+            surface_area = 2 * np.pi * self.insert_ID * self.insert_length / 4
+            var_names += ['Insert surface area']
+        else:
+            surface_area = 2 * np.pi * self.FT_ID * self.FT_length / 4
+            var_names += ['Coated wall surface area (1/4 length)']
+        var += [surface_area]; var_fmts += ['.1f']; units += ['cm2'] 
     
         # Diffusion Correction Factor - gamma_eff / gamma - eq. 15 from Knopf et al., Anal. Chem., 2015
         if self.insert_length > 0:
