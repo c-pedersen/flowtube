@@ -2,7 +2,7 @@
 Constants and unit conversions.
 '''
 
-import math
+import numpy as np
 import pandas as pd
 from tabulate import tabulate # pyright: ignore[reportMissingModuleSource]
 from requests.structures import CaseInsensitiveDict
@@ -44,7 +44,37 @@ def cross_sectional_area(diameter: float) -> float:
         float: Cross sectional area.
     '''
 
-    return math.pi * (diameter / 2) ** 2
+    return np.pi * (diameter / 2) ** 2
+
+def partial_cylinder_area(height: float, width: float) -> float:
+    """
+    Calculate the cross-sectional area of a partial cylinder ("boat") given its height and width. Assumes the 
+    partial cylinder is a segment of a circle with given width as chord length and that the height is less than
+    the diameter of the circle. Calculations based on: https://mathworld.wolfram.com/CircularSegment.html and
+    https://www.vcalc.com/wiki/KurtHeckman/Circle-area-of-an-arc-segment-h.
+
+    Args:
+    height (float): Height of the segment (cm).
+    width (float): Chord length of the segment (cm).
+
+    Returns:
+    float: Cross-sectional area (cm^2).
+    """
+
+    # Ensure the proper geometry for the following calculation
+    if height > width / 2:
+        raise ValueError('Boat height cannot be greater than boat radius.')
+
+    # Calculate radius from height and chord length 
+    r = (height / 2) + (width ** 2 / (8 * height))
+
+    # Central angle (theta) in radians
+    theta = 2 * np.arccos((r - height) / r)
+
+    # Area of the segment
+    area = (r ** 2 / 2) * (theta - np.sin(theta))
+
+    return area
 
 ### Display Calculations ###
 def table(var_names: list[str], var: list[float], var_fmts: list[str], units: list[str]) -> None:
