@@ -72,7 +72,7 @@ def MR_to_molec(obj: basic_attrs, conc: float) -> float:
         float: Concentration in molec. cm-3.
     '''
 
-    return obj.P / (tools.UNIVERSAL_GAS_CONSTANT * obj.T) * tools.AVOGADROS_NUMBER / 100 ** 3 * conc
+    return obj.P / (tools.UNIVERSAL_GAS_CONSTANT * obj.T) * tools.AVOGADROS_NUMBER / 100 ** 3 * conc * 1e-9
 
 def molec_velocity(obj: basic_attrs, molar_mass: float) -> float:
     ''' Calculate thermal molecular velocity. Formula matched to values from Knopf et al., Anal. Chem., 2015
@@ -89,7 +89,7 @@ def molec_velocity(obj: basic_attrs, molar_mass: float) -> float:
 
 ### Flow diagnostics calculations ###
 def reynolds_number(obj: carrier_attrs, FR: float, diameter: float) -> float:
-    ''' Calculate Reynolds number.
+    ''' Calculate Reynolds number for a gas flowing through a cylinder.
 
     Args:
         obj (carrier_attrs): Object with full attributes (P in Pa, T in K, carrier_dynamic_viscosity in kg m-1 s-1, 
@@ -154,7 +154,11 @@ def buoyancy_parameters(obj: carrier_attrs, delta_T: float, distance: float, Re:
     return grashof_number / Re ** 2
 
 def length_to_laminar(diameter: float, Re: float) -> float:
-    ''' Entrance length (cm) - length to achieve laminar profile - Bird et al., 2002, page 52
+    ''' Entrance length (cm) - length to achieve laminar profile - Bird et al., 2002, page 52. Note that the scalar term
+        can vary depending on the source. Keyser, 1994 gives a value of 0.0565 for 99% attainment of parabolic profile
+        while Hanson and Kosciuch, 2003 provide a value of 0.05 for 95% attainment. Using an exponential fit of the
+        values, it seems that the 0.035 figure that Bird et al., 2002 gives is for a 85% attainment. Choose whichever
+        value is most appropriate for your purposes.
 
     Args:
         diameter (float): Diameter of the cylinder (cm).
@@ -164,10 +168,10 @@ def length_to_laminar(diameter: float, Re: float) -> float:
         float: Length to laminar profile (cm).
     '''
 
-    return 0.035 * diameter * Re
+    return 0.05 * diameter * Re
 
 def mixing_time(obj: full_attrs, diameter: float) -> float:
-    ''' Calculate mixing time (s) - eq. 10 from Hanson and Lovejoy, Geophys. Res. Lett., 1994.
+    ''' Calculate mixing time (s) - Hanson and Lovejoy, Geophys. Res. Lett., 1994.
 
     Args:
         obj (full_attrs): Object with full attributes (P in Pa, T in K, reactant_diffusion_rate in cm2 s-1,
@@ -296,8 +300,15 @@ def cylinder_loss(obj: full_attrs, diameter: float, N_eff_Shw: float, Kn: float,
     through Laminar Flow Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87, 3746–3754. 
     https://doi.org/10.1021/ac5042395
 
+    Keyser, L.F., 1984. High-pressure flow kinetics. A study of the hydroxyl + hydrogen chloride reaction from 2 to 100 
+    torr. J. Phys. Chem. 88, 4750–4758. https://doi.org/10.1021/j150664a061
+
     Hanson, D.R., Lovejoy, E.R., 1994. The uptake of N2O5 onto small sulfuric acid particles. Geophys. Res. Lett. 21, 
     2401–2404. https://doi.org/10.1029/94GL02288
+
+    Hanson, D., Kosciuch, E., 2003. The NH3 Mass Accommodation Coefficient for Uptake onto Sulfuric Acid Solutions. 
+    J. Phys. Chem. A 107, 2199–2208. https://doi.org/10.1021/jp021570j
+
 
     Moore, J.H., Davis, C.C., Coplan, M.A., 2009. Building Scientific Apparatus, 4th ed. ed. Cambridge University Press,
     Leiden.
