@@ -1,5 +1,5 @@
 import numpy as np
-import molmass as mm  # pyright: ignore[reportMissingImports]
+import molmass as mm
 from numpy.typing import NDArray
 import warnings
 
@@ -695,10 +695,10 @@ class CoatedWallReactor:
             tools.table(
                 "Reactant Uptake",
                 var_names,
-                var,
+                var,  # pyright: ignore[reportArgumentType]
                 var_fmts,
                 units,
-            )  # pyright: ignore[reportArgumentType]
+            )  
 
         return C_g, uptake
 

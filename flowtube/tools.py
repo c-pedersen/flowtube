@@ -4,7 +4,7 @@ Constants and unit conversions.
 
 import numpy as np
 import pandas as pd
-from tabulate import tabulate  # pyright: ignore[reportMissingModuleSource]
+from tabulate import tabulate
 from requests.structures import CaseInsensitiveDict
 
 
@@ -119,7 +119,7 @@ def table(
         [var_names, [format(v, "8" + fmt) for v, fmt in zip(var, var_fmts)], units]
     ).T
     table = tabulate(
-        data,
+        data,  # pyright: ignore[reportArgumentType]
         disable_numparse=True,
         tablefmt="fancy_grid",
         showindex=False,
