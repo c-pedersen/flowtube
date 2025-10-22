@@ -1,9 +1,11 @@
 """
-flowtube - A Python package for transport and diffusion calculations in cylindrical flow reactors.
+flowtube - A Python package for transport and diffusion calculations in
+cylindrical flow reactors.
 
-This package provides tools and utilities for flow reactor analysis including
-coated wall reactor (CWR) calculations, viscosity/density calculations, 
-and binary diffusion coefficients for atmospheric chemistry research.
+This package provides tools and utilities for flow reactor analysis
+including coated wall reactor (CWR) calculations, viscosity/density
+calculations, and binary diffusion coefficients for atmospheric
+chemistry research.
 """
 
 from typing import TYPE_CHECKING
@@ -24,12 +26,13 @@ from .coated_wall_reactor import CoatedWallReactor
 # Explicit type hint for Pylance
 if TYPE_CHECKING:
     from .coated_wall_reactor import CoatedWallReactor as _CoatedWallReactor
+
     CoatedWallReactor: type[_CoatedWallReactor]
 
 __all__ = [
     "CoatedWallReactor",
-    "tools", 
+    "tools",
     "viscosity_density",
     "diffusion_coef",
-    "flow_calc"
+    "flow_calc",
 ]

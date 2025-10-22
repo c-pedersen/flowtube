@@ -50,3 +50,7 @@ flowtube = ["py.typed", "*.pyi"]
 include = ["flowtube"]
 exclude = ["**/__pycache__"]
 typeCheckingMode = "standard"
+
+[tool.ruff]
+line-length = 88
+docstring-code-line-length = 72

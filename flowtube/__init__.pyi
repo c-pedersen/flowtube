@@ -7,8 +7,11 @@ from . import diffusion_coef as diffusion_coef
 from . import flow_calc as flow_calc
 
 class CoatedWallReactor:
-    """Handles calculations relevant to flow rate, flow diagnostics, transport, and uptake for a coated wall reactor."""
-    
+    """
+    Handles calculations relevant to flow rate, flow diagnostics,
+    transport, and uptake for a coated wall reactor.
+    """
+
     FT_ID: float
     FT_length: float
     injector_ID: float
@@ -18,7 +21,7 @@ class CoatedWallReactor:
     reactant_MR: float
     insert_ID: float
     insert_length: float
-    
+
     def __init__(
         self,
         FT_ID: float,
@@ -31,7 +34,6 @@ class CoatedWallReactor:
         insert_ID: float = ...,
         insert_length: float = ...,
     ) -> None: ...
-    
     def initialize(
         self,
         reactant_FR: float,
@@ -44,7 +46,6 @@ class CoatedWallReactor:
         axial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
-    
     def flows(
         self,
         reactant_FR: float,
@@ -52,16 +53,13 @@ class CoatedWallReactor:
         carrier_FR: float,
         disp: bool = ...,
     ) -> None: ...
-    
     def carrier_flow(
         self,
         radial_delta_T: float = ...,
         axial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
-    
     def reactant_diffusion(self, disp: bool = ...) -> None: ...
-    
     def reactant_uptake(
         self,
         hypothetical_gamma: Any,
