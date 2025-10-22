@@ -22,16 +22,20 @@ from . import flow_calc
 
 # Import the main CWR class for direct access
 from .coated_wall_reactor import CoatedWallReactor
+from .boat_reactor import BoatReactor
 
 # Explicit type hint for Pylance
 if TYPE_CHECKING:
     from .coated_wall_reactor import CoatedWallReactor as _CoatedWallReactor
 
     CoatedWallReactor: type[_CoatedWallReactor]
+    from .boat_reactor import BoatReactor as _BoatReactor
+    BoatReactor: type[_BoatReactor]
 
 __all__ = [
     "CoatedWallReactor",
-    "tools",
+    "BoatReactor",
+    "tools", 
     "viscosity_density",
     "diffusion_coef",
     "flow_calc",
