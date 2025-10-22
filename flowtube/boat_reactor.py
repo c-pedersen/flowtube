@@ -1,5 +1,5 @@
 import numpy as np
-import molmass as mm  # pyright: ignore[reportMissingImports]
+import molmass as mm
 from numpy.typing import NDArray
 import warnings
 
@@ -296,7 +296,13 @@ class BoatReactor:
 
         ### Display Values ###
         if disp:
-            tools.table(var_names, var, var_fmts, units)
+            tools.table(
+                "Flow Setpoints and Conditions",
+                var_names,
+                var,
+                var_fmts,
+                units,
+            )
 
     def carrier_flow(
         self,
@@ -379,18 +385,23 @@ class BoatReactor:
         units += ["unitless"]
         if radial_buoyancy > 1:
             warnings.warn(
-                "Radial buoyancy parameter > 1. " \
+                "Radial buoyancy parameter > 1. "
                 "Flow may be affected by buoyancy effects"
             )
         if axial_buoyancy > 1:
             warnings.warn(
-                "Axial buoyancy parameter > 1. " \
-                "Flow may be affected by buoyancy effects"
+                "Axial buoyancy parameter > 1. Flow may be affected by buoyancy effects"
             )
 
         ### Display Values ###
         if disp:
-            tools.table(var_names, var, var_fmts, units)
+            tools.table(
+                "Fluid Dynamics of Carrier Gas",
+                var_names,
+                var,
+                var_fmts,
+                units,
+            )
 
     def reactant_diffusion(self, disp: bool = True):
         """Performs and displays reactant diffusion calculations.
@@ -409,7 +420,7 @@ class BoatReactor:
         units: list[str] = []
 
         # Reactant Diffusion Rate (cm2 s-1)
-        self.reactant_diffusion_rate = diffusion_coef.binary_diffusion_coefficent(self)
+        self.reactant_diffusion_rate = diffusion_coef.binary_diffusion_coefficient(self)
         var_names += ["Reactant Diffusion Rate"]
         var += [self.reactant_diffusion_rate]
         var_fmts += [".3g"]
@@ -433,7 +444,7 @@ class BoatReactor:
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
 
-        # Peclet Number - if > 10 then axial diffusion is negligible 
+        # Peclet Number - if > 10 then axial diffusion is negligible
         # - eq. 1 from Knopf et al., Anal. Chem., 2015
         Pe = advection_rate / self.reactant_diffusion_rate
         var_names += ["Peclet Number"]
@@ -457,21 +468,27 @@ class BoatReactor:
         var_fmts += [".2g"]
         units += ["cm"]
 
-        # Effective Sherwood Number (unitless) 
+        # Effective Sherwood Number (unitless)
         # - eq. 11 from Knopf et al., Anal. Chem., 2015
-        # Note: the boat geometry is not considered and thus this value 
+        # Note: the boat geometry is not considered and thus this value
         # should be used as a limiting case
         self.N_eff_Shw_FT = flow_calc.N_eff_Shw(self, self.FT_length, self.total_FR)
 
-        # Knudsen Number for reactant-wall/insert interaction 
+        # Knudsen Number for reactant-wall/insert interaction
         # - eq. 8 from Knopf et al., Anal. Chem., 2015
-        # Note: the boat geometry is not considered and thus this value 
+        # Note: the boat geometry is not considered and thus this value
         # should be used as a limiting case
         self.Kn_FT = flow_calc.Kn(reactant_mean_free_path, self.FT_ID)
 
         ### Display Values ###
         if disp:
-            tools.table(var_names, var, var_fmts, units)
+            tools.table(
+                "Reactant Diffusion Parameters",
+                var_names,
+                var,
+                var_fmts,
+                units,
+            )
 
     def reactant_uptake(
         self,
@@ -480,14 +497,14 @@ class BoatReactor:
         disp: bool = True,
     ) -> NDArray[np.float64] | float:
         """
-        Calculates reactant uptake to the boat and loss to flow tube 
+        Calculates reactant uptake to the boat and loss to flow tube
         walls.
 
         Args:
-            hypothetical_gamma (float or numpy.ndarray): Hypothetical 
-                uptake coefficient to calculate diffusion correction 
+            hypothetical_gamma (float or numpy.ndarray): Hypothetical
+                uptake coefficient to calculate diffusion correction
                 factor.
-            gamma_wall (float): Wall uptake coefficient (default: 5e-6 
+            gamma_wall (float): Wall uptake coefficient (default: 5e-6
                 for halocarbon wax coating - Ivanov et al., 2021).
             disp (bool): Display calculated values.
 
@@ -529,7 +546,7 @@ class BoatReactor:
         )
         if diff_corr > 0.05:
             warnings.warn(
-                "Diffusion correction is > 5%. " \
+                "Diffusion correction is > 5%. "
                 "Negligible diffusion may no longer be a valid assumption"
             )
         var_names += [
@@ -551,7 +568,7 @@ class BoatReactor:
         var_fmts += [".2f"]
         units += ["unitless"]
 
-        # Corrected Loss Rate (s-1) 
+        # Corrected Loss Rate (s-1)
         # - see flow_calc.py and Hanson and Ravishankara, 1993 for details
         k = (
             flow_calc.observed_loss_rate(self, self.FT_ID, hypothetical_gamma)
@@ -569,7 +586,7 @@ class BoatReactor:
         var_fmts += [".1f"]
         units += ["%"]
 
-        # Reactant Wall Loss (fraction) 
+        # Reactant Wall Loss (fraction)
         # - calculated as if there is no boat, take as an upper limit
         reactant_wall_loss = flow_calc.cylinder_loss(
             self,
@@ -586,7 +603,13 @@ class BoatReactor:
 
         ### Display Values ###
         if disp is True or not isinstance(var, np.ndarray):
-            tools.table(var_names, var, var_fmts, units)  # pyright: ignore[reportArgumentType]
+            tools.table(
+                "Reactant Uptake",
+                var_names,
+                var,  # pyright: ignore[reportArgumentType]
+                var_fmts,
+                units,
+            ) 
 
         return uptake
 
