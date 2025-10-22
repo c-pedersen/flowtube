@@ -101,6 +101,7 @@ class CoatedWallReactor:
         P: float,
         P_units: str,
         T: float,
+        reactant_diffusion_rate=None,
         radial_delta_T: float = 1,
         axial_delta_T: float = 1,
         disp: bool = True,
@@ -118,6 +119,8 @@ class CoatedWallReactor:
             P (float): Pressure.
             P_units (str): Pressure units.
             T (float): Temperature (C).
+            reactant_diffusion_rate (float): Reactant diffusion rate 
+                (cm2 s-1).
             radial_delta_T (float): Radial temperature gradient (K)
                 (default = 1 K).
             axial_delta_T (float): Axial temperature gradient (K)
@@ -150,11 +153,21 @@ class CoatedWallReactor:
         self.P = tools.P_in_Pa(P, P_units)
         self.T = tools.T_in_K(T)
 
-        self.flows(reactant_FR, reactant_carrier_FR, carrier_FR, disp=disp)
-        self.carrier_flow(
-            radial_delta_T=radial_delta_T, axial_delta_T=axial_delta_T, disp=disp
+        self.flows(
+            reactant_FR,
+            reactant_carrier_FR,
+            carrier_FR,
+            disp=disp,
         )
-        self.reactant_diffusion(disp=disp)
+        self.carrier_flow(
+            radial_delta_T=radial_delta_T,
+            axial_delta_T=axial_delta_T,
+            disp=disp,
+        )
+        self.reactant_diffusion(
+            reactant_diffusion_rate=reactant_diffusion_rate,
+            disp=disp,
+        )
 
     def flows(
         self,
@@ -421,11 +434,13 @@ class CoatedWallReactor:
 
     def reactant_diffusion(
         self,
+        reactant_diffusion_rate=None,
         disp: bool = True,
     ) -> None:
         """Performs and displays reactant diffusion calculations.
 
         Args:
+            reactant_diffusion_rate (float): Reactant diffusion rate (cm2 s-1).
             disp (bool): Display calculated calculated values.
 
         Returns:
@@ -439,8 +454,14 @@ class CoatedWallReactor:
         units: list[str] = []
 
         # Reactant Diffusion Rate (cm2 s-1)
-        self.reactant_diffusion_rate = diffusion_coef.binary_diffusion_coefficient(self)
-        var_names += ["Reactant Diffusion Rate"]
+        if reactant_diffusion_rate is None:
+            self.reactant_diffusion_rate = diffusion_coef.binary_diffusion_coefficient(
+                self
+            )
+            var_names += ["Reactant Diffusion Rate"]
+        else:
+            self.reactant_diffusion_rate = reactant_diffusion_rate
+            var_names += ["Input Reactant Diffusion Rate"]
         var += [self.reactant_diffusion_rate]
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
@@ -698,7 +719,7 @@ class CoatedWallReactor:
                 var,  # pyright: ignore[reportArgumentType]
                 var_fmts,
                 units,
-            )  
+            )
 
         return C_g, uptake
 
