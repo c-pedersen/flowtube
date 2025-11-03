@@ -40,7 +40,8 @@ class BoatReactor:
                 injector.
             reactant_gas (str): Molecular formula of reactant gas
                 (supported Ar, He, Air, Br2, Cl2, HBr, HCl, HI, H2O, I2,
-                NO, N2, and O2).
+                NO, N2, and O2 or other if manually inputting the
+                diffusion coefficient).
             carrier_gas (str): Molecular formula of carrier gas
                 (supported: Ar, He, N2, O2).
             reactant_MR (float): Reactant mixing ratio (mol mol-1).
@@ -56,10 +57,15 @@ class BoatReactor:
         ### Check for valid inputs ###
         # Check if the gases are supported
         if reactant_gas not in diffusion_coef.sigmas.keys():
-            raise ValueError(
-                f"Unsupported reactant gas. "
-                f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}"
-            )
+            # Validate molecular formulas using molarmass
+            try:
+                mm.Formula(reactant_gas).mass  # raises on invalid formula
+            except Exception:
+                raise ValueError(
+                    f"Invalid reactant gas molecular formula: {reactant_gas}. "
+                    f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}, or "
+                    f"other if manually inputting diffusion coefficient"
+                    )
         if carrier_gas not in viscosity_density.a.keys():
             raise ValueError(
                 f"Unsupported carrier gas. "
@@ -132,8 +138,8 @@ class BoatReactor:
             P (float): Pressure.
             P_units (str): Pressure units.
             T (float): Temperature (C).
-            reactant_diffusion_rate (float): Reactant diffusion rate 
-                (cm2 s-1).
+            reactant_diffusion_rate (float, optional): Reactant
+                diffusion rate (cm2 s-1).
             radial_delta_T (float): Radial temperature gradient (K)
                 (default = 1 K).
             axial_delta_T (float): Axial temperature gradient (K)
@@ -438,14 +444,20 @@ class BoatReactor:
         units: list[str] = []
 
         # Reactant Diffusion Rate (cm2 s-1)
-        if reactant_diffusion_rate is None:
+        if self.reactant_gas not in diffusion_coef.sigmas.keys():
+            if reactant_diffusion_rate is None:
+                raise ValueError(
+                    f"Must input reactant diffusion rate for {self.reactant_gas}"
+                )
+
+            self.reactant_diffusion_rate = reactant_diffusion_rate
+            var_names += ["Manually Inputted Reactant Diffusion Rate"]
+        else:
             self.reactant_diffusion_rate = diffusion_coef.binary_diffusion_coefficient(
                 self
             )
             var_names += ["Reactant Diffusion Rate"]
-        else:
-            self.reactant_diffusion_rate = reactant_diffusion_rate
-            var_names += ["Input Reactant Diffusion Rate"]
+
         var += [self.reactant_diffusion_rate]
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
@@ -604,8 +616,8 @@ class BoatReactor:
         units += ["s-1"]
 
         # Uptake to boat (fraction) - first order kinetics
-        uptake = 1 - np.exp(-k * self.residence_time)
-        var_names += ["Loss to Boat"]
+        uptake = 1 - np.exp(-k * self.residence_time / 4)
+        var_names += ["Loss to Boat - 1/4 Length"]
         var += [uptake * 100]
         var_fmts += [".1f"]
         units += ["%"]
