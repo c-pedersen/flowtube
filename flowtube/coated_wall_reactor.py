@@ -82,6 +82,8 @@ class CoatedWallReactor:
             raise ValueError("Injector OD cannot be larger than flow tube ID")
         elif injector_ID > injector_OD:
             raise ValueError("Injector ID cannot be larger than injector OD")
+        elif injector_ID == 0 or injector_OD == 0:
+            raise ValueError("Injector dimensions must be non-zero")
 
         # Check mixing ratio
         if reactant_MR < 0 or reactant_MR > 1:
@@ -139,6 +141,12 @@ class CoatedWallReactor:
         # Check if flow rates are positive
         if reactant_FR < 0 or reactant_carrier_FR < 0 or carrier_FR < 0:
             raise ValueError("Flow rates must be positive")
+        
+        # Check for non-zero flow
+        if (reactant_FR <= 0) + (reactant_carrier_FR < 0) + (carrier_FR < 0):
+            raise ValueError("Reactant flow rate must be positive and non-zero")
+        if reactant_carrier_FR < 0 and carrier_FR < 0:
+            raise ValueError(" Flow rates must be positive or zero")
 
         # Check if the pressure units are supported
         if P_units not in tools.P_CF.keys():
@@ -346,12 +354,12 @@ class CoatedWallReactor:
         units += ["kg m-3"]
 
         # Reynolds Number - laminar flow if Re < 1800
-        Re_FT = flow_calc.reynolds_number(self, self.total_FR, self.FT_ID)
+        self.Re_FT = flow_calc.reynolds_number(self, self.total_FR, self.FT_ID)
         var_names += ["Flow Tube Reynolds Number"]
-        var += [Re_FT]
+        var += [self.Re_FT]
         var_fmts += [".0f"]
         units += ["unitless"]
-        if Re_FT > 1800:
+        if self.Re_FT > 1800:
             warnings.warn("Re > 1800. Flow in flow tube may not be laminar")
 
         if self.insert_length > 0:
@@ -364,7 +372,7 @@ class CoatedWallReactor:
                 warnings.warn("Re > 1800. Flow in insert may not be laminar")
 
         # Entrance length (cm) - see flow_calc.py for details
-        length_to_laminar = flow_calc.length_to_laminar(self.FT_ID, Re_FT)
+        length_to_laminar = flow_calc.length_to_laminar(self.FT_ID, self.Re_FT)
         var_names += ["Flow Tube Entrance length"]
         var += [length_to_laminar]
         var_fmts += [".1f"]
@@ -404,10 +412,10 @@ class CoatedWallReactor:
 
         # Buoyancy Parameters - see flow_calc.py for details
         radial_buoyancy = flow_calc.buoyancy_parameters(
-            self, radial_delta_T, self.FT_ID, Re_FT
+            self, radial_delta_T, self.FT_ID, self.Re_FT
         )
         axial_buoyancy = flow_calc.buoyancy_parameters(
-            self, axial_delta_T, self.FT_length, Re_FT
+            self, axial_delta_T, self.FT_length, self.Re_FT
         )
         var_names += [f"Radial Buoyancy Parameter (ΔT={radial_delta_T:.1f} C)"]
         var += [radial_buoyancy]
@@ -484,7 +492,7 @@ class CoatedWallReactor:
         )  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
 
         # Reactant Mean Free Path (cm) - Fuchs and Sutugin, 1971
-        reactant_mean_free_path = (
+        self.reactant_mean_free_path = (
             3 * self.reactant_diffusion_rate / self.reactant_molec_velocity
         )
 
@@ -501,12 +509,12 @@ class CoatedWallReactor:
 
         # Peclet Number - if > 10 then axial diffusion is negligible
         # - eq. 1 from Knopf et al., Anal. Chem., 2015
-        Pe = advection_rate / self.reactant_diffusion_rate
+        self.Pe_FT = advection_rate / self.reactant_diffusion_rate
         var_names += ["Peclet Number"]
-        var += [self.reactant_diffusion_rate]
+        var += [self.Pe_FT]
         var_fmts += [".4g"]
         units += ["unitless"]
-        if Pe < 10:
+        if self.Pe_FT < 10:
             warnings.warn("Pe < 10. Axial diffusion is non-negligible")
 
         # Mixing Time (s) - see flow_calc.py for details
@@ -541,9 +549,9 @@ class CoatedWallReactor:
 
         # Knudsen Number for reactant-wall/insert interaction
         # - eq. 8 from Knopf et al., Anal. Chem., 2015
-        self.Kn_FT = flow_calc.Kn(reactant_mean_free_path, self.FT_ID)
+        self.Kn_FT = flow_calc.Kn(self.reactant_mean_free_path, self.FT_ID)
         if self.insert_length > 0:
-            self.Kn_insert = flow_calc.Kn(reactant_mean_free_path, self.insert_ID)
+            self.Kn_insert = flow_calc.Kn(self.reactant_mean_free_path, self.insert_ID)
 
         # Diffusion Limited Rate Constant (s-1) and Uptake Coefficient
         # - see flow_calc.py for details

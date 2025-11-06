@@ -54,3 +54,8 @@ typeCheckingMode = "standard"
 [tool.ruff]
 line-length = 88
 docstring-code-line-length = 72
+
+# pyproject.toml
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["flowtube"]

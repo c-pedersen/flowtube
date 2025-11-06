@@ -94,6 +94,8 @@ class BoatReactor:
             raise ValueError("Injector OD cannot be larger than flow tube ID")
         elif injector_ID > injector_OD:
             raise ValueError("Injector ID cannot be larger than injector OD")
+        elif injector_ID == 0 or injector_OD == 0:
+            raise ValueError("Injector dimensions must be non-zero")
 
         # Check mixing ratio
         if reactant_MR < 0 or reactant_MR > 1:
@@ -153,6 +155,12 @@ class BoatReactor:
         # Check if flow rates are positive
         if reactant_FR < 0 or reactant_carrier_FR < 0 or carrier_FR < 0:
             raise ValueError("Flow rates must be positive")
+        
+        # Check for non-zero flow
+        if (reactant_FR <= 0) + (reactant_carrier_FR < 0) + (carrier_FR < 0):
+            raise ValueError("Reactant flow rate must be positive and non-zero")
+        if reactant_carrier_FR < 0 and carrier_FR < 0:
+            raise ValueError(" Flow rates must be positive or zero")
 
         # Check if the pressure units are supported
         if P_units not in tools.P_CF.keys():
@@ -364,21 +372,21 @@ class BoatReactor:
 
         # Reynolds Number - considers the boat as floating in the flow and thus this
         # should be taken as an upper limit.
-        Re = flow_calc.reynolds_number_irregular(
+        self.Re = flow_calc.reynolds_number_irregular(
             self,
             cross_sectional_area=self.net_cross_section,
             wetted_perimeter=self.boat_perimeter,
             FR=self.total_FR,
         )
         var_names += ["Reynolds Number Over Boat (upper limit)"]
-        var += [Re]
+        var += [self.Re]
         var_fmts += [".0f"]
         units += ["unitless"]
-        if Re > 1800:
+        if self.Re > 1800:
             warnings.warn("Re > 1800. Flow in flow tube may not be laminar")
 
         # Entrance length (cm) - see flow_calc.py for details
-        length_to_laminar = flow_calc.length_to_laminar(self.FT_ID, Re)
+        length_to_laminar = flow_calc.length_to_laminar(self.FT_ID, self.Re)
         var_names += ["Entrance length Over Boat (upper limit)"]
         var += [length_to_laminar]
         var_fmts += [".1f"]
@@ -403,10 +411,10 @@ class BoatReactor:
 
         # Buoyancy Parameters - see flow_calc.py for details
         radial_buoyancy = flow_calc.buoyancy_parameters(
-            self, radial_delta_T, self.FT_ID, Re
+            self, radial_delta_T, self.FT_ID, self.Re
         )
         axial_buoyancy = flow_calc.buoyancy_parameters(
-            self, axial_delta_T, self.FT_length, Re
+            self, axial_delta_T, self.FT_length, self.Re
         )
         var_names += [f"Radial Buoyancy Parameter (ΔT={radial_delta_T:.1f} C)"]
         var += [radial_buoyancy]
