@@ -10,7 +10,7 @@ chemistry research.
 
 from typing import TYPE_CHECKING
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __author__ = "Corey Pedersen"
 __email__ = "coreyped@gmail.com"
 
