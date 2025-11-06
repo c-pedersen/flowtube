@@ -5,8 +5,8 @@
 A Python package for transport and diffusion calculations in cylindrical
 flow reactors using the KPS method published in Knopf et al., Anal. 
 Chem., 2015. The package is currently designed for coated wall reactor 
-(CWR) analysis with plans to support aerosol flow reactors in future 
-versions.
+(CWR) and boat reactor analysis with plans to support aerosol flow 
+reactors in future versions.
 
 Author: Corey Pedersen
 
@@ -24,6 +24,9 @@ calculations
 
 Support for Inserts: Handles coated cylindrical inserts within flow 
 tubes
+
+Support for Boats: Handles boat reactors which are placed in side of a 
+flow tube and filled with an analyte solution.
 
 ## Scientific Applications
 This package is designed for atmospheric chemistry and aerosol research,
@@ -57,7 +60,7 @@ KPS method assumptions (Knopf et al., 2015):
 6. There is an absence of gas-phase reactions impacting gas species 
     concentration
 
-## Bibliography
+## Bibliography (more citations within package files)
 Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and 
 Penetration of Gas Molecules and Aerosol Particles through Laminar Flow 
 Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87, 3746–3754. 
