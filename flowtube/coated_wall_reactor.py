@@ -50,10 +50,15 @@ class CoatedWallReactor:
         ### Check for valid inputs ###
         # Check if the gases are supported
         if reactant_gas not in diffusion_coef.sigmas.keys():
-            raise ValueError(
-                f"Unsupported reactant gas. "
-                f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}"
-            )
+            # Validate molecular formulas using molarmass
+            try:
+                mm.Formula(reactant_gas).mass  # raises on invalid formula
+            except Exception:
+                raise ValueError(
+                    f"Invalid reactant gas molecular formula: {reactant_gas}. "
+                    f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}, or "
+                    f"other if manually inputting diffusion coefficient"
+                )
         if carrier_gas not in viscosity_density.a.keys():
             raise ValueError(
                 f"Unsupported carrier gas. "
@@ -454,14 +459,20 @@ class CoatedWallReactor:
         units: list[str] = []
 
         # Reactant Diffusion Rate (cm2 s-1)
-        if reactant_diffusion_rate is None:
+        if self.reactant_gas not in diffusion_coef.sigmas.keys():
+            if reactant_diffusion_rate is None:
+                raise ValueError(
+                    f"Must input reactant diffusion rate for {self.reactant_gas}"
+                )
+
+            self.reactant_diffusion_rate = reactant_diffusion_rate
+            var_names += ["Manually Inputted Reactant Diffusion Rate"]
+        else:
             self.reactant_diffusion_rate = diffusion_coef.binary_diffusion_coefficient(
                 self
             )
             var_names += ["Reactant Diffusion Rate"]
-        else:
-            self.reactant_diffusion_rate = reactant_diffusion_rate
-            var_names += ["Input Reactant Diffusion Rate"]
+            
         var += [self.reactant_diffusion_rate]
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
