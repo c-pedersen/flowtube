@@ -65,7 +65,7 @@ class BoatReactor:
                     f"Invalid reactant gas molecular formula: {reactant_gas}. "
                     f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}, or "
                     f"other if manually inputting diffusion coefficient"
-                    )
+                )
         if carrier_gas not in viscosity_density.a.keys():
             raise ValueError(
                 f"Unsupported carrier gas. "
@@ -242,11 +242,11 @@ class BoatReactor:
         )
 
         # Calculate the cross-sectional area of the boat reactor and flow tube
-        boat_cross_section = tools.partial_cylinder_area(
+        self.boat_perimeter, self.boat_cross_section = tools.partial_cylinder_area(
             self.boat_height, self.boat_width
         )
         self.net_cross_section = (
-            tools.cross_sectional_area(self.FT_ID) - boat_cross_section
+            tools.cross_sectional_area(self.FT_ID) - self.boat_cross_section
         )
 
         # Minimum Carrier Flow Velocity & Rate
@@ -295,11 +295,11 @@ class BoatReactor:
         var_fmts += [".2e"]
         units += ["molec. cm-3"]
 
-        # Total Flow Velocities
+        # Total Flow Velocity over the boat
         self.flow_velocity = (
             flow_calc.sccm_to_ccm(self, self.total_FR) / self.net_cross_section / 60
         )
-        var_names += ["Flow Tube Velocity"]
+        var_names += ["Flow Velocity Over Boat"]
         var += [self.flow_velocity]
         var_fmts += [".3g"]
         units += ["cm s-1"]
@@ -308,7 +308,7 @@ class BoatReactor:
         self.residence_time = (
             self.boat_length - self.boat_wall_thickness * 2
         ) / self.flow_velocity
-        var_names += ["Boat Residence Time"]
+        var_names += ["Residence Time Over Boat"]
         var += [self.residence_time]
         var_fmts += [".3g"]
         units += ["s"]
@@ -362,37 +362,51 @@ class BoatReactor:
         var_fmts += [".3g"]
         units += ["kg m-3"]
 
-        # Reynolds Number - laminar flow if Re < 1800
-        Re_FT = flow_calc.reynolds_number(self, self.total_FR, self.FT_ID)
-        var_names += ["!!!!!!!!!Flow Tube Reynolds Number"]
-        var += [Re_FT]
+        # Reynolds Number - considers the boat as floating in the flow and thus this
+        # should be taken as an upper limit.
+        Re = flow_calc.reynolds_number_irregular(
+            self,
+            cross_sectional_area=self.net_cross_section,
+            wetted_perimeter=self.boat_perimeter,
+            FR=self.total_FR,
+        )
+        var_names += ["Reynolds Number Over Boat (upper limit)"]
+        var += [Re]
         var_fmts += [".0f"]
         units += ["unitless"]
-        if Re_FT > 1800:
+        if Re > 1800:
             warnings.warn("Re > 1800. Flow in flow tube may not be laminar")
 
         # Entrance length (cm) - see flow_calc.py for details
-        length_to_laminar = flow_calc.length_to_laminar(self.FT_ID, Re_FT)
-        var_names += ["Flow Tube Entrance length"]
+        length_to_laminar = flow_calc.length_to_laminar(self.FT_ID, Re)
+        var_names += ["Entrance length Over Boat (upper limit)"]
         var += [length_to_laminar]
         var_fmts += [".1f"]
         units += ["cm"]
 
         # Pressure Gradient (%) - see flow_calc.py for details
-        FT_pressure_gradient = flow_calc.pressure_gradient(
-            self, flow_calc.conductance(self, self.FT_ID, self.FT_length), self.total_FR
+        equivalent_diameter = np.sqrt(self.net_cross_section / np.pi)
+        boat_conductance = flow_calc.conductance(
+            self, equivalent_diameter, self.boat_length
         )
-        var_names += ["!!!!!!!!Flow Tube Pressure Gradient"]
+        FT_conductance = flow_calc.conductance(
+            self, self.FT_ID, self.FT_length - self.boat_length
+        )
+        total_conductance = 1 / (1 / boat_conductance + 1 / FT_conductance)
+        FT_pressure_gradient = flow_calc.pressure_gradient(
+            self, total_conductance, self.total_FR
+        )
+        var_names += ["Flow Tube Pressure Gradient (approx.)"]
         var += [FT_pressure_gradient * 100]
         var_fmts += [".2f"]
         units += ["%"]
 
         # Buoyancy Parameters - see flow_calc.py for details
         radial_buoyancy = flow_calc.buoyancy_parameters(
-            self, radial_delta_T, self.FT_ID, Re_FT
+            self, radial_delta_T, self.FT_ID, Re
         )
         axial_buoyancy = flow_calc.buoyancy_parameters(
-            self, axial_delta_T, self.FT_length, Re_FT
+            self, axial_delta_T, self.FT_length, Re
         )
         var_names += [f"Radial Buoyancy Parameter (ΔT={radial_delta_T:.1f} C)"]
         var += [radial_buoyancy]
@@ -473,17 +487,20 @@ class BoatReactor:
             3 * self.reactant_diffusion_rate / self.reactant_molec_velocity
         )
 
-        # Advection Rate (cm2 s-1) - eq. 1 from Knopf et al., Anal. Chem., 2015
+        # Flow Tube Advection Rate (cm2 s-1)
+        # - eq. 1 from Knopf et al., Anal. Chem., 2015
+        # - should be smaller than over the boat, take this as a lower limit.
         advection_rate = self.flow_velocity * self.FT_ID
-        var_names += ["Flow Tube Advection Rate"]
+        var_names += ["Flow Tube Advection Rate (lower limit for boat)"]
         var += [advection_rate]
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
 
-        # Peclet Number - if > 10 then axial diffusion is negligible
+        # Flow Tube Peclet Number - if > 10 then axial diffusion is negligible
         # - eq. 1 from Knopf et al., Anal. Chem., 2015
+        # - should be smaller than over the boat, take this as a lower limit.
         Pe = advection_rate / self.reactant_diffusion_rate
-        var_names += ["Peclet Number"]
+        var_names += ["Flow Tube Peclet Number (lower limit for boat)"]
         var += [Pe]
         var_fmts += [".4g"]
         units += ["unitless"]
@@ -491,15 +508,17 @@ class BoatReactor:
             warnings.warn("Pe < 10. Axial diffusion is non-negligible")
 
         # Mixing Time (s) - see flow_calc.py for details
+        # - should be larger than over the boat, take this as an upper limit.
         mixing_time = flow_calc.mixing_time(self, self.FT_ID)
-        var_names += ["Flow Tube Mixing Time (upper limit)"]
+        var_names += ["Flow Tube Mixing Time (upper limit for boat)"]
         var += [mixing_time]
         var_fmts += [".2g"]
         units += ["s"]
 
         # Mixing Length (cm)
+        # - should be larger than over the boat, take this as an upper limit.
         mixing_length = self.flow_velocity * mixing_time
-        var_names += ["Flow Tube Mixing Length"]
+        var_names += ["Flow Tube Mixing Length (upper limit for boat)"]
         var += [mixing_length]
         var_fmts += [".2g"]
         units += ["cm"]
@@ -568,9 +587,11 @@ class BoatReactor:
         liquid_length = self.boat_length - self.boat_wall_thickness * 2
         liquid_height = self.boat_height - self.boat_wall_thickness
         liquid_surface_area = liquid_width * liquid_length
-        liquid_volume = (
-            tools.partial_cylinder_area(liquid_height, liquid_width) * liquid_length
+        _, liquid_cross_section = tools.partial_cylinder_area(
+            liquid_height,
+            liquid_width,
         )
+        liquid_volume = liquid_cross_section * liquid_length
         var_names += ["Boat Surface Area", "Boat Volume"]
         var += [liquid_surface_area, liquid_volume]
         var_fmts += [".1f", ".1f"]
@@ -598,9 +619,9 @@ class BoatReactor:
         actual_SA_V_ratio = liquid_surface_area / (
             self.net_cross_section * liquid_length
         )
-        geometric_correction = actual_SA_V_ratio / cylinder_SA_V_ratio
+        self.geometric_correction = actual_SA_V_ratio / cylinder_SA_V_ratio
         var_names += ["Boat geometry correction factor"]
-        var += [1 / geometric_correction]
+        var += [1 / self.geometric_correction]
         var_fmts += [".2f"]
         units += ["unitless"]
 
@@ -608,7 +629,7 @@ class BoatReactor:
         # - see flow_calc.py and Hanson and Ravishankara, 1993 for details
         k = (
             flow_calc.observed_loss_rate(self, self.FT_ID, hypothetical_gamma)
-            / geometric_correction
+            / self.geometric_correction
         )
         var_names += ["Loss Rate"]
         var += [k]

@@ -61,21 +61,23 @@ def cross_sectional_area(
 def partial_cylinder_area(
     height: float,
     width: float,
-) -> float:
+) -> tuple[float, float]:
     """
-    Calculate the cross-sectional area of a partial cylinder ("boat")
-    given its height and width. Assumes the partial cylinder is a
-    segment of a circle with given width as chord length and that the
-    height is less than the diameter of the circle. Calculations based
-    on: https://mathworld.wolfram.com/CircularSegment.html and
+    Calculate the cross-sectional area and perimeter of a partial 
+    cylinder ("boat") given its height and width. Assumes the partial 
+    cylinder is a segment of a circle with given width as chord length 
+    and that the height is less than the diameter of the circle. 
+    Calculations based on: 
+    https://mathworld.wolfram.com/CircularSegment.html and
     https://www.vcalc.com/wiki/KurtHeckman/Circle-area-of-an-arc-segment-h.
 
     Args:
-    height (float): Height of the segment (cm).
-    width (float): Chord length of the segment (cm).
+        height (float): Height of the segment (cm).
+        width (float): Chord length of the segment (cm).
 
     Returns:
-    float: Cross-sectional area (cm^2).
+        float: Outer perimeter (cm).
+        float: Cross-sectional area (cm^2).
     """
 
     # Ensure the proper geometry for the following calculation
@@ -88,10 +90,16 @@ def partial_cylinder_area(
     # Central angle (theta) in radians
     theta = 2 * np.arccos((r - height) / r)
 
+    # Arc length
+    arc_length = r * theta
+
+    # Wetted perimeter
+    perimeter = arc_length + width
+
     # Area of the segment
     area = (r**2 / 2) * (theta - np.sin(theta))
 
-    return area
+    return perimeter, area
 
 
 ### Display Calculations ###

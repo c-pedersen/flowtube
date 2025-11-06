@@ -172,6 +172,41 @@ def reynolds_number(
     )
 
 
+def reynolds_number_irregular(
+    obj: carrier_attrs,
+    cross_sectional_area: float,
+    wetted_perimeter: float,
+    FR: float,
+) -> float:
+    """
+    Calculate Reynolds number for a gas flowing through a cylinder.
+    Formula 6-14 from Holman and Bhattacharyya 2011.
+
+    Args:
+        obj (carrier_attrs): Object with full attributes (P in Pa,
+            T in K, carrier_dynamic_viscosity in kg m-1 s-1,
+            carrier_density in kg m-3).
+        cross_sectional_area (float): Cross sectional area of the flow
+            passage (cm2).
+        wetted_perimeter (float): Wetted perimeter of the flow passage
+            (cm).
+        FR (float): Total flow rate in sccm.
+
+    Returns:
+        float: Reynolds number.
+    """
+    hydraulic_diameter = 4 * cross_sectional_area / wetted_perimeter
+
+    return (
+        (obj.carrier_density / 100**3)
+        * sccm_to_ccm(obj, FR)
+        / cross_sectional_area
+        / 60
+        * hydraulic_diameter
+        / (obj.carrier_dynamic_viscosity / 100)
+    )
+
+
 def conductance(
     obj: carrier_attrs,
     diameter: float,
@@ -501,6 +536,8 @@ Hanson, D., Kosciuch, E., 2003. The NH3 Mass Accommodation Coefficient
 for Uptake onto Sulfuric Acid Solutions. J. Phys. Chem. A 107, 
 2199–2208. https://doi.org/10.1021/jp021570j
 
+Holman, J. P., & Bhattacharyya, S. (2011). Heat transfer in SI units 
+(10th ed.). McGraw-Hill. p. 284
 
 Moore, J.H., Davis, C.C., Coplan, M.A., 2009. Building Scientific 
 Apparatus, 4th ed. ed. Cambridge University Press, Leiden.
