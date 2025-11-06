@@ -10,7 +10,7 @@ Chem., 2015. The package is currently designed for coated wall reactor
 (CWR) and boat reactor analysis with plans to support aerosol flow 
 reactors in future versions.
 
-Author: Corey Pedersen
+Author: Corey Pedersen 
 
 ## Features
 Flow Calculations: Flow rates, velocities, residence times, and Reynolds 
