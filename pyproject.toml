@@ -34,6 +34,12 @@ dependencies = [
     "molmass>=2019.1.1",
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest >=7.0",
+    "pytest-cov",
+]
+
 [project.urls]
 Homepage = "https://github.com/c-pedersen/flowtube"
 Repository = "https://github.com/c-pedersen/flowtube"
