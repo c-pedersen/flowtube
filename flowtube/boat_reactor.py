@@ -122,7 +122,7 @@ class BoatReactor:
         P: float,
         P_units: str,
         T: float,
-        reactant_diffusion_rate=None,
+        reactant_diffusion_rate: float = np.nan,
         radial_delta_T: float = 1,
         axial_delta_T: float = 1,
         disp: bool = True,
@@ -446,7 +446,7 @@ class BoatReactor:
 
     def reactant_diffusion(
         self,
-        reactant_diffusion_rate=None,
+        reactant_diffusion_rate: float = np.nan,
         disp: bool = True,
     ) -> None:
         """Performs and displays reactant diffusion calculations.
@@ -467,7 +467,7 @@ class BoatReactor:
 
         # Reactant Diffusion Rate (cm2 s-1)
         if self.reactant_gas not in diffusion_coef.sigmas.keys():
-            if reactant_diffusion_rate is None:
+            if np.isnan(reactant_diffusion_rate):
                 raise ValueError(
                     f"Must input reactant diffusion rate for {self.reactant_gas}"
                 )

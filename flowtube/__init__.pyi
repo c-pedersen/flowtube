@@ -43,6 +43,7 @@ class CoatedWallReactor:
         P: float,
         P_units: str,
         T: float,
+        reactant_diffusion_rate: float = ...,
         radial_delta_T: float = ...,
         axial_delta_T: float = ...,
         disp: bool = ...,
@@ -69,7 +70,10 @@ class CoatedWallReactor:
     ) -> tuple[NDArray[np.float64] | float, NDArray[np.float64] | float]: ...
 
 class BoatReactor:
-    """Handles calculations relevant to flow rate, diagnostics, transport, and uptake for a boat reactor."""
+    """
+    Handles calculations relevant to flow rate, diagnostics, transport, 
+    and uptake for a boat reactor.
+    """
 
     FT_ID: float
     FT_length: float
@@ -106,6 +110,7 @@ class BoatReactor:
         P: float,
         P_units: str,
         T: float,
+        reactant_diffusion_rate: float = ...,
         radial_delta_T: float = ..., 
         axial_delta_T: float = ...,
         disp: bool = ...,

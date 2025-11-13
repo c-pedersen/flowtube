@@ -40,6 +40,9 @@ test = [
     "pytest >=7.0",
     "pytest-cov",
 ]
+dev = [
+    "twine >= 6.0.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/c-pedersen/flowtube"
