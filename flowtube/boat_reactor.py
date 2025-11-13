@@ -155,7 +155,7 @@ class BoatReactor:
         # Check if flow rates are positive
         if reactant_FR < 0 or reactant_carrier_FR < 0 or carrier_FR < 0:
             raise ValueError("Flow rates must be positive")
-        
+
         # Check for non-zero flow
         if (reactant_FR <= 0) + (reactant_carrier_FR < 0) + (carrier_FR < 0):
             raise ValueError("Reactant flow rate must be positive and non-zero")
@@ -488,7 +488,7 @@ class BoatReactor:
         # - formula matched to values from Knopf et al., Anal. Chem., 2015
         self.reactant_molec_velocity = flow_calc.molec_velocity(
             self, float(mm.Formula(self.reactant_gas).mass)
-        )  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+        )
 
         # Reactant Mean Free Path (cm) - Fuchs and Sutugin, 1971
         reactant_mean_free_path = (
@@ -558,7 +558,7 @@ class BoatReactor:
         hypothetical_gamma: NDArray[np.float64] | float,
         gamma_wall: float = 5e-6,
         disp: bool = True,
-    ) -> NDArray[np.float64] | float:
+    ) -> None:
         """
         Calculates reactant uptake to the boat and loss to flow tube
         walls.
@@ -572,7 +572,7 @@ class BoatReactor:
             disp (bool): Display calculated values.
 
         Returns:
-            float: Loss to boat as ratio to inital amount (fraction).
+            None
         """
 
         ### Check for valid inputs ###
@@ -627,27 +627,27 @@ class BoatReactor:
         actual_SA_V_ratio = liquid_surface_area / (
             self.net_cross_section * liquid_length
         )
-        self.geometric_correction = actual_SA_V_ratio / cylinder_SA_V_ratio
+        self.geometric_correction = cylinder_SA_V_ratio / actual_SA_V_ratio
         var_names += ["Boat geometry correction factor"]
-        var += [1 / self.geometric_correction]
+        var += [self.geometric_correction]
         var_fmts += [".2f"]
         units += ["unitless"]
 
         # Corrected Loss Rate (s-1)
         # - see flow_calc.py and Hanson and Ravishankara, 1993 for details
-        k = (
+        self.k = (
             flow_calc.observed_loss_rate(self, self.FT_ID, hypothetical_gamma)
             / self.geometric_correction
         )
         var_names += ["Loss Rate"]
-        var += [k]
+        var += [self.k]
         var_fmts += [".3g"]
         units += ["s-1"]
 
         # Uptake to boat (fraction) - first order kinetics
-        uptake = 1 - np.exp(-k * self.residence_time / 4)
+        self.uptake = 1 - np.exp(-self.k * self.residence_time / 4)
         var_names += ["Loss to Boat - 1/4 Length"]
-        var += [uptake * 100]
+        var += [self.uptake * 100]
         var_fmts += [".1f"]
         units += ["%"]
 
@@ -675,8 +675,6 @@ class BoatReactor:
                 var_fmts,
                 units,
             )
-
-        return uptake
 
 
 """ 
