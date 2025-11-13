@@ -442,8 +442,8 @@ def correction_factor(
     gamma: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
-    Calculate correction factor for uptake coefficient - eq. 20 from
-    Knopf et al., 2015.
+    Calculate correction factor (gamma_eff / gamma) for uptake 
+    coefficient - eq. 15 from Knopf et al., 2015.
 
     Args:
         N_eff_Shw (float): Effective Sherwood number (unitless).
@@ -452,7 +452,7 @@ def correction_factor(
             (unitless).
 
     Returns:
-        float: Correction factor (unitless).
+        float: Correction factor (unitless: gamma_eff / gamma).
     """
 
     return 1 / (1 + gamma * 3 / (2 * N_eff_Shw * Kn))
@@ -464,7 +464,8 @@ def observed_loss_rate(
     gamma_eff: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
-    Calculate observed loss rate (s-1) - eq. 19 from Knopf et al., 2015.
+    Calculate observed first order loss rate (s-1) - eq. 19 from Knopf 
+    et al., 2015.
 
     Args:
         obj (full_attrs): Object with full attributes (P in Pa, T in K,
@@ -475,7 +476,7 @@ def observed_loss_rate(
         gamma_eff (float): Effective uptake coefficient (unitless).
 
     Returns:
-        float: Observed loss rate (s-1).
+        float: Observed first order loss rate (s-1).
     """
 
     return gamma_eff * obj.reactant_molec_velocity / diameter
@@ -490,7 +491,8 @@ def cylinder_loss(
     time: float,
 ) -> NDArray[np.float64] | float:
     """
-    Calculate penetration (unitless) - eq. 21 from Knopf et al., 2015.
+    Calculate amount of gas lost to cylinder walls according to a 
+    provided gamma - eq. 21 from Knopf et al., 2015.
 
     Args:
         obj (full_attrs): Object with full attributes (P in Pa, T in K,
