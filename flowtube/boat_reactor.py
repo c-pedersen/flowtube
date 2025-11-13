@@ -667,7 +667,7 @@ class BoatReactor:
         units += ["%"]
 
         ### Display Values ###
-        if disp is True or not isinstance(var, np.ndarray):
+        if disp and not isinstance(var, np.ndarray):
             tools.table(
                 "Reactant Uptake",
                 var_names,
