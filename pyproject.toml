@@ -33,6 +33,7 @@ dependencies = [
     "tabulate>=0.8.0",
     "molmass>=2019.1.1",
     "requests>=2.22.0",
+    "scipy>=1.0.0"
 ]
 
 [project.optional-dependencies]

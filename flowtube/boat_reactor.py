@@ -3,7 +3,7 @@ import molmass as mm
 from numpy.typing import NDArray
 import warnings
 
-from . import tools, diffusion_coef, viscosity_density, flow_calc
+from . import tools, diffusion_coef, viscosity_density, flow_calc, kinetics
 
 
 class BoatReactor:
@@ -155,7 +155,7 @@ class BoatReactor:
         # Check if flow rates are positive
         if reactant_FR < 0 or reactant_carrier_FR < 0 or carrier_FR < 0:
             raise ValueError("Flow rates must be positive")
-        
+
         # Check for non-zero flow
         if (reactant_FR <= 0) + (reactant_carrier_FR < 0) + (carrier_FR < 0):
             raise ValueError("Reactant flow rate must be positive and non-zero")
@@ -484,8 +484,7 @@ class BoatReactor:
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
 
-        # Thermal Molecular Velocity (cm s-1)
-        # - formula matched to values from Knopf et al., Anal. Chem., 2015
+        # Thermal Molecular Velocity (cm s-1) - see flow_calc.py for details
         self.reactant_molec_velocity = flow_calc.molec_velocity(
             self, float(mm.Formula(self.reactant_gas).mass)
         )  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
@@ -532,13 +531,11 @@ class BoatReactor:
         units += ["cm"]
 
         # Effective Sherwood Number (unitless)
-        # - eq. 11 from Knopf et al., Anal. Chem., 2015
         # Note: the boat geometry is not considered and thus this value
         # should be used as a limiting case
         self.N_eff_Shw_FT = flow_calc.N_eff_Shw(self, self.FT_length, self.total_FR)
 
         # Knudsen Number for reactant-wall/insert interaction
-        # - eq. 8 from Knopf et al., Anal. Chem., 2015
         # Note: the boat geometry is not considered and thus this value
         # should be used as a limiting case
         self.Kn_FT = flow_calc.Kn(reactant_mean_free_path, self.FT_ID)
@@ -605,8 +602,8 @@ class BoatReactor:
         var_fmts += [".1f", ".1f"]
         units += ["cm2", "cm3"]
 
-        # Diffusion Correction - see flow_calc.py for details
-        diff_corr = 1 - flow_calc.correction_factor(
+        # Diffusion Correction - see kinetics.py for details
+        diff_corr = 1 - kinetics.correction_factor(
             self.N_eff_Shw_FT, self.Kn_FT, hypothetical_gamma
         )
         if diff_corr > 0.05:
@@ -634,9 +631,9 @@ class BoatReactor:
         units += ["unitless"]
 
         # Corrected Loss Rate (s-1)
-        # - see flow_calc.py and Hanson and Ravishankara, 1993 for details
+        # - see kinetics.py and Hanson and Ravishankara, 1993 for details
         k = (
-            flow_calc.observed_loss_rate(self, self.FT_ID, hypothetical_gamma)
+            kinetics.observed_loss_rate(self, self.FT_ID, hypothetical_gamma)
             / self.geometric_correction
         )
         var_names += ["Loss Rate"]
@@ -653,7 +650,7 @@ class BoatReactor:
 
         # Reactant Wall Loss (fraction)
         # - calculated as if there is no boat, take as an upper limit
-        reactant_wall_loss = flow_calc.cylinder_loss(
+        reactant_wall_loss = kinetics.cylinder_loss(
             self,
             self.FT_ID,
             self.N_eff_Shw_FT,
@@ -678,6 +675,64 @@ class BoatReactor:
 
         return uptake
 
+    def calculate_gamma(
+        self,
+        concentrations: NDArray[np.float64],
+        exposure: NDArray[np.float64],
+        exposure_units: str,
+    ) -> tuple[float, float, float, tuple[float, float]]:
+        """
+        Fits the observed loss to the boat to a first order kinetic
+        model to extract the uptake coefficient.
+
+        Args:
+            concentrations (numpy.ndarray): Reactant concentrations
+                (arbitrary units).
+            exposure (numpy.ndarray): Reactant exposure (s or cm).
+            exposure_units (str): Units of exposure (s or cm).
+
+        Returns:
+            float: k, first order loss rate (s-1).
+            float: r_value, correlation coefficient of the fit.
+            float: gamma, uptake coefficient.
+            tuple[float, float]: 95% confidence interval for gamma
+        """
+
+        # Check for geometric correction and apply 
+        # (see geometric_correction in reactant_uptake)
+        if not hasattr(self, "geometric_correction"):
+            raise AttributeError("Must call reactant_uptake() before using fit()")
+        else:
+            diameter = self.FT_ID * self.geometric_correction
+
+        # Fit data to first order kinetics
+        slope, intercept, r_value, p_value, std_err = kinetics.fit_first_order_kinetics(
+            obj=self,
+            concentrations=concentrations,
+            exposure=exposure,
+            exposure_units=exposure_units,
+        )
+        k = -slope
+
+        # Calculate gamma and confidence intervals
+        gamma = kinetics.gamma_from_k(
+            self,
+            k=k,
+            diameter=diameter,
+        )
+        gamma_upper = kinetics.gamma_from_k(
+            self,
+            k=k + std_err * 1.96,
+            diameter=diameter,
+        )
+        gamma_lower = kinetics.gamma_from_k(
+            self,
+            k=k - std_err * 1.96,
+            diameter=diameter,
+        )
+
+        return k, r_value, gamma, (gamma_lower, gamma_upper)
+
 
 """ 
 Citations:
@@ -686,10 +741,6 @@ Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
 Penetration of Gas Molecules and Aerosol Particles through Laminar Flow 
 Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87, 3746–3754. 
 https://doi.org/10.1021/ac5042395
-
-Hanson, D., Kosciuch, E., 2003. The NH3 Mass Accommodation Coefficient 
-for Uptake onto Sulfuric Acid Solutions. J. Phys. Chem. A 107, 
-2199–2208. https://doi.org/10.1021/jp021570j
 
 Hanson, D.R., Ravishankara, A.R., 1993. Uptake of hydrochloric acid and 
 hypochlorous acid onto sulfuric acid: solubilities, diffusivities, and 

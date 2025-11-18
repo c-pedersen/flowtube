@@ -1,5 +1,6 @@
 # Core scientific computing
 numpy>=1.18.0
+scipy>=1.0.0
 
 # Data manipulation and analysis
 pandas>=1.0.0

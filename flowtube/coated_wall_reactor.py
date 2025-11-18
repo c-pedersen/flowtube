@@ -3,7 +3,7 @@ import molmass as mm
 from numpy.typing import NDArray
 import warnings
 
-from . import tools, diffusion_coef, viscosity_density, flow_calc
+from . import tools, diffusion_coef, viscosity_density, flow_calc, kinetics
 
 
 class CoatedWallReactor:
@@ -554,19 +554,19 @@ class CoatedWallReactor:
             self.Kn_insert = flow_calc.Kn(self.reactant_mean_free_path, self.insert_ID)
 
         # Diffusion Limited Rate Constant (s-1) and Uptake Coefficient
-        # - see flow_calc.py for details
+        # - see kinetics.py for details
         if self.insert_length > 0:
-            k_diff = flow_calc.diffusion_limited_rate_constant(
+            k_diff = kinetics.diffusion_limited_rate_constant(
                 self, self.N_eff_Shw_insert, self.insert_ID
             )
-            gamma_eff_diff = flow_calc.diffusion_limited_uptake_coefficient(
+            gamma_eff_diff = kinetics.diffusion_limited_uptake_coefficient(
                 self, self.insert_ID, k_diff
             )
         else:
-            k_diff = flow_calc.diffusion_limited_rate_constant(
+            k_diff = kinetics.diffusion_limited_rate_constant(
                 self, self.N_eff_Shw_FT, self.FT_ID
             )
-            gamma_eff_diff = flow_calc.diffusion_limited_uptake_coefficient(
+            gamma_eff_diff = kinetics.diffusion_limited_uptake_coefficient(
                 self, self.FT_ID, k_diff
             )
         var_names += ["Diffusion Limited Rate Constant"]
@@ -650,12 +650,12 @@ class CoatedWallReactor:
         # Diffusion Correction Factor - gamma_eff / gamma
         # - eq. 15 from Knopf et al., Anal. Chem., 2015
         if self.insert_length > 0:
-            C_g = flow_calc.correction_factor(
+            C_g = kinetics.correction_factor(
                 self.N_eff_Shw_insert, self.Kn_insert, hypothetical_gamma
             )
             var_names += ["Insert Diffusion Correction Factor (γ_eff/γ)"]
         else:
-            C_g = flow_calc.correction_factor(
+            C_g = kinetics.correction_factor(
                 self.N_eff_Shw_FT, self.Kn_FT, hypothetical_gamma
             )
             var_names += ["Flow Tube Diffusion Correction Factor (γ_eff/γ)"]
@@ -681,19 +681,19 @@ class CoatedWallReactor:
         var_fmts += [".2e"]
         units += ["unitless"]
 
-        # Observed Loss Rate (s-1) - see flow_calc.py for details
+        # Observed Loss Rate (s-1) - see kinetics.py for details
         if self.insert_length > 0:
-            k_obs = flow_calc.observed_loss_rate(self, self.insert_ID, gamma_eff)
+            k_obs = kinetics.observed_loss_rate(self, self.insert_ID, gamma_eff)
         else:
-            k_obs = flow_calc.observed_loss_rate(self, self.FT_ID, gamma_eff)
+            k_obs = kinetics.observed_loss_rate(self, self.FT_ID, gamma_eff)
         var_names += ["Observed Loss Rate"]
         var += [k_obs]
         var_fmts += [".3g"]
         units += ["s-1"]
 
-        # Uptake to coated region - see flow_calc.py for details
+        # Uptake to coated region - see kinetics.py for details
         if self.insert_length > 0:
-            uptake = flow_calc.cylinder_loss(
+            uptake = kinetics.cylinder_loss(
                 self,
                 self.insert_ID,
                 self.N_eff_Shw_insert,
@@ -703,7 +703,7 @@ class CoatedWallReactor:
             )
             var_names += ["Insert Loss"]
         else:
-            uptake = flow_calc.cylinder_loss(
+            uptake = kinetics.cylinder_loss(
                 self,
                 self.FT_ID,
                 self.N_eff_Shw_FT,
@@ -717,7 +717,7 @@ class CoatedWallReactor:
         units += ["%"]
 
         # Reactant Wall Loss (entire FT minus insert)
-        reactant_wall_loss = flow_calc.cylinder_loss(
+        reactant_wall_loss = kinetics.cylinder_loss(
             self,
             self.FT_ID,
             self.N_eff_Shw_FT,
@@ -741,6 +741,62 @@ class CoatedWallReactor:
             )
 
         return C_g, uptake
+
+    def calculate_gamma(
+        self,
+        concentrations: NDArray[np.float64],
+        exposure: NDArray[np.float64],
+        exposure_units: str,
+    ) -> tuple[float, float, float, tuple[float, float]]:
+        """
+        Fits the observed loss to the boat to a first order kinetic
+        model to extract the uptake coefficient.
+
+        Args:
+            concentrations (numpy.ndarray): Reactant concentrations
+                (arbitrary units).
+            exposure (numpy.ndarray): Reactant exposure (s or cm).
+            exposure_units (str): Units of exposure (s or cm).
+
+        Returns:
+            float: k, first order loss rate (s-1).
+            float: r_value, correlation coefficient of the fit.
+            float: gamma, uptake coefficient.
+            tuple[float, float]: 95% confidence interval for gamma
+        """
+        # Check which inner diameter to use
+        if self.insert_length > 0:
+            diameter = self.insert_ID
+        else:
+            diameter = self.FT_ID
+
+        # Fit data to first order kinetics
+        slope, intercept, r_value, p_value, std_err = kinetics.fit_first_order_kinetics(
+            obj=self,
+            concentrations=concentrations,
+            exposure=exposure,
+            exposure_units=exposure_units,
+        )
+        k = -slope
+
+        # Calculate gamma and confidence intervals
+        gamma = kinetics.gamma_from_k(
+            self,
+            k=k,
+            diameter=diameter,
+        )
+        gamma_upper = kinetics.gamma_from_k(
+            self,
+            k=k + std_err * 1.96,
+            diameter=diameter,
+        )
+        gamma_lower = kinetics.gamma_from_k(
+            self,
+            k=k - std_err * 1.96,
+            diameter=diameter,
+        )
+
+        return k, r_value, gamma, (gamma_lower, gamma_upper)
 
 
 """ 
