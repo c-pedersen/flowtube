@@ -1,5 +1,5 @@
 # flowtube Package
-![PyPI Version](https://img.shields.io/pypi/v/flowtube.svg)
+[![PyPI Version](https://img.shields.io/pypi/v/flowtube.svg)](https://img.shields.io/pypi/v/flowtube.svg?cacheSeconds=3600)
 [![License: MIT](https://cdn.prod.website-files.com/5e0f1144930a8bc8aace526c/65dd9eb5aaca434fac4f1c34_License-MIT-blue.svg)](/LICENSE)
 [![Tests](https://github.com/c-pedersen/flowtube/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/c-pedersen/flowtube/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/c-pedersen/flowtube/branch/main/graph/badge.svg?ts=20251106)](https://codecov.io/gh/c-pedersen/flowtube)
@@ -10,7 +10,7 @@ Chem., 2015. The package is currently designed for coated wall reactor
 (CWR) and boat reactor analysis with plans to support aerosol flow 
 reactors in future versions.
 
-Author: Corey Pedersen
+Author: Corey Pedersen 
 
 ## Features
 Flow Calculations: Flow rates, velocities, residence times, and Reynolds 
