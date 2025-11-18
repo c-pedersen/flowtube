@@ -2,6 +2,7 @@
 import pytest
 from flowtube import CoatedWallReactor
 from flowtube import BoatReactor
+import numpy as np
 
 """ Tests for common errors across Reactor classes. """
 
@@ -25,9 +26,7 @@ def test_injector_dimensions(Reactor, make_constructor_kwargs):
 
     # Test non-zero injector dimensions
     kwargs = make_constructor_kwargs(Reactor, injector_ID=0.0)
-    with pytest.raises(
-        ValueError, match=r"Injector dimensions must be non-zero"
-    ):
+    with pytest.raises(ValueError, match=r"Injector dimensions must be non-zero"):
         Reactor(**kwargs)
 
 
@@ -122,3 +121,57 @@ def test_mixing_ratio_bounds(Reactor, make_constructor_kwargs, build_reactor):
     kwargs = make_constructor_kwargs(Reactor, reactant_MR=-0.01)
     with pytest.raises(ValueError, match=r"(mixing|MR).*0.*1"):
         build_reactor(Reactor, constructor_overrides=kwargs)
+
+
+@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+def test_fitting(Reactor, build_reactor):
+    # init error: negative flow in initialize
+    obj, _, _ = build_reactor(Reactor, call_initialize=False)
+    with pytest.raises(RuntimeError, match=r"Must call*"):
+        obj.calculate_gamma(
+            concentrations=np.array([0.01, 0.02, 0.03]),
+            exposure=np.array([0.1, 0.2, 0.3]),
+            exposure_units="s",
+        )
+
+
+@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+def test_fitting_invalid_exposure_units(Reactor, build_reactor):
+    obj, _, _ = build_reactor(Reactor)
+    obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
+    with pytest.raises(ValueError, match=r"Unsupported exposure units"):
+        obj.calculate_gamma(
+            concentrations=np.array([0.01, 0.02, 0.03]),
+            exposure=np.array([0.1, 0.2, 0.3]),
+            exposure_units="invalid_unit",
+        )
+
+
+@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+def test_fitting_negative_concentrations(Reactor, build_reactor):
+    obj, _, _ = build_reactor(Reactor)
+    obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
+    with pytest.raises(ValueError, match=r"Concentrations must be non-negative"):
+        obj.calculate_gamma(
+            concentrations=np.array([-0.01, 0.02, 0.03]),
+            exposure=np.array([0.1, 0.2, 0.3]),
+            exposure_units="s",
+        )
+
+
+@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+def test_fitting_non_numpy_inputs(Reactor, build_reactor):
+    obj, _, _ = build_reactor(Reactor)
+    obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
+    with pytest.raises(TypeError, match=r"Concentrations must be a numpy array"):
+        obj.calculate_gamma(
+            concentrations=[0.01, 0.02, 0.03],
+            exposure=np.array([0.1, 0.2, 0.3]),
+            exposure_units="s",
+        )
+    with pytest.raises(TypeError, match=r"Exposure must be a numpy array"):
+        obj.calculate_gamma(
+            concentrations=np.array([0.01, 0.02, 0.03]),
+            exposure=[0.1, 0.2, 0.3],
+            exposure_units="s",
+        )

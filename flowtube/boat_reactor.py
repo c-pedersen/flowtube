@@ -698,10 +698,10 @@ class BoatReactor:
             tuple[float, float]: 95% confidence interval for gamma
         """
 
-        # Check for geometric correction and apply 
+        # Check for geometric correction and apply
         # (see geometric_correction in reactant_uptake)
         if not hasattr(self, "geometric_correction"):
-            raise AttributeError("Must call reactant_uptake() before using fit()")
+            raise RuntimeError("Must call reactant_uptake() before calculate_gamma()")
         else:
             diameter = self.FT_ID * self.geometric_correction
 

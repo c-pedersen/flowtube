@@ -3,9 +3,9 @@ flowtube - A Python package for transport and diffusion calculations in
 cylindrical flow reactors.
 
 This package provides tools and utilities for flow reactor analysis
-including coated wall reactor (CWR) calculations, viscosity/density
-calculations, and binary diffusion coefficients for atmospheric
-chemistry research.
+including coated wall reactor (CWR), boat reactor, viscosity/density, 
+and binary diffusion coefficients calculations for atmospheric chemistry 
+research.
 """
 
 from typing import TYPE_CHECKING
@@ -19,8 +19,9 @@ from . import tools
 from . import viscosity_density
 from . import diffusion_coef
 from . import flow_calc
+from . import kinetics
 
-# Import the main CWR class for direct access
+# Import the main classes for direct access
 from .coated_wall_reactor import CoatedWallReactor
 from .boat_reactor import BoatReactor
 
@@ -39,4 +40,5 @@ __all__ = [
     "viscosity_density",
     "diffusion_coef",
     "flow_calc",
+    "kinetics",
 ]

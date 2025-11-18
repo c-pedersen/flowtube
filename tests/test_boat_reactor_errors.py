@@ -1,5 +1,6 @@
 import pytest
 from flowtube import BoatReactor
+import numpy as np
 
 """ Tests for errors specific to BoatReactor. """
 
@@ -20,3 +21,14 @@ def test_boat_wall_thickness_positive(make_constructor_kwargs):
     )
     with pytest.raises(ValueError, match=r"Boat dimensions must be positive"):
         BoatReactor(**kwargs)
+
+
+def test_fitting_before_reactant_uptake(build_reactor):
+    # init error: negative flow in initialize
+    obj, _, _ = build_reactor(BoatReactor)
+    with pytest.raises(RuntimeError, match=r"Must call reactant_uptake*"):
+        obj.calculate_gamma(
+            concentrations=np.array([0.01, 0.02, 0.03]),
+            exposure=np.array([0.1, 0.2, 0.3]),
+            exposure_units="s",
+        )
