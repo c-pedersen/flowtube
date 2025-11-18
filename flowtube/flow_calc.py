@@ -4,7 +4,6 @@ package.
 """
 
 from typing import Protocol
-from numpy.typing import NDArray
 import numpy as np
 from . import tools
 
@@ -364,7 +363,11 @@ def N_eff_Shw(
     # Axial Distance (unitless)
     # - eq. 2 from Knopf et al., Anal. Chem., 2015
     z_star = (
-        length * np.pi / 2 * obj.reactant_diffusion_rate / (sccm_to_ccm(obj, FR) / 60)
+        length
+        * np.pi
+        / 2
+        * obj.reactant_diffusion_rate
+        / (sccm_to_ccm(obj, FR) / 60)
     )
 
     return 3.6568 + 0.0978 / (z_star + 0.0154)
@@ -387,132 +390,6 @@ def Kn(
 
     return 2 * mean_free_path / char_length
 
-
-def diffusion_limited_rate_constant(
-    obj: full_attrs,
-    N_eff_Shw: float,
-    diameter: float,
-) -> float:
-    """
-    Calculate diffusion limited rate constant (s-1) - eq. 10 from Knopf
-    et al., 2015.
-
-    Args:
-        obj (full_attrs): Object with full attributes (P in Pa, T in K,
-            reactant_diffusion_rate in cm2 s-1,
-            carrier_dynamic_viscosity in kg m-1 s-1,
-            carrier_density in kg m-3).
-        N_eff_Shw (float): Effective Sherwood number.
-        diameter (float): Diameter of the cylinder (cm).
-
-    Returns:
-        float: Diffusion limited rate constant (s-1).
-    """
-
-    return 4 * N_eff_Shw * obj.reactant_diffusion_rate / diameter**2
-
-
-def diffusion_limited_uptake_coefficient(
-    obj: full_attrs,
-    diameter: float,
-    k_diff: float,
-) -> float:
-    """
-    Calculate diffusion limited effective uptake coefficient - eq. 19
-    from Knopf et al., 2015.
-
-    Args:
-        obj (full_attrs): Object with full attributes (P in Pa, T in K,
-            reactant_diffusion_rate in cm2 s-1,
-            carrier_dynamic_viscosity in kg m-1 s-1,
-            carrier_density in kg m-3).
-        diameter (float): Diameter of the cylinder (cm).
-        k_diff (float): Diffusion limited rate constant (s-1).
-
-    Returns:
-        float: Diffusion limited effective uptake coefficient (cm s-1).
-    """
-
-    return diameter / obj.reactant_molec_velocity * k_diff
-
-
-def correction_factor(
-    N_eff_Shw: float,
-    Kn: float,
-    gamma: NDArray[np.float64] | float,
-) -> NDArray[np.float64] | float:
-    """
-    Calculate correction factor for uptake coefficient - eq. 20 from
-    Knopf et al., 2015.
-
-    Args:
-        N_eff_Shw (float): Effective Sherwood number (unitless).
-        Kn (float): Knudsen number (unitless).
-        hypothetical_gamma (float): Hypothetical uptake coefficient
-            (unitless).
-
-    Returns:
-        float: Correction factor (unitless).
-    """
-
-    return 1 / (1 + gamma * 3 / (2 * N_eff_Shw * Kn))
-
-
-def observed_loss_rate(
-    obj: full_attrs,
-    diameter: float,
-    gamma_eff: NDArray[np.float64] | float,
-) -> NDArray[np.float64] | float:
-    """
-    Calculate observed loss rate (s-1) - eq. 19 from Knopf et al., 2015.
-
-    Args:
-        obj (full_attrs): Object with full attributes (P in Pa, T in K,
-            reactant_diffusion_rate in cm2 s-1,
-            carrier_dynamic_viscosity in kg m-1 s-1,
-            carrier_density in kg m-3).
-        diameter (float): Diameter of the cylinder (cm).
-        gamma_eff (float): Effective uptake coefficient (unitless).
-
-    Returns:
-        float: Observed loss rate (s-1).
-    """
-
-    return gamma_eff * obj.reactant_molec_velocity / diameter
-
-
-def cylinder_loss(
-    obj: full_attrs,
-    diameter: float,
-    N_eff_Shw: float,
-    Kn: float,
-    gamma: NDArray[np.float64] | float,
-    time: float,
-) -> NDArray[np.float64] | float:
-    """
-    Calculate penetration (unitless) - eq. 21 from Knopf et al., 2015.
-
-    Args:
-        obj (full_attrs): Object with full attributes (P in Pa, T in K,
-            reactant_diffusion_rate in cm2 s-1,
-            carrier_dynamic_viscosity in kg m-1 s-1,
-            carrier_density in kg m-3).
-        time (float): Residence time in cylinder (s).
-
-    Returns:
-        float: Penetration - fraction of initial reactant after passing
-            through cylinder (unitless).
-    """
-
-    return 1 - np.exp(
-        -gamma
-        / (1 + gamma * 3 / (2 * N_eff_Shw * Kn))
-        * obj.reactant_molec_velocity
-        / diameter
-        * time
-    )
-
-
 """ 
 Citations:
     
@@ -532,10 +409,6 @@ Hanson, D.R., Lovejoy, E.R., 1994. The uptake of N2O5 onto small
 sulfuric acid particles. Geophys. Res. Lett. 21, 2401–2404. 
 https://doi.org/10.1029/94GL02288
 
-Hanson, D., Kosciuch, E., 2003. The NH3 Mass Accommodation Coefficient 
-for Uptake onto Sulfuric Acid Solutions. J. Phys. Chem. A 107, 
-2199–2208. https://doi.org/10.1021/jp021570j
-
 Holman, J. P., & Bhattacharyya, S. (2011). Heat transfer in SI units 
 (10th ed.). McGraw-Hill. p. 284
 
@@ -544,5 +417,4 @@ Apparatus, 4th ed. ed. Cambridge University Press, Leiden.
 
 Incropera, F.P., DeWitt, D.P., Bergman, T.L., Lavine, A.S. (Eds.), 2007.
 Fundamentals of heat and mass transfer, 6. ed. ed. Wiley, Hoboken, NJ.
-
 """
