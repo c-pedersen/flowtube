@@ -108,7 +108,7 @@ class CoatedWallReactor:
         P: float,
         P_units: str,
         T: float,
-        reactant_diffusion_rate=None,
+        reactant_diffusion_rate: float = np.nan,
         radial_delta_T: float = 1,
         axial_delta_T: float = 1,
         disp: bool = True,
@@ -126,7 +126,7 @@ class CoatedWallReactor:
             P (float): Pressure.
             P_units (str): Pressure units.
             T (float): Temperature (C).
-            reactant_diffusion_rate (float): Reactant diffusion rate 
+            reactant_diffusion_rate (float): Reactant diffusion rate
                 (cm2 s-1).
             radial_delta_T (float): Radial temperature gradient (K)
                 (default = 1 K).
@@ -141,7 +141,7 @@ class CoatedWallReactor:
         # Check if flow rates are positive
         if reactant_FR < 0 or reactant_carrier_FR < 0 or carrier_FR < 0:
             raise ValueError("Flow rates must be positive")
-        
+
         # Check for non-zero flow
         if (reactant_FR <= 0) + (reactant_carrier_FR < 0) + (carrier_FR < 0):
             raise ValueError("Reactant flow rate must be positive and non-zero")
@@ -447,7 +447,7 @@ class CoatedWallReactor:
 
     def reactant_diffusion(
         self,
-        reactant_diffusion_rate=None,
+        reactant_diffusion_rate: float = np.nan,
         disp: bool = True,
     ) -> None:
         """Performs and displays reactant diffusion calculations.
@@ -468,7 +468,7 @@ class CoatedWallReactor:
 
         # Reactant Diffusion Rate (cm2 s-1)
         if self.reactant_gas not in diffusion_coef.sigmas.keys():
-            if reactant_diffusion_rate is None:
+            if np.isnan(reactant_diffusion_rate):
                 raise ValueError(
                     f"Must input reactant diffusion rate for {self.reactant_gas}"
                 )
@@ -480,7 +480,7 @@ class CoatedWallReactor:
                 self
             )
             var_names += ["Reactant Diffusion Rate"]
-            
+
         var += [self.reactant_diffusion_rate]
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
@@ -601,7 +601,7 @@ class CoatedWallReactor:
         hypothetical_gamma: NDArray[np.float64] | float,
         gamma_wall: float = 5e-6,
         disp: bool = True,
-    ) -> tuple[NDArray[np.float64] | float, NDArray[np.float64] | float]:
+    ) -> None:
         """
         Calculates reactant uptake to coated wall or insert and loss to
         flow tube walls.
@@ -616,9 +616,7 @@ class CoatedWallReactor:
             disp (bool): Display calculated values.
 
         Returns:
-            float: Gas phase diffusion correction factor (unitless).
-            float: Loss to insert or coated wall as ratio of inital
-                amount (fraction).
+            None.
         """
 
         ### Check for valid inputs ###
@@ -650,21 +648,21 @@ class CoatedWallReactor:
         # Diffusion Correction Factor - gamma_eff / gamma
         # - eq. 15 from Knopf et al., Anal. Chem., 2015
         if self.insert_length > 0:
-            C_g = kinetics.correction_factor(
+            self.C_g = kinetics.correction_factor(
                 self.N_eff_Shw_insert, self.Kn_insert, hypothetical_gamma
             )
             var_names += ["Insert Diffusion Correction Factor (γ_eff/γ)"]
         else:
-            C_g = kinetics.correction_factor(
+            self.C_g = kinetics.correction_factor(
                 self.N_eff_Shw_FT, self.Kn_FT, hypothetical_gamma
             )
             var_names += ["Flow Tube Diffusion Correction Factor (γ_eff/γ)"]
-        var += [C_g]
+        var += [self.C_g]
         var_fmts += [".3g"]
         units += ["unitless"]
 
         # Diffusion Correction
-        diff_corr = 1 - C_g
+        diff_corr = 1 - self.C_g
         if self.insert_length > 0:
             var_names += ["Insert Diffusion Correction"]
         else:
@@ -675,7 +673,7 @@ class CoatedWallReactor:
 
         # Effective Uptake Coefficient
         # - eq. 15 from Knopf et al., Anal. Chem., 2015
-        gamma_eff = hypothetical_gamma * C_g
+        gamma_eff = hypothetical_gamma * self.C_g
         var_names += ["Effective Uptake Coefficient"]
         var += [gamma_eff]
         var_fmts += [".2e"]
@@ -693,7 +691,7 @@ class CoatedWallReactor:
 
         # Uptake to coated region - see kinetics.py for details
         if self.insert_length > 0:
-            uptake = kinetics.cylinder_loss(
+            self.uptake = kinetics.cylinder_loss(
                 self,
                 self.insert_ID,
                 self.N_eff_Shw_insert,
@@ -703,7 +701,7 @@ class CoatedWallReactor:
             )
             var_names += ["Insert Loss"]
         else:
-            uptake = kinetics.cylinder_loss(
+            self.uptake = kinetics.cylinder_loss(
                 self,
                 self.FT_ID,
                 self.N_eff_Shw_FT,
@@ -712,7 +710,7 @@ class CoatedWallReactor:
                 self.FT_residence_time / 4,
             )
             var_names += ["Flow Tube Loss - 1/4 Length"]
-        var += [uptake * 100]
+        var += [self.uptake * 100]
         var_fmts += [".1f"]
         units += ["%"]
 
@@ -731,7 +729,7 @@ class CoatedWallReactor:
         units += ["%"]
 
         ### Display Values ###
-        if disp or not isinstance(var, np.ndarray):
+        if disp and not isinstance(var, np.ndarray):
             tools.table(
                 "Reactant Uptake",
                 var_names,
@@ -739,8 +737,6 @@ class CoatedWallReactor:
                 var_fmts,
                 units,
             )
-
-        return C_g, uptake
 
     def calculate_gamma(
         self,

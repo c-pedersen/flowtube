@@ -1,6 +1,6 @@
 import pytest
-from flowtube import BoatReactor
 import numpy as np
+from flowtube import BoatReactor
 
 """ Tests for errors specific to BoatReactor. """
 
@@ -32,3 +32,22 @@ def test_fitting_before_reactant_uptake(build_reactor):
             exposure=np.array([0.1, 0.2, 0.3]),
             exposure_units="s",
         )
+
+
+def test_boat_uptake(build_reactor):
+    boat, _, _ = build_reactor(BoatReactor)
+    gamma = 1e-6
+    boat.reactant_uptake(hypothetical_gamma=gamma)
+
+    assert (
+        boat.k * boat.FT_ID / boat.reactant_molec_velocity * boat.geometric_correction
+        == pytest.approx(gamma)
+    )
+    assert 1 - np.exp(
+        -gamma
+        / boat.geometric_correction
+        * boat.reactant_molec_velocity
+        / boat.FT_ID
+        * boat.residence_time
+        / 4,
+    ) == pytest.approx(boat.uptake)

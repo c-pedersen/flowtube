@@ -122,7 +122,7 @@ class BoatReactor:
         P: float,
         P_units: str,
         T: float,
-        reactant_diffusion_rate=None,
+        reactant_diffusion_rate: float = np.nan,
         radial_delta_T: float = 1,
         axial_delta_T: float = 1,
         disp: bool = True,
@@ -446,7 +446,7 @@ class BoatReactor:
 
     def reactant_diffusion(
         self,
-        reactant_diffusion_rate=None,
+        reactant_diffusion_rate: float = np.nan,
         disp: bool = True,
     ) -> None:
         """Performs and displays reactant diffusion calculations.
@@ -467,7 +467,7 @@ class BoatReactor:
 
         # Reactant Diffusion Rate (cm2 s-1)
         if self.reactant_gas not in diffusion_coef.sigmas.keys():
-            if reactant_diffusion_rate is None:
+            if np.isnan(reactant_diffusion_rate):
                 raise ValueError(
                     f"Must input reactant diffusion rate for {self.reactant_gas}"
                 )
@@ -487,7 +487,7 @@ class BoatReactor:
         # Thermal Molecular Velocity (cm s-1) - see flow_calc.py for details
         self.reactant_molec_velocity = flow_calc.molec_velocity(
             self, float(mm.Formula(self.reactant_gas).mass)
-        )  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+        )
 
         # Reactant Mean Free Path (cm) - Fuchs and Sutugin, 1971
         reactant_mean_free_path = (
@@ -555,7 +555,7 @@ class BoatReactor:
         hypothetical_gamma: NDArray[np.float64] | float,
         gamma_wall: float = 5e-6,
         disp: bool = True,
-    ) -> NDArray[np.float64] | float:
+    ) -> None:
         """
         Calculates reactant uptake to the boat and loss to flow tube
         walls.
@@ -569,7 +569,7 @@ class BoatReactor:
             disp (bool): Display calculated values.
 
         Returns:
-            float: Loss to boat as ratio to inital amount (fraction).
+            None
         """
 
         ### Check for valid inputs ###
@@ -624,27 +624,27 @@ class BoatReactor:
         actual_SA_V_ratio = liquid_surface_area / (
             self.net_cross_section * liquid_length
         )
-        self.geometric_correction = actual_SA_V_ratio / cylinder_SA_V_ratio
+        self.geometric_correction = cylinder_SA_V_ratio / actual_SA_V_ratio
         var_names += ["Boat geometry correction factor"]
-        var += [1 / self.geometric_correction]
+        var += [self.geometric_correction]
         var_fmts += [".2f"]
         units += ["unitless"]
 
         # Corrected Loss Rate (s-1)
         # - see kinetics.py and Hanson and Ravishankara, 1993 for details
-        k = (
+        self.k = (
             kinetics.observed_loss_rate(self, self.FT_ID, hypothetical_gamma)
             / self.geometric_correction
         )
         var_names += ["Loss Rate"]
-        var += [k]
+        var += [self.k]
         var_fmts += [".3g"]
         units += ["s-1"]
 
         # Uptake to boat (fraction) - first order kinetics
-        uptake = 1 - np.exp(-k * self.residence_time / 4)
+        self.uptake = 1 - np.exp(-self.k * self.residence_time / 4)
         var_names += ["Loss to Boat - 1/4 Length"]
-        var += [uptake * 100]
+        var += [self.uptake * 100]
         var_fmts += [".1f"]
         units += ["%"]
 
@@ -664,7 +664,7 @@ class BoatReactor:
         units += ["%"]
 
         ### Display Values ###
-        if disp is True or not isinstance(var, np.ndarray):
+        if disp and not isinstance(var, np.ndarray):
             tools.table(
                 "Reactant Uptake",
                 var_names,
@@ -672,8 +672,6 @@ class BoatReactor:
                 var_fmts,
                 units,
             )
-
-        return uptake
 
     def calculate_gamma(
         self,

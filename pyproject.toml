@@ -42,7 +42,8 @@ test = [
     "pytest-cov",
 ]
 dev = [
-    "sphinx>8.0.0"
+    "sphinx>=8.0.0"
+    "twine>=6.0.0",
 ]
 
 [project.urls]
@@ -60,11 +61,11 @@ flowtube = ["py.typed", "*.pyi"]
 [tool.pyright]
 include = ["flowtube"]
 exclude = ["**/__pycache__"]
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"
 
-[tool.ruff]
-line-length = 88
-docstring-code-line-length = 72
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 72
+max-line-length = 88
 
 # pyproject.toml
 [tool.pytest.ini_options]

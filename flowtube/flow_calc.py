@@ -363,11 +363,7 @@ def N_eff_Shw(
     # Axial Distance (unitless)
     # - eq. 2 from Knopf et al., Anal. Chem., 2015
     z_star = (
-        length
-        * np.pi
-        / 2
-        * obj.reactant_diffusion_rate
-        / (sccm_to_ccm(obj, FR) / 60)
+        length * np.pi / 2 * obj.reactant_diffusion_rate / (sccm_to_ccm(obj, FR) / 60)
     )
 
     return 3.6568 + 0.0978 / (z_star + 0.0154)
@@ -389,6 +385,7 @@ def Kn(
     """
 
     return 2 * mean_free_path / char_length
+
 
 """ 
 Citations:
