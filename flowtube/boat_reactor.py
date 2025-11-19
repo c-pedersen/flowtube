@@ -467,10 +467,13 @@ class BoatReactor:
 
         # Reactant Diffusion Rate (cm2 s-1)
         if self.reactant_gas not in diffusion_coef.sigmas.keys():
-            if np.isnan(reactant_diffusion_rate):
-                raise ValueError(
-                    f"Must input reactant diffusion rate for {self.reactant_gas}"
-                )
+            if isinstance(reactant_diffusion_rate, (float, np.floating)):
+                if np.isnan(reactant_diffusion_rate):
+                    raise ValueError(
+                        f"Must input reactant diffusion rate for {self.reactant_gas}"
+                    )
+            else:
+                raise TypeError("Reactant diffusion rate must be a number")
 
             self.reactant_diffusion_rate = reactant_diffusion_rate
             var_names += ["Manually Inputted Reactant Diffusion Rate"]
@@ -704,7 +707,7 @@ class BoatReactor:
             diameter = self.FT_ID * self.geometric_correction
 
         # Fit data to first order kinetics
-        slope, intercept, r_value, p_value, std_err = kinetics.fit_first_order_kinetics(
+        slope, _, r_value, _, std_err = kinetics.fit_first_order_kinetics(
             obj=self,
             concentrations=concentrations,
             exposure=exposure,

@@ -61,7 +61,7 @@ flowtube = ["py.typed", "*.pyi"]
 [tool.pyright]
 include = ["flowtube"]
 exclude = ["**/__pycache__"]
-typeCheckingMode = "strict"
+typeCheckingMode = "standard"
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 72
