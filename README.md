@@ -13,6 +13,8 @@ reactors in future versions.
 
 Author: Corey Pedersen 
 
+Documentation: https://flowtube.readthedocs.io/
+
 ## Features
 Flow Calculations: Flow rates, velocities, residence times, and Reynolds 
 numbers
