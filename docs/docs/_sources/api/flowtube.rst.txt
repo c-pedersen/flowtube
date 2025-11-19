@@ -1,0 +1,77 @@
+flowtube package
+================
+
+Submodules
+----------
+
+flowtube.boat\_reactor module
+-----------------------------
+
+.. automodule:: flowtube.boat_reactor
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :special-members: __call__
+
+flowtube.coated\_wall\_reactor.CoatedWallReactor module
+-------------------------------------
+
+.. autoclass:: flowtube.coated_wall_reactor.CoatedWallReactor
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :special-members: __call__
+
+flowtube.diffusion\_coef module
+-------------------------------
+
+.. automodule:: flowtube.diffusion_coef
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :special-members: __call__
+
+flowtube.flow\_calc module
+--------------------------
+
+.. automodule:: flowtube.flow_calc
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :special-members: __call__
+
+flowtube.kinetics module
+------------------------
+
+.. automodule:: flowtube.kinetics
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :special-members: __call__
+
+flowtube.tools module
+---------------------
+
+.. automodule:: flowtube.tools
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :special-members: __call__
+
+flowtube.viscosity\_density module
+----------------------------------
+
+.. automodule:: flowtube.viscosity_density
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :special-members: __call__
+
+Module contents
+---------------
+
+.. automodule:: flowtube
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :special-members: __call__

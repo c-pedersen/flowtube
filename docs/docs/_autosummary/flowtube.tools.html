@@ -1,0 +1,230 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flowtube.tools &mdash; flowtube 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            flowtube
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">flowtube</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">flowtube.tools</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/flowtube.tools.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-flowtube.tools">
+<span id="flowtube-tools"></span><h1>flowtube.tools<a class="headerlink" href="#module-flowtube.tools" title="Link to this heading"></a></h1>
+<p>Constants and unit conversions.</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#flowtube.tools.P_in_Pa" title="flowtube.tools.P_in_Pa"><code class="xref py py-obj docutils literal notranslate"><span class="pre">P_in_Pa</span></code></a>(P, units)</p></td>
+<td><p>Convert pressure to Pa.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#flowtube.tools.T_in_K" title="flowtube.tools.T_in_K"><code class="xref py py-obj docutils literal notranslate"><span class="pre">T_in_K</span></code></a>(T)</p></td>
+<td><p>Convert celcius to Kelvin.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#flowtube.tools.cross_sectional_area" title="flowtube.tools.cross_sectional_area"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cross_sectional_area</span></code></a>(diameter)</p></td>
+<td><p>Calculate cross sectional area.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#flowtube.tools.partial_cylinder_area" title="flowtube.tools.partial_cylinder_area"><code class="xref py py-obj docutils literal notranslate"><span class="pre">partial_cylinder_area</span></code></a>(height, width)</p></td>
+<td><p>Calculate the cross-sectional area and perimeter of a partial cylinder (&quot;boat&quot;) given its height and width.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#flowtube.tools.table" title="flowtube.tools.table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">table</span></code></a>(title, var_names, var, var_fmts, units)</p></td>
+<td><p>Print a formatted table of variables.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.tools.T_in_K">
+<span class="sig-prename descclassname"><span class="pre">flowtube.tools.</span></span><span class="sig-name descname"><span class="pre">T_in_K</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/tools.html#T_in_K"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.tools.T_in_K" title="Link to this definition"></a></dt>
+<dd><p>Convert celcius to Kelvin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<em>float</em>) – Temperature in Celcius.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Temperature in Kelvin.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.tools.P_in_Pa">
+<span class="sig-prename descclassname"><span class="pre">flowtube.tools.</span></span><span class="sig-name descname"><span class="pre">P_in_Pa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/tools.html#P_in_Pa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.tools.P_in_Pa" title="Link to this definition"></a></dt>
+<dd><p>Convert pressure to Pa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>P</strong> (<em>float</em>) – Pressure.</p></li>
+<li><p><strong>units</strong> (<em>float</em>) – Supported pressure units: Torr, bar, mbar, or
+hPa.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pressure in Pa.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.tools.cross_sectional_area">
+<span class="sig-prename descclassname"><span class="pre">flowtube.tools.</span></span><span class="sig-name descname"><span class="pre">cross_sectional_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/tools.html#cross_sectional_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.tools.cross_sectional_area" title="Link to this definition"></a></dt>
+<dd><p>Calculate cross sectional area.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>diameter</strong> (<em>float</em>) – Diameter.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cross sectional area.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.tools.partial_cylinder_area">
+<span class="sig-prename descclassname"><span class="pre">flowtube.tools.</span></span><span class="sig-name descname"><span class="pre">partial_cylinder_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/tools.html#partial_cylinder_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.tools.partial_cylinder_area" title="Link to this definition"></a></dt>
+<dd><p>Calculate the cross-sectional area and perimeter of a partial
+cylinder (“boat”) given its height and width. Assumes the partial
+cylinder is a segment of a circle with given width as chord length
+and that the height is less than the diameter of the circle.
+Calculations based on:
+<a class="reference external" href="https://mathworld.wolfram.com/CircularSegment.html">https://mathworld.wolfram.com/CircularSegment.html</a> and
+<a class="reference external" href="https://www.vcalc.com/wiki/KurtHeckman/Circle-area-of-an-arc-segment-h">https://www.vcalc.com/wiki/KurtHeckman/Circle-area-of-an-arc-segment-h</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>height</strong> (<em>float</em>) – Height of the segment (cm).</p></li>
+<li><p><strong>width</strong> (<em>float</em>) – Chord length of the segment (cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Outer perimeter (cm).
+float: Cross-sectional area (cm^2).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.tools.table">
+<span class="sig-prename descclassname"><span class="pre">flowtube.tools.</span></span><span class="sig-name descname"><span class="pre">table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_fmts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/tools.html#table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.tools.table" title="Link to this definition"></a></dt>
+<dd><p>Print a formatted table of variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> (<em>str</em>) – Title of the table.</p></li>
+<li><p><strong>var_names</strong> (<em>list</em>) – List of variable names.</p></li>
+<li><p><strong>var</strong> (<em>list</em>) – Variable values.</p></li>
+<li><p><strong>var_fmts</strong> (<em>list</em>) – List of formats for each variable.</p></li>
+<li><p><strong>units</strong> (<em>list</em>) – List of units for each variable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Corey Pedersen.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

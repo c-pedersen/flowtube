@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flowtube.kinetics &mdash; flowtube 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            flowtube
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">flowtube</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">flowtube.kinetics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/flowtube.kinetics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-flowtube.kinetics">
+<span id="flowtube-kinetics"></span><h1>flowtube.kinetics<a class="headerlink" href="#module-flowtube.kinetics" title="Link to this heading"></a></h1>
+<p>Kinetics calculations for flow tube experiments.</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#flowtube.kinetics.correction_factor" title="flowtube.kinetics.correction_factor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">correction_factor</span></code></a>(N_eff_Shw, Kn, gamma)</p></td>
+<td><p>Calculate correction factor for uptake coefficient - eq.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#flowtube.kinetics.cylinder_loss" title="flowtube.kinetics.cylinder_loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cylinder_loss</span></code></a>(obj, diameter, N_eff_Shw, Kn, ...)</p></td>
+<td><p>Calculate penetration (unitless) - eq.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#flowtube.kinetics.diffusion_limited_rate_constant" title="flowtube.kinetics.diffusion_limited_rate_constant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diffusion_limited_rate_constant</span></code></a>(obj, ...)</p></td>
+<td><p>Calculate diffusion limited rate constant (s-1) - eq.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#flowtube.kinetics.diffusion_limited_uptake_coefficient" title="flowtube.kinetics.diffusion_limited_uptake_coefficient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diffusion_limited_uptake_coefficient</span></code></a>(obj, ...)</p></td>
+<td><p>Calculate diffusion limited effective uptake coefficient - eq.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#flowtube.kinetics.fit_first_order_kinetics" title="flowtube.kinetics.fit_first_order_kinetics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_first_order_kinetics</span></code></a>(obj, ...)</p></td>
+<td><p>Fits the observed loss to a first order kinetic model to extract the uptake coefficient.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#flowtube.kinetics.gamma_from_k" title="flowtube.kinetics.gamma_from_k"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gamma_from_k</span></code></a>(obj, k, diameter)</p></td>
+<td><p>Calculate effective uptake coefficient from rate constant.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#flowtube.kinetics.observed_loss_rate" title="flowtube.kinetics.observed_loss_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">observed_loss_rate</span></code></a>(obj, diameter, gamma_eff)</p></td>
+<td><p>Calculate observed loss rate (s-1) - eq.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.diffusion_limited_rate_constant">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">diffusion_limited_rate_constant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_eff_Shw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#diffusion_limited_rate_constant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.diffusion_limited_rate_constant" title="Link to this definition"></a></dt>
+<dd><p>Calculate diffusion limited rate constant (s-1) - eq. 10 from Knopf
+et al., 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="flowtube.flow_calc.html#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>N_eff_Shw</strong> (<em>float</em>) – Effective Sherwood number.</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the cylinder (cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Diffusion limited rate constant (s-1).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.diffusion_limited_uptake_coefficient">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">diffusion_limited_uptake_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_diff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#diffusion_limited_uptake_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.diffusion_limited_uptake_coefficient" title="Link to this definition"></a></dt>
+<dd><p>Calculate diffusion limited effective uptake coefficient - eq. 19
+from Knopf et al., 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="flowtube.flow_calc.html#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the cylinder (cm).</p></li>
+<li><p><strong>k_diff</strong> (<em>float</em>) – Diffusion limited rate constant (s-1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Diffusion limited effective uptake coefficient (cm s-1).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.correction_factor">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">correction_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N_eff_Shw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Kn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#correction_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.correction_factor" title="Link to this definition"></a></dt>
+<dd><p>Calculate correction factor for uptake coefficient - eq. 20 from
+Knopf et al., 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>N_eff_Shw</strong> (<em>float</em>) – Effective Sherwood number (unitless).</p></li>
+<li><p><strong>Kn</strong> (<em>float</em>) – Knudsen number (unitless).</p></li>
+<li><p><strong>hypothetical_gamma</strong> (<em>float</em>) – Hypothetical uptake coefficient
+(unitless).</p></li>
+<li><p><strong>gamma</strong> (<em>ndarray</em><em>[</em><em>tuple</em><em>[</em><em>Any</em><em>, </em><em>...</em><em>]</em><em>, </em><em>dtype</em><em>[</em><em>float64</em><em>]</em><em>] </em><em>| </em><em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Correction factor (unitless).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.observed_loss_rate">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">observed_loss_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_eff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#observed_loss_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.observed_loss_rate" title="Link to this definition"></a></dt>
+<dd><p>Calculate observed loss rate (s-1) - eq. 19 from Knopf et al., 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="flowtube.flow_calc.html#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the cylinder (cm).</p></li>
+<li><p><strong>gamma_eff</strong> (<em>float</em>) – Effective uptake coefficient (unitless).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Observed loss rate (s-1).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.cylinder_loss">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">cylinder_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_eff_Shw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Kn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#cylinder_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.cylinder_loss" title="Link to this definition"></a></dt>
+<dd><p>Calculate penetration (unitless) - eq. 21 from Knopf et al., 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="flowtube.flow_calc.html#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>time</strong> (<em>float</em>) – Residence time in cylinder (s).</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>)</p></li>
+<li><p><strong>N_eff_Shw</strong> (<em>float</em>)</p></li>
+<li><p><strong>Kn</strong> (<em>float</em>)</p></li>
+<li><p><strong>gamma</strong> (<em>ndarray</em><em>[</em><em>tuple</em><em>[</em><em>Any</em><em>, </em><em>...</em><em>]</em><em>, </em><em>dtype</em><em>[</em><em>float64</em><em>]</em><em>] </em><em>| </em><em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Penetration - fraction of initial reactant after passing</dt><dd><p>through cylinder (unitless).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.gamma_from_k">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">gamma_from_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#gamma_from_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.gamma_from_k" title="Link to this definition"></a></dt>
+<dd><p>Calculate effective uptake coefficient from rate constant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="flowtube.flow_calc.html#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>k</strong> (<em>float</em>) – Rate constant (s-1).</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the cylinder (cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Effective uptake coefficient (unitless).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.fit_first_order_kinetics">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">fit_first_order_kinetics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concentrations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#fit_first_order_kinetics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.fit_first_order_kinetics" title="Link to this definition"></a></dt>
+<dd><p>Fits the observed loss to a first order kinetic model to extract the
+uptake coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="flowtube.flow_calc.html#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>concentrations</strong> (<em>NDArray</em><em>[</em><em>np.float64</em><em>]</em>) – Array of observed
+concentrations (unitless).</p></li>
+<li><p><strong>exposure</strong> (<em>NDArray</em><em>[</em><em>np.float64</em><em>]</em>) – Array of exposures (s or cm).</p></li>
+<li><p><strong>exposure_units</strong> (<em>str</em>) – Units of exposure (“s”, “sec”, “second”,
+“seconds”, “cm”, “centimeter”, “centimeters”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Tuple containing the</dt><dd><p>slope, intercept, r-value, p-value, and standard error of
+the regression.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[float, float, float, float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Corey Pedersen.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

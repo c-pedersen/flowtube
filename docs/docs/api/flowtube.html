@@ -1,0 +1,1771 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flowtube package &mdash; flowtube 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="flowtube" href="modules.html" />
+    <link rel="prev" title="flowtube documentation" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            flowtube
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">flowtube package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-flowtube.boat_reactor">flowtube.boat_reactor module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.boat_reactor.BoatReactor"><code class="docutils literal notranslate"><span class="pre">BoatReactor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.boat_reactor.BoatReactor.initialize"><code class="docutils literal notranslate"><span class="pre">BoatReactor.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.boat_reactor.BoatReactor.flows"><code class="docutils literal notranslate"><span class="pre">BoatReactor.flows()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.boat_reactor.BoatReactor.carrier_flow"><code class="docutils literal notranslate"><span class="pre">BoatReactor.carrier_flow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.boat_reactor.BoatReactor.reactant_diffusion"><code class="docutils literal notranslate"><span class="pre">BoatReactor.reactant_diffusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.boat_reactor.BoatReactor.reactant_uptake"><code class="docutils literal notranslate"><span class="pre">BoatReactor.reactant_uptake()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.boat_reactor.BoatReactor.calculate_gamma"><code class="docutils literal notranslate"><span class="pre">BoatReactor.calculate_gamma()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#flowtube-coated-wall-reactor-coatedwallreactor-module">flowtube.coated_wall_reactor.CoatedWallReactor module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.coated_wall_reactor.CoatedWallReactor"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.coated_wall_reactor.CoatedWallReactor.initialize"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.coated_wall_reactor.CoatedWallReactor.flows"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.flows()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.coated_wall_reactor.CoatedWallReactor.carrier_flow"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.carrier_flow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.coated_wall_reactor.CoatedWallReactor.reactant_diffusion"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.reactant_diffusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.coated_wall_reactor.CoatedWallReactor.reactant_uptake"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.reactant_uptake()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.coated_wall_reactor.CoatedWallReactor.calculate_gamma"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.calculate_gamma()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-flowtube.diffusion_coef">flowtube.diffusion_coef module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.diffusion_coef.required_attrs"><code class="docutils literal notranslate"><span class="pre">required_attrs</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.diffusion_coef.required_attrs.P"><code class="docutils literal notranslate"><span class="pre">required_attrs.P</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.diffusion_coef.required_attrs.T"><code class="docutils literal notranslate"><span class="pre">required_attrs.T</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.diffusion_coef.required_attrs.reactant_gas"><code class="docutils literal notranslate"><span class="pre">required_attrs.reactant_gas</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.diffusion_coef.required_attrs.carrier_gas"><code class="docutils literal notranslate"><span class="pre">required_attrs.carrier_gas</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.diffusion_coef.non_polar_Lennard_Jones_potential"><code class="docutils literal notranslate"><span class="pre">non_polar_Lennard_Jones_potential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.diffusion_coef.binary_diffusion_coefficient"><code class="docutils literal notranslate"><span class="pre">binary_diffusion_coefficient()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-flowtube.flow_calc">flowtube.flow_calc module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.basic_attrs"><code class="docutils literal notranslate"><span class="pre">basic_attrs</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.flow_calc.basic_attrs.P"><code class="docutils literal notranslate"><span class="pre">basic_attrs.P</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.flow_calc.basic_attrs.T"><code class="docutils literal notranslate"><span class="pre">basic_attrs.T</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.carrier_attrs"><code class="docutils literal notranslate"><span class="pre">carrier_attrs</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.flow_calc.carrier_attrs.carrier_dynamic_viscosity"><code class="docutils literal notranslate"><span class="pre">carrier_attrs.carrier_dynamic_viscosity</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.flow_calc.carrier_attrs.carrier_density"><code class="docutils literal notranslate"><span class="pre">carrier_attrs.carrier_density</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.full_attrs"><code class="docutils literal notranslate"><span class="pre">full_attrs</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.flow_calc.full_attrs.reactant_diffusion_rate"><code class="docutils literal notranslate"><span class="pre">full_attrs.reactant_diffusion_rate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.flow_calc.full_attrs.reactant_molec_velocity"><code class="docutils literal notranslate"><span class="pre">full_attrs.reactant_molec_velocity</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.sccm_to_ccm"><code class="docutils literal notranslate"><span class="pre">sccm_to_ccm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.ccm_to_sccm"><code class="docutils literal notranslate"><span class="pre">ccm_to_sccm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.sccm_to_velocity"><code class="docutils literal notranslate"><span class="pre">sccm_to_velocity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.MR_to_molec"><code class="docutils literal notranslate"><span class="pre">MR_to_molec()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.molec_velocity"><code class="docutils literal notranslate"><span class="pre">molec_velocity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.reynolds_number"><code class="docutils literal notranslate"><span class="pre">reynolds_number()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.reynolds_number_irregular"><code class="docutils literal notranslate"><span class="pre">reynolds_number_irregular()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.conductance"><code class="docutils literal notranslate"><span class="pre">conductance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.pressure_gradient"><code class="docutils literal notranslate"><span class="pre">pressure_gradient()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.buoyancy_parameters"><code class="docutils literal notranslate"><span class="pre">buoyancy_parameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.length_to_laminar"><code class="docutils literal notranslate"><span class="pre">length_to_laminar()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.mixing_time"><code class="docutils literal notranslate"><span class="pre">mixing_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.N_eff_Shw"><code class="docutils literal notranslate"><span class="pre">N_eff_Shw()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.flow_calc.Kn"><code class="docutils literal notranslate"><span class="pre">Kn()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-flowtube.kinetics">flowtube.kinetics module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.kinetics.diffusion_limited_rate_constant"><code class="docutils literal notranslate"><span class="pre">diffusion_limited_rate_constant()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.kinetics.diffusion_limited_uptake_coefficient"><code class="docutils literal notranslate"><span class="pre">diffusion_limited_uptake_coefficient()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.kinetics.correction_factor"><code class="docutils literal notranslate"><span class="pre">correction_factor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.kinetics.observed_loss_rate"><code class="docutils literal notranslate"><span class="pre">observed_loss_rate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.kinetics.cylinder_loss"><code class="docutils literal notranslate"><span class="pre">cylinder_loss()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.kinetics.gamma_from_k"><code class="docutils literal notranslate"><span class="pre">gamma_from_k()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.kinetics.fit_first_order_kinetics"><code class="docutils literal notranslate"><span class="pre">fit_first_order_kinetics()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-flowtube.tools">flowtube.tools module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.tools.T_in_K"><code class="docutils literal notranslate"><span class="pre">T_in_K()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.tools.P_in_Pa"><code class="docutils literal notranslate"><span class="pre">P_in_Pa()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.tools.cross_sectional_area"><code class="docutils literal notranslate"><span class="pre">cross_sectional_area()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.tools.partial_cylinder_area"><code class="docutils literal notranslate"><span class="pre">partial_cylinder_area()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.tools.table"><code class="docutils literal notranslate"><span class="pre">table()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-flowtube.viscosity_density">flowtube.viscosity_density module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.viscosity_density.basic_attrs"><code class="docutils literal notranslate"><span class="pre">basic_attrs</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.viscosity_density.basic_attrs.P"><code class="docutils literal notranslate"><span class="pre">basic_attrs.P</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.viscosity_density.basic_attrs.T"><code class="docutils literal notranslate"><span class="pre">basic_attrs.T</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.viscosity_density.real_density"><code class="docutils literal notranslate"><span class="pre">real_density()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.viscosity_density.dynamic_viscosity"><code class="docutils literal notranslate"><span class="pre">dynamic_viscosity()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-flowtube">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.CoatedWallReactor"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.CoatedWallReactor.calculate_gamma"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.calculate_gamma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.CoatedWallReactor.carrier_flow"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.carrier_flow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.CoatedWallReactor.flows"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.flows()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.CoatedWallReactor.initialize"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.CoatedWallReactor.reactant_diffusion"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.reactant_diffusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.CoatedWallReactor.reactant_uptake"><code class="docutils literal notranslate"><span class="pre">CoatedWallReactor.reactant_uptake()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#flowtube.BoatReactor"><code class="docutils literal notranslate"><span class="pre">BoatReactor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.BoatReactor.calculate_gamma"><code class="docutils literal notranslate"><span class="pre">BoatReactor.calculate_gamma()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.BoatReactor.carrier_flow"><code class="docutils literal notranslate"><span class="pre">BoatReactor.carrier_flow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.BoatReactor.flows"><code class="docutils literal notranslate"><span class="pre">BoatReactor.flows()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.BoatReactor.initialize"><code class="docutils literal notranslate"><span class="pre">BoatReactor.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.BoatReactor.reactant_diffusion"><code class="docutils literal notranslate"><span class="pre">BoatReactor.reactant_diffusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flowtube.BoatReactor.reactant_uptake"><code class="docutils literal notranslate"><span class="pre">BoatReactor.reactant_uptake()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">flowtube</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">flowtube</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">flowtube package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/flowtube.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="flowtube-package">
+<h1>flowtube package<a class="headerlink" href="#flowtube-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-flowtube.boat_reactor">
+<span id="flowtube-boat-reactor-module"></span><h2>flowtube.boat_reactor module<a class="headerlink" href="#module-flowtube.boat_reactor" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="flowtube.boat_reactor.BoatReactor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flowtube.boat_reactor.</span></span><span class="sig-name descname"><span class="pre">BoatReactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">FT_ID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FT_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">injector_ID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">injector_OD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_gas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_gas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_MR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boat_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boat_height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boat_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boat_wall_thickness</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.boat_reactor.BoatReactor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>FT_ID</strong> (<em>float</em>)</p></li>
+<li><p><strong>FT_length</strong> (<em>float</em>)</p></li>
+<li><p><strong>injector_ID</strong> (<em>float</em>)</p></li>
+<li><p><strong>injector_OD</strong> (<em>float</em>)</p></li>
+<li><p><strong>reactant_gas</strong> (<em>str</em>)</p></li>
+<li><p><strong>carrier_gas</strong> (<em>str</em>)</p></li>
+<li><p><strong>reactant_MR</strong> (<em>float</em>)</p></li>
+<li><p><strong>boat_width</strong> (<em>float</em>)</p></li>
+<li><p><strong>boat_height</strong> (<em>float</em>)</p></li>
+<li><p><strong>boat_length</strong> (<em>float</em>)</p></li>
+<li><p><strong>boat_wall_thickness</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.boat_reactor.BoatReactor.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_diffusion_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.boat_reactor.BoatReactor.initialize" title="Link to this definition"></a></dt>
+<dd><p>Sets experimental conditions and calls calculation functions for
+numerous flow and diffusion parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_FR</strong> (<em>float</em>) – Reactant flow rate (sccm).</p></li>
+<li><p><strong>reactant_carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) used
+to dilute the reactant.</p></li>
+<li><p><strong>carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) typically
+injected near the start of the flow tube.</p></li>
+<li><p><strong>P</strong> (<em>float</em>) – Pressure.</p></li>
+<li><p><strong>P_units</strong> (<em>str</em>) – Pressure units.</p></li>
+<li><p><strong>T</strong> (<em>float</em>) – Temperature (C).</p></li>
+<li><p><strong>reactant_diffusion_rate</strong> (<em>float</em><em>, </em><em>optional</em>) – Reactant
+diffusion rate (cm2 s-1).</p></li>
+<li><p><strong>radial_delta_T</strong> (<em>float</em>) – Radial temperature gradient (K)
+(default = 1 K).</p></li>
+<li><p><strong>axial_delta_T</strong> (<em>float</em>) – Axial temperature gradient (K)
+(default = 1 K).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.boat_reactor.BoatReactor.flows">
+<span class="sig-name descname"><span class="pre">flows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.flows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.boat_reactor.BoatReactor.flows" title="Link to this definition"></a></dt>
+<dd><p>Calculates Flow Tube flows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_FR</strong> (<em>float</em>) – Reactant flow rate (sccm).</p></li>
+<li><p><strong>reactant_carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) used
+to dilute the reactant.</p></li>
+<li><p><strong>carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) typically
+injected near the start of the flow tube.</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.boat_reactor.BoatReactor.carrier_flow">
+<span class="sig-name descname"><span class="pre">carrier_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.carrier_flow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.boat_reactor.BoatReactor.carrier_flow" title="Link to this definition"></a></dt>
+<dd><p>Performs and displays carrier gas transport calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delta_T_radial</strong> (<em>float</em>) – Radial temperature gradient (K).</p></li>
+<li><p><strong>delta_T_axial</strong> (<em>float</em>) – Axial temperature gradient (K).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated values.</p></li>
+<li><p><strong>radial_delta_T</strong> (<em>float</em>)</p></li>
+<li><p><strong>axial_delta_T</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.boat_reactor.BoatReactor.reactant_diffusion">
+<span class="sig-name descname"><span class="pre">reactant_diffusion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_diffusion_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.reactant_diffusion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.boat_reactor.BoatReactor.reactant_diffusion" title="Link to this definition"></a></dt>
+<dd><p>Performs and displays reactant diffusion calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_diffusion_rate</strong> (<em>float</em>) – Reactant diffusion rate (cm2 s-1).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.boat_reactor.BoatReactor.reactant_uptake">
+<span class="sig-name descname"><span class="pre">reactant_uptake</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hypothetical_gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_wall</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.reactant_uptake"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.boat_reactor.BoatReactor.reactant_uptake" title="Link to this definition"></a></dt>
+<dd><p>Calculates reactant uptake to the boat and loss to flow tube
+walls.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hypothetical_gamma</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – Hypothetical
+uptake coefficient to calculate diffusion correction
+factor.</p></li>
+<li><p><strong>gamma_wall</strong> (<em>float</em>) – Wall uptake coefficient (default: 5e-6
+for halocarbon wax coating - Ivanov et al., 2021).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Loss to boat as ratio to inital amount (fraction).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.boat_reactor.BoatReactor.calculate_gamma">
+<span class="sig-name descname"><span class="pre">calculate_gamma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concentrations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.calculate_gamma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.boat_reactor.BoatReactor.calculate_gamma" title="Link to this definition"></a></dt>
+<dd><p>Fits the observed loss to the boat to a first order kinetic
+model to extract the uptake coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>concentrations</strong> (<em>numpy.ndarray</em>) – Reactant concentrations
+(arbitrary units).</p></li>
+<li><p><strong>exposure</strong> (<em>numpy.ndarray</em>) – Reactant exposure (s or cm).</p></li>
+<li><p><strong>exposure_units</strong> (<em>str</em>) – Units of exposure (s or cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>k, first order loss rate (s-1).
+float: r_value, correlation coefficient of the fit.
+float: gamma, uptake coefficient.
+tuple[float, float]: 95% confidence interval for gamma</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="flowtube-coated-wall-reactor-coatedwallreactor-module">
+<h2>flowtube.coated_wall_reactor.CoatedWallReactor module<a class="headerlink" href="#flowtube-coated-wall-reactor-coatedwallreactor-module" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="flowtube.coated_wall_reactor.CoatedWallReactor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flowtube.coated_wall_reactor.</span></span><span class="sig-name descname"><span class="pre">CoatedWallReactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">FT_ID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FT_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">injector_ID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">injector_OD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_gas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_gas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_MR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">insert_ID</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">insert_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.coated_wall_reactor.CoatedWallReactor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>FT_ID</strong> (<em>float</em>)</p></li>
+<li><p><strong>FT_length</strong> (<em>float</em>)</p></li>
+<li><p><strong>injector_ID</strong> (<em>float</em>)</p></li>
+<li><p><strong>injector_OD</strong> (<em>float</em>)</p></li>
+<li><p><strong>reactant_gas</strong> (<em>str</em>)</p></li>
+<li><p><strong>carrier_gas</strong> (<em>str</em>)</p></li>
+<li><p><strong>reactant_MR</strong> (<em>float</em>)</p></li>
+<li><p><strong>insert_ID</strong> (<em>float</em>)</p></li>
+<li><p><strong>insert_length</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.coated_wall_reactor.CoatedWallReactor.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_diffusion_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.coated_wall_reactor.CoatedWallReactor.initialize" title="Link to this definition"></a></dt>
+<dd><p>Sets experimental conditions and calls calculation functions for
+numerous flow and diffusion parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_FR</strong> (<em>float</em>) – Reactant flow rate (sccm).</p></li>
+<li><p><strong>reactant_carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) used
+to dilute the reactant.</p></li>
+<li><p><strong>carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) typically
+injected near the start of the flow tube.</p></li>
+<li><p><strong>P</strong> (<em>float</em>) – Pressure.</p></li>
+<li><p><strong>P_units</strong> (<em>str</em>) – Pressure units.</p></li>
+<li><p><strong>T</strong> (<em>float</em>) – Temperature (C).</p></li>
+<li><p><strong>reactant_diffusion_rate</strong> (<em>float</em>) – Reactant diffusion rate
+(cm2 s-1).</p></li>
+<li><p><strong>radial_delta_T</strong> (<em>float</em>) – Radial temperature gradient (K)
+(default = 1 K).</p></li>
+<li><p><strong>axial_delta_T</strong> (<em>float</em>) – Axial temperature gradient (K)
+(default = 1 K).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.coated_wall_reactor.CoatedWallReactor.flows">
+<span class="sig-name descname"><span class="pre">flows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.flows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.coated_wall_reactor.CoatedWallReactor.flows" title="Link to this definition"></a></dt>
+<dd><p>Calculates Flow Tube flows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_FR</strong> (<em>float</em>) – Reactant flow rate (sccm).</p></li>
+<li><p><strong>reactant_carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) used
+to dilute the reactant.</p></li>
+<li><p><strong>carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) typically
+injected near the start of the flow tube.</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.coated_wall_reactor.CoatedWallReactor.carrier_flow">
+<span class="sig-name descname"><span class="pre">carrier_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.carrier_flow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.coated_wall_reactor.CoatedWallReactor.carrier_flow" title="Link to this definition"></a></dt>
+<dd><p>Performs and displays carrier gas transport calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delta_T_radial</strong> (<em>float</em>) – Radial temperature gradient (K).</p></li>
+<li><p><strong>delta_T_axial</strong> (<em>float</em>) – Axial temperature gradient (K).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated values.</p></li>
+<li><p><strong>radial_delta_T</strong> (<em>float</em>)</p></li>
+<li><p><strong>axial_delta_T</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.coated_wall_reactor.CoatedWallReactor.reactant_diffusion">
+<span class="sig-name descname"><span class="pre">reactant_diffusion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_diffusion_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.reactant_diffusion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.coated_wall_reactor.CoatedWallReactor.reactant_diffusion" title="Link to this definition"></a></dt>
+<dd><p>Performs and displays reactant diffusion calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_diffusion_rate</strong> (<em>float</em>) – Reactant diffusion rate (cm2 s-1).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.coated_wall_reactor.CoatedWallReactor.reactant_uptake">
+<span class="sig-name descname"><span class="pre">reactant_uptake</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hypothetical_gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_wall</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.reactant_uptake"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.coated_wall_reactor.CoatedWallReactor.reactant_uptake" title="Link to this definition"></a></dt>
+<dd><p>Calculates reactant uptake to coated wall or insert and loss to
+flow tube walls.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hypothetical_gamma</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – Hypothetical
+uptake coefficient to calculate diffusion correction
+factor.</p></li>
+<li><p><strong>gamma_wall</strong> (<em>float</em>) – Wall uptake coefficient (default: 5e-6
+for halocarbon wax coating - Ivanov et al., J. Mass
+Spectrom., 2021).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>Gas phase diffusion correction factor (unitless).
+float: Loss to insert or coated wall as ratio of inital</p>
+<blockquote>
+<div><p>amount (fraction).</p>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.coated_wall_reactor.CoatedWallReactor.calculate_gamma">
+<span class="sig-name descname"><span class="pre">calculate_gamma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concentrations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.calculate_gamma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.coated_wall_reactor.CoatedWallReactor.calculate_gamma" title="Link to this definition"></a></dt>
+<dd><p>Fits the observed loss to the boat to a first order kinetic
+model to extract the uptake coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>concentrations</strong> (<em>numpy.ndarray</em>) – Reactant concentrations
+(arbitrary units).</p></li>
+<li><p><strong>exposure</strong> (<em>numpy.ndarray</em>) – Reactant exposure (s or cm).</p></li>
+<li><p><strong>exposure_units</strong> (<em>str</em>) – Units of exposure (s or cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>k, first order loss rate (s-1).
+float: r_value, correlation coefficient of the fit.
+float: gamma, uptake coefficient.
+tuple[float, float]: 95% confidence interval for gamma</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-flowtube.diffusion_coef">
+<span id="flowtube-diffusion-coef-module"></span><h2>flowtube.diffusion_coef module<a class="headerlink" href="#module-flowtube.diffusion_coef" title="Link to this heading"></a></h2>
+<p>Handles the calculation of the diffusion coefficient of a binary gas
+mixture.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="flowtube.diffusion_coef.required_attrs">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flowtube.diffusion_coef.</span></span><span class="sig-name descname"><span class="pre">required_attrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/diffusion_coef.html#required_attrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.diffusion_coef.required_attrs" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.diffusion_coef.required_attrs.P">
+<span class="sig-name descname"><span class="pre">P</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#flowtube.diffusion_coef.required_attrs.P" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.diffusion_coef.required_attrs.T">
+<span class="sig-name descname"><span class="pre">T</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#flowtube.diffusion_coef.required_attrs.T" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.diffusion_coef.required_attrs.reactant_gas">
+<span class="sig-name descname"><span class="pre">reactant_gas</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#flowtube.diffusion_coef.required_attrs.reactant_gas" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.diffusion_coef.required_attrs.carrier_gas">
+<span class="sig-name descname"><span class="pre">carrier_gas</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#flowtube.diffusion_coef.required_attrs.carrier_gas" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.diffusion_coef.non_polar_Lennard_Jones_potential">
+<span class="sig-prename descclassname"><span class="pre">flowtube.diffusion_coef.</span></span><span class="sig-name descname"><span class="pre">non_polar_Lennard_Jones_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/diffusion_coef.html#non_polar_Lennard_Jones_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.diffusion_coef.non_polar_Lennard_Jones_potential" title="Link to this definition"></a></dt>
+<dd><p>Calculation of non-polar Lennard-Jones Potential for a binary gas
+mixture. Formulas 11-3.4 to 11-3.6 in Reid et al., 1987</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>e_k</strong> (<em>float</em>) – Lennard-Jones Energy (K).</p></li>
+<li><p><strong>T</strong> (<em>float</em>) – Temperature in K.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Non-polar Lennard Jones potential.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.diffusion_coef.binary_diffusion_coefficient">
+<span class="sig-prename descclassname"><span class="pre">flowtube.diffusion_coef.</span></span><span class="sig-name descname"><span class="pre">binary_diffusion_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/diffusion_coef.html#binary_diffusion_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.diffusion_coef.binary_diffusion_coefficient" title="Link to this definition"></a></dt>
+<dd><p>Calculation of non-polar diffusion coefficient for a low pressure
+binary gas mixture. Supported gases: Ar, He, Air, Br2, Cl2, HBr,
+HCl, HI, H2O, I2, NO, N2, and O2. Formulas 11-3.1 to 11-3.2 in Reid
+et al., 1987</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>object</strong> (<a class="reference internal" href="#flowtube.diffusion_coef.required_attrs" title="flowtube.diffusion_coef.required_attrs"><em>required_attrs</em></a>) – Object with required attributes</p></li>
+<li><p><strong>Pa</strong> (<em>(</em><em>P in</em>)</p></li>
+<li><p><strong>K</strong> (<em>T in</em>)</p></li>
+<li><p><strong>reactant_gas</strong></p></li>
+<li><p><strong>carrier_gas</strong><strong>)</strong><strong>.</strong></p></li>
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.diffusion_coef.required_attrs" title="flowtube.diffusion_coef.required_attrs"><em>required_attrs</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Diffusion coefficient for binary gas mixture (cm2 s-1)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-flowtube.flow_calc">
+<span id="flowtube-flow-calc-module"></span><h2>flowtube.flow_calc module<a class="headerlink" href="#module-flowtube.flow_calc" title="Link to this heading"></a></h2>
+<p>Conversion functions for flow rates and concentrations in flowtube
+package.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="flowtube.flow_calc.basic_attrs">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">basic_attrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#basic_attrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.basic_attrs" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.flow_calc.basic_attrs.P">
+<span class="sig-name descname"><span class="pre">P</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#flowtube.flow_calc.basic_attrs.P" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.flow_calc.basic_attrs.T">
+<span class="sig-name descname"><span class="pre">T</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#flowtube.flow_calc.basic_attrs.T" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="flowtube.flow_calc.carrier_attrs">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">carrier_attrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#carrier_attrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.carrier_attrs" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flowtube.flow_calc.basic_attrs" title="flowtube.flow_calc.basic_attrs"><code class="xref py py-class docutils literal notranslate"><span class="pre">basic_attrs</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.flow_calc.carrier_attrs.carrier_dynamic_viscosity">
+<span class="sig-name descname"><span class="pre">carrier_dynamic_viscosity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#flowtube.flow_calc.carrier_attrs.carrier_dynamic_viscosity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.flow_calc.carrier_attrs.carrier_density">
+<span class="sig-name descname"><span class="pre">carrier_density</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#flowtube.flow_calc.carrier_attrs.carrier_density" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="flowtube.flow_calc.full_attrs">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">full_attrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#full_attrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.full_attrs" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flowtube.flow_calc.carrier_attrs" title="flowtube.flow_calc.carrier_attrs"><code class="xref py py-class docutils literal notranslate"><span class="pre">carrier_attrs</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.flow_calc.full_attrs.reactant_diffusion_rate">
+<span class="sig-name descname"><span class="pre">reactant_diffusion_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#flowtube.flow_calc.full_attrs.reactant_diffusion_rate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.flow_calc.full_attrs.reactant_molec_velocity">
+<span class="sig-name descname"><span class="pre">reactant_molec_velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#flowtube.flow_calc.full_attrs.reactant_molec_velocity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.sccm_to_ccm">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">sccm_to_ccm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FR</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#sccm_to_ccm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.sccm_to_ccm" title="Link to this definition"></a></dt>
+<dd><p>Convert sccm to cm3 per min.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.basic_attrs" title="flowtube.flow_calc.basic_attrs"><em>basic_attrs</em></a>) – Object with basic attributes
+(P in Pa, T in K).</p></li>
+<li><p><strong>FR</strong> (<em>float</em>) – Flow rate in sccm.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Flow rate in cm3 min-1</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.ccm_to_sccm">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">ccm_to_sccm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FR</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#ccm_to_sccm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.ccm_to_sccm" title="Link to this definition"></a></dt>
+<dd><p>Convert cm3 per min to sccm</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.basic_attrs" title="flowtube.flow_calc.basic_attrs"><em>basic_attrs</em></a>) – Object with basic attributes
+(P in Pa, T in K).</p></li>
+<li><p><strong>FR</strong> (<em>float</em>) – Flow rate in cm3 min-1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Flow rate to sccm.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.sccm_to_velocity">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">sccm_to_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#sccm_to_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.sccm_to_velocity" title="Link to this definition"></a></dt>
+<dd><p>Calculate flow velocity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.basic_attrs" title="flowtube.flow_calc.basic_attrs"><em>basic_attrs</em></a>) – Object with basic attributes
+(P in Pa, T in K).</p></li>
+<li><p><strong>FR</strong> (<em>float</em>) – Flow rate in sccm.</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter in cm.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Flow velocity in cm s-1.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.MR_to_molec">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">MR_to_molec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#MR_to_molec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.MR_to_molec" title="Link to this definition"></a></dt>
+<dd><p>Convert mixing ratio in ppb to molecules cm-3.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.basic_attrs" title="flowtube.flow_calc.basic_attrs"><em>basic_attrs</em></a>) – Object with basic attributes
+(P in Pa, T in K).</p></li>
+<li><p><strong>conc</strong> (<em>float</em>) – Mixing ratio (ppb - mol mol-1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Concentration in molec. cm-3.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.molec_velocity">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">molec_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molar_mass</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#molec_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.molec_velocity" title="Link to this definition"></a></dt>
+<dd><p>Calculate thermal molecular velocity. Formula matched to values from
+Knopf et al., Anal. Chem., 2015</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.basic_attrs" title="flowtube.flow_calc.basic_attrs"><em>basic_attrs</em></a>) – Object with basic attributes
+(P in Pa, T in K).</p></li>
+<li><p><strong>molar_mass</strong> (<em>float</em>) – Molar mass of the gas (g mol-1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Thermal molecular velocity in cm s-1.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.reynolds_number">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">reynolds_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#reynolds_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.reynolds_number" title="Link to this definition"></a></dt>
+<dd><p>Calculate Reynolds number for a gas flowing through a cylinder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.carrier_attrs" title="flowtube.flow_calc.carrier_attrs"><em>carrier_attrs</em></a>) – Object with full attributes (P in Pa,
+T in K, carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>FR</strong> (<em>float</em>) – Total flow rate in sccm.</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the cylinder (cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reynolds number.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.reynolds_number_irregular">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">reynolds_number_irregular</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cross_sectional_area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wetted_perimeter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FR</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#reynolds_number_irregular"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.reynolds_number_irregular" title="Link to this definition"></a></dt>
+<dd><p>Calculate Reynolds number for a gas flowing through a cylinder.
+Formula 6-14 from Holman and Bhattacharyya 2011.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.carrier_attrs" title="flowtube.flow_calc.carrier_attrs"><em>carrier_attrs</em></a>) – Object with full attributes (P in Pa,
+T in K, carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>cross_sectional_area</strong> (<em>float</em>) – Cross sectional area of the flow
+passage (cm2).</p></li>
+<li><p><strong>wetted_perimeter</strong> (<em>float</em>) – Wetted perimeter of the flow passage
+(cm).</p></li>
+<li><p><strong>FR</strong> (<em>float</em>) – Total flow rate in sccm.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reynolds number.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.conductance">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">conductance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#conductance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.conductance" title="Link to this definition"></a></dt>
+<dd><p>Calculate conductance through cylinder - eq. 3.17 from Moore et al.,
+2009.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.carrier_attrs" title="flowtube.flow_calc.carrier_attrs"><em>carrier_attrs</em></a>) – Object with full attributes (P in Pa,
+T in K, carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Inner diameter (cm).</p></li>
+<li><p><strong>length</strong> (<em>float</em>) – Length (cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Conductance in L s-1.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.pressure_gradient">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">pressure_gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conductance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FR</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#pressure_gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.pressure_gradient" title="Link to this definition"></a></dt>
+<dd><p>Calculate pressure gradient - eqs. 3.9 &amp; 3.10 from Moore et al.,
+2009.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.basic_attrs" title="flowtube.flow_calc.basic_attrs"><em>basic_attrs</em></a>) – Object with basic attributes
+(P in Pa, T in K).</p></li>
+<li><p><strong>conductance</strong> (<em>float</em>) – Conductance in L s-1.</p></li>
+<li><p><strong>flow_rate</strong> (<em>float</em>) – Flow rate in sccm.</p></li>
+<li><p><strong>FR</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pressure gradient ratio.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.buoyancy_parameters">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">buoyancy_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Re</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#buoyancy_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.buoyancy_parameters" title="Link to this definition"></a></dt>
+<dd><p>Calculate buoyancy parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.carrier_attrs" title="flowtube.flow_calc.carrier_attrs"><em>carrier_attrs</em></a>) – Object with full attributes (P in Pa,
+T in K, carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>delta_T</strong> (<em>float</em>) – Temperature difference (K).</p></li>
+<li><p><strong>distance</strong> (<em>float</em>) – Distance over which the temperature difference
+is measured (cm) (typically axial or radial).</p></li>
+<li><p><strong>Re</strong> (<em>float</em>) – Reynolds number of the flow tube.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Buoyancy parameter (&gt;1 indicates the flow being driven by</dt><dd><p>buoyancy).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.length_to_laminar">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">length_to_laminar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Re</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#length_to_laminar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.length_to_laminar" title="Link to this definition"></a></dt>
+<dd><p>Entrance length (cm) - length to achieve laminar profile - Bird et
+al., 2002, page 52. Note that the scalar term can vary depending on
+the source. Keyser, 1994 gives a value of 0.0565 for 99% attainment
+of parabolic profile while Hanson and Kosciuch, 2003 provide a value
+of 0.05 for 95% attainment. Using an exponential fit of the values,
+it seems that the 0.035 figure that Bird et al., 2002 gives is for a
+85% attainment. Choose whichever value is most appropriate for your
+purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the cylinder (cm).</p></li>
+<li><p><strong>Re</strong> (<em>float</em>) – Reynolds number of the flow tube.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Length to laminar profile (cm).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.mixing_time">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">mixing_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#mixing_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.mixing_time" title="Link to this definition"></a></dt>
+<dd><p>Calculate mixing time (s) - Hanson and Lovejoy, Geophys. Res. Lett.,
+1994.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the cylinder (cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mixing time in seconds.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.N_eff_Shw">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">N_eff_Shw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FR</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#N_eff_Shw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.N_eff_Shw" title="Link to this definition"></a></dt>
+<dd><p>Calculate the effective Sherwood number - eq. 11 from Knopf et al.,
+2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>length</strong> (<em>float</em>) – Length of the flow tube (cm).</p></li>
+<li><p><strong>FR</strong> (<em>float</em>) – Total flow rate in cm3 min-1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Effective Sherwood number.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.flow_calc.Kn">
+<span class="sig-prename descclassname"><span class="pre">flowtube.flow_calc.</span></span><span class="sig-name descname"><span class="pre">Kn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean_free_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">char_length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/flow_calc.html#Kn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.flow_calc.Kn" title="Link to this definition"></a></dt>
+<dd><p>Calculate Knudsen number - eq. 8 from Knopf et al., 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mean_free_path</strong> (<em>float</em>) – Mean free path of the reactant (cm).</p></li>
+<li><p><strong>char_length</strong> (<em>float</em>) – Characteristic length: diameter of cylinder
+for a coated wall reactor (cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Knudsen number.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-flowtube.kinetics">
+<span id="flowtube-kinetics-module"></span><h2>flowtube.kinetics module<a class="headerlink" href="#module-flowtube.kinetics" title="Link to this heading"></a></h2>
+<p>Kinetics calculations for flow tube experiments.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.diffusion_limited_rate_constant">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">diffusion_limited_rate_constant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_eff_Shw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#diffusion_limited_rate_constant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.diffusion_limited_rate_constant" title="Link to this definition"></a></dt>
+<dd><p>Calculate diffusion limited rate constant (s-1) - eq. 10 from Knopf
+et al., 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>N_eff_Shw</strong> (<em>float</em>) – Effective Sherwood number.</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the cylinder (cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Diffusion limited rate constant (s-1).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.diffusion_limited_uptake_coefficient">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">diffusion_limited_uptake_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_diff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#diffusion_limited_uptake_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.diffusion_limited_uptake_coefficient" title="Link to this definition"></a></dt>
+<dd><p>Calculate diffusion limited effective uptake coefficient - eq. 19
+from Knopf et al., 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the cylinder (cm).</p></li>
+<li><p><strong>k_diff</strong> (<em>float</em>) – Diffusion limited rate constant (s-1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Diffusion limited effective uptake coefficient (cm s-1).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.correction_factor">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">correction_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N_eff_Shw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Kn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#correction_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.correction_factor" title="Link to this definition"></a></dt>
+<dd><p>Calculate correction factor for uptake coefficient - eq. 20 from
+Knopf et al., 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>N_eff_Shw</strong> (<em>float</em>) – Effective Sherwood number (unitless).</p></li>
+<li><p><strong>Kn</strong> (<em>float</em>) – Knudsen number (unitless).</p></li>
+<li><p><strong>hypothetical_gamma</strong> (<em>float</em>) – Hypothetical uptake coefficient
+(unitless).</p></li>
+<li><p><strong>gamma</strong> (<em>ndarray</em><em>[</em><em>tuple</em><em>[</em><em>Any</em><em>, </em><em>...</em><em>]</em><em>, </em><em>dtype</em><em>[</em><em>float64</em><em>]</em><em>] </em><em>| </em><em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Correction factor (unitless).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.observed_loss_rate">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">observed_loss_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_eff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#observed_loss_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.observed_loss_rate" title="Link to this definition"></a></dt>
+<dd><p>Calculate observed loss rate (s-1) - eq. 19 from Knopf et al., 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the cylinder (cm).</p></li>
+<li><p><strong>gamma_eff</strong> (<em>float</em>) – Effective uptake coefficient (unitless).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Observed loss rate (s-1).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.cylinder_loss">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">cylinder_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_eff_Shw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Kn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#cylinder_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.cylinder_loss" title="Link to this definition"></a></dt>
+<dd><p>Calculate penetration (unitless) - eq. 21 from Knopf et al., 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>time</strong> (<em>float</em>) – Residence time in cylinder (s).</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>)</p></li>
+<li><p><strong>N_eff_Shw</strong> (<em>float</em>)</p></li>
+<li><p><strong>Kn</strong> (<em>float</em>)</p></li>
+<li><p><strong>gamma</strong> (<em>ndarray</em><em>[</em><em>tuple</em><em>[</em><em>Any</em><em>, </em><em>...</em><em>]</em><em>, </em><em>dtype</em><em>[</em><em>float64</em><em>]</em><em>] </em><em>| </em><em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Penetration - fraction of initial reactant after passing</dt><dd><p>through cylinder (unitless).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.gamma_from_k">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">gamma_from_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#gamma_from_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.gamma_from_k" title="Link to this definition"></a></dt>
+<dd><p>Calculate effective uptake coefficient from rate constant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>k</strong> (<em>float</em>) – Rate constant (s-1).</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the cylinder (cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Effective uptake coefficient (unitless).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.kinetics.fit_first_order_kinetics">
+<span class="sig-prename descclassname"><span class="pre">flowtube.kinetics.</span></span><span class="sig-name descname"><span class="pre">fit_first_order_kinetics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concentrations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/kinetics.html#fit_first_order_kinetics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.kinetics.fit_first_order_kinetics" title="Link to this definition"></a></dt>
+<dd><p>Fits the observed loss to a first order kinetic model to extract the
+uptake coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.flow_calc.full_attrs" title="flowtube.flow_calc.full_attrs"><em>full_attrs</em></a>) – Object with full attributes (P in Pa, T in K,
+reactant_diffusion_rate in cm2 s-1,
+carrier_dynamic_viscosity in kg m-1 s-1,
+carrier_density in kg m-3).</p></li>
+<li><p><strong>concentrations</strong> (<em>NDArray</em><em>[</em><em>np.float64</em><em>]</em>) – Array of observed
+concentrations (unitless).</p></li>
+<li><p><strong>exposure</strong> (<em>NDArray</em><em>[</em><em>np.float64</em><em>]</em>) – Array of exposures (s or cm).</p></li>
+<li><p><strong>exposure_units</strong> (<em>str</em>) – Units of exposure (“s”, “sec”, “second”,
+“seconds”, “cm”, “centimeter”, “centimeters”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Tuple containing the</dt><dd><p>slope, intercept, r-value, p-value, and standard error of
+the regression.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[float, float, float, float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-flowtube.tools">
+<span id="flowtube-tools-module"></span><h2>flowtube.tools module<a class="headerlink" href="#module-flowtube.tools" title="Link to this heading"></a></h2>
+<p>Constants and unit conversions.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.tools.T_in_K">
+<span class="sig-prename descclassname"><span class="pre">flowtube.tools.</span></span><span class="sig-name descname"><span class="pre">T_in_K</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/tools.html#T_in_K"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.tools.T_in_K" title="Link to this definition"></a></dt>
+<dd><p>Convert celcius to Kelvin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<em>float</em>) – Temperature in Celcius.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Temperature in Kelvin.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.tools.P_in_Pa">
+<span class="sig-prename descclassname"><span class="pre">flowtube.tools.</span></span><span class="sig-name descname"><span class="pre">P_in_Pa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/tools.html#P_in_Pa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.tools.P_in_Pa" title="Link to this definition"></a></dt>
+<dd><p>Convert pressure to Pa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>P</strong> (<em>float</em>) – Pressure.</p></li>
+<li><p><strong>units</strong> (<em>float</em>) – Supported pressure units: Torr, bar, mbar, or
+hPa.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pressure in Pa.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.tools.cross_sectional_area">
+<span class="sig-prename descclassname"><span class="pre">flowtube.tools.</span></span><span class="sig-name descname"><span class="pre">cross_sectional_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/tools.html#cross_sectional_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.tools.cross_sectional_area" title="Link to this definition"></a></dt>
+<dd><p>Calculate cross sectional area.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>diameter</strong> (<em>float</em>) – Diameter.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cross sectional area.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.tools.partial_cylinder_area">
+<span class="sig-prename descclassname"><span class="pre">flowtube.tools.</span></span><span class="sig-name descname"><span class="pre">partial_cylinder_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/tools.html#partial_cylinder_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.tools.partial_cylinder_area" title="Link to this definition"></a></dt>
+<dd><p>Calculate the cross-sectional area and perimeter of a partial
+cylinder (“boat”) given its height and width. Assumes the partial
+cylinder is a segment of a circle with given width as chord length
+and that the height is less than the diameter of the circle.
+Calculations based on:
+<a class="reference external" href="https://mathworld.wolfram.com/CircularSegment.html">https://mathworld.wolfram.com/CircularSegment.html</a> and
+<a class="reference external" href="https://www.vcalc.com/wiki/KurtHeckman/Circle-area-of-an-arc-segment-h">https://www.vcalc.com/wiki/KurtHeckman/Circle-area-of-an-arc-segment-h</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>height</strong> (<em>float</em>) – Height of the segment (cm).</p></li>
+<li><p><strong>width</strong> (<em>float</em>) – Chord length of the segment (cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Outer perimeter (cm).
+float: Cross-sectional area (cm^2).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.tools.table">
+<span class="sig-prename descclassname"><span class="pre">flowtube.tools.</span></span><span class="sig-name descname"><span class="pre">table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_fmts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/tools.html#table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.tools.table" title="Link to this definition"></a></dt>
+<dd><p>Print a formatted table of variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> (<em>str</em>) – Title of the table.</p></li>
+<li><p><strong>var_names</strong> (<em>list</em>) – List of variable names.</p></li>
+<li><p><strong>var</strong> (<em>list</em>) – Variable values.</p></li>
+<li><p><strong>var_fmts</strong> (<em>list</em>) – List of formats for each variable.</p></li>
+<li><p><strong>units</strong> (<em>list</em>) – List of units for each variable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-flowtube.viscosity_density">
+<span id="flowtube-viscosity-density-module"></span><h2>flowtube.viscosity_density module<a class="headerlink" href="#module-flowtube.viscosity_density" title="Link to this heading"></a></h2>
+<p>Handles the calculation of the viscosity and density of a variety of
+pure gases.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="flowtube.viscosity_density.basic_attrs">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flowtube.viscosity_density.</span></span><span class="sig-name descname"><span class="pre">basic_attrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/viscosity_density.html#basic_attrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.viscosity_density.basic_attrs" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.viscosity_density.basic_attrs.P">
+<span class="sig-name descname"><span class="pre">P</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#flowtube.viscosity_density.basic_attrs.P" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flowtube.viscosity_density.basic_attrs.T">
+<span class="sig-name descname"><span class="pre">T</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#flowtube.viscosity_density.basic_attrs.T" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.viscosity_density.real_density">
+<span class="sig-prename descclassname"><span class="pre">flowtube.viscosity_density.</span></span><span class="sig-name descname"><span class="pre">real_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/viscosity_density.html#real_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.viscosity_density.real_density" title="Link to this definition"></a></dt>
+<dd><p>Calculates the real density of a gas using van der Waal’s equation
+of state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.viscosity_density.basic_attrs" title="flowtube.viscosity_density.basic_attrs"><em>basic_attrs</em></a>) – Object with basic attributes
+(P in Pa, T in K).</p></li>
+<li><p><strong>gas</strong> (<em>str</em>) – Molecular formula of gas (supported: Ar, He, N2, O2).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Real density of gas in kg m-3.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flowtube.viscosity_density.dynamic_viscosity">
+<span class="sig-prename descclassname"><span class="pre">flowtube.viscosity_density.</span></span><span class="sig-name descname"><span class="pre">dynamic_viscosity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/viscosity_density.html#dynamic_viscosity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.viscosity_density.dynamic_viscosity" title="Link to this definition"></a></dt>
+<dd><p>Estimate absolute/dynamic viscosity of pure gases using the
+corresponding states method from Reid et al., 1987.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference internal" href="#flowtube.viscosity_density.basic_attrs" title="flowtube.viscosity_density.basic_attrs"><em>basic_attrs</em></a>) – Object with basic attributes
+(P in Pa, T in K).</p></li>
+<li><p><strong>gas</strong> (<em>str</em>) – Molecular formula of gas (supported: Ar, He, N2, O2).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Gas viscosity (kg m-1 s-1).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-flowtube">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-flowtube" title="Link to this heading"></a></h2>
+<p>flowtube - A Python package for transport and diffusion calculations in
+cylindrical flow reactors.</p>
+<p>This package provides tools and utilities for flow reactor analysis
+including coated wall reactor (CWR), boat reactor, viscosity/density,
+and binary diffusion coefficients calculations for atmospheric chemistry
+research.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="flowtube.CoatedWallReactor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flowtube.</span></span><span class="sig-name descname"><span class="pre">CoatedWallReactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">FT_ID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FT_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">injector_ID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">injector_OD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_gas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_gas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_MR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">insert_ID</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">insert_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.CoatedWallReactor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>FT_ID</strong> (<em>float</em>)</p></li>
+<li><p><strong>FT_length</strong> (<em>float</em>)</p></li>
+<li><p><strong>injector_ID</strong> (<em>float</em>)</p></li>
+<li><p><strong>injector_OD</strong> (<em>float</em>)</p></li>
+<li><p><strong>reactant_gas</strong> (<em>str</em>)</p></li>
+<li><p><strong>carrier_gas</strong> (<em>str</em>)</p></li>
+<li><p><strong>reactant_MR</strong> (<em>float</em>)</p></li>
+<li><p><strong>insert_ID</strong> (<em>float</em>)</p></li>
+<li><p><strong>insert_length</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.CoatedWallReactor.calculate_gamma">
+<span class="sig-name descname"><span class="pre">calculate_gamma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concentrations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.calculate_gamma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.CoatedWallReactor.calculate_gamma" title="Link to this definition"></a></dt>
+<dd><p>Fits the observed loss to the boat to a first order kinetic
+model to extract the uptake coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>concentrations</strong> (<em>numpy.ndarray</em>) – Reactant concentrations
+(arbitrary units).</p></li>
+<li><p><strong>exposure</strong> (<em>numpy.ndarray</em>) – Reactant exposure (s or cm).</p></li>
+<li><p><strong>exposure_units</strong> (<em>str</em>) – Units of exposure (s or cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>k, first order loss rate (s-1).
+float: r_value, correlation coefficient of the fit.
+float: gamma, uptake coefficient.
+tuple[float, float]: 95% confidence interval for gamma</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.CoatedWallReactor.carrier_flow">
+<span class="sig-name descname"><span class="pre">carrier_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.carrier_flow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.CoatedWallReactor.carrier_flow" title="Link to this definition"></a></dt>
+<dd><p>Performs and displays carrier gas transport calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delta_T_radial</strong> (<em>float</em>) – Radial temperature gradient (K).</p></li>
+<li><p><strong>delta_T_axial</strong> (<em>float</em>) – Axial temperature gradient (K).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated values.</p></li>
+<li><p><strong>radial_delta_T</strong> (<em>float</em>)</p></li>
+<li><p><strong>axial_delta_T</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.CoatedWallReactor.flows">
+<span class="sig-name descname"><span class="pre">flows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.flows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.CoatedWallReactor.flows" title="Link to this definition"></a></dt>
+<dd><p>Calculates Flow Tube flows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_FR</strong> (<em>float</em>) – Reactant flow rate (sccm).</p></li>
+<li><p><strong>reactant_carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) used
+to dilute the reactant.</p></li>
+<li><p><strong>carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) typically
+injected near the start of the flow tube.</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.CoatedWallReactor.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_diffusion_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.CoatedWallReactor.initialize" title="Link to this definition"></a></dt>
+<dd><p>Sets experimental conditions and calls calculation functions for
+numerous flow and diffusion parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_FR</strong> (<em>float</em>) – Reactant flow rate (sccm).</p></li>
+<li><p><strong>reactant_carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) used
+to dilute the reactant.</p></li>
+<li><p><strong>carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) typically
+injected near the start of the flow tube.</p></li>
+<li><p><strong>P</strong> (<em>float</em>) – Pressure.</p></li>
+<li><p><strong>P_units</strong> (<em>str</em>) – Pressure units.</p></li>
+<li><p><strong>T</strong> (<em>float</em>) – Temperature (C).</p></li>
+<li><p><strong>reactant_diffusion_rate</strong> (<em>float</em>) – Reactant diffusion rate
+(cm2 s-1).</p></li>
+<li><p><strong>radial_delta_T</strong> (<em>float</em>) – Radial temperature gradient (K)
+(default = 1 K).</p></li>
+<li><p><strong>axial_delta_T</strong> (<em>float</em>) – Axial temperature gradient (K)
+(default = 1 K).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.CoatedWallReactor.reactant_diffusion">
+<span class="sig-name descname"><span class="pre">reactant_diffusion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_diffusion_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.reactant_diffusion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.CoatedWallReactor.reactant_diffusion" title="Link to this definition"></a></dt>
+<dd><p>Performs and displays reactant diffusion calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_diffusion_rate</strong> (<em>float</em>) – Reactant diffusion rate (cm2 s-1).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.CoatedWallReactor.reactant_uptake">
+<span class="sig-name descname"><span class="pre">reactant_uptake</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hypothetical_gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_wall</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/coated_wall_reactor.html#CoatedWallReactor.reactant_uptake"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.CoatedWallReactor.reactant_uptake" title="Link to this definition"></a></dt>
+<dd><p>Calculates reactant uptake to coated wall or insert and loss to
+flow tube walls.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hypothetical_gamma</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – Hypothetical
+uptake coefficient to calculate diffusion correction
+factor.</p></li>
+<li><p><strong>gamma_wall</strong> (<em>float</em>) – Wall uptake coefficient (default: 5e-6
+for halocarbon wax coating - Ivanov et al., J. Mass
+Spectrom., 2021).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>Gas phase diffusion correction factor (unitless).
+float: Loss to insert or coated wall as ratio of inital</p>
+<blockquote>
+<div><p>amount (fraction).</p>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="flowtube.BoatReactor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flowtube.</span></span><span class="sig-name descname"><span class="pre">BoatReactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">FT_ID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FT_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">injector_ID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">injector_OD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_gas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_gas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_MR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boat_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boat_height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boat_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boat_wall_thickness</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.BoatReactor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>FT_ID</strong> (<em>float</em>)</p></li>
+<li><p><strong>FT_length</strong> (<em>float</em>)</p></li>
+<li><p><strong>injector_ID</strong> (<em>float</em>)</p></li>
+<li><p><strong>injector_OD</strong> (<em>float</em>)</p></li>
+<li><p><strong>reactant_gas</strong> (<em>str</em>)</p></li>
+<li><p><strong>carrier_gas</strong> (<em>str</em>)</p></li>
+<li><p><strong>reactant_MR</strong> (<em>float</em>)</p></li>
+<li><p><strong>boat_width</strong> (<em>float</em>)</p></li>
+<li><p><strong>boat_height</strong> (<em>float</em>)</p></li>
+<li><p><strong>boat_length</strong> (<em>float</em>)</p></li>
+<li><p><strong>boat_wall_thickness</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.BoatReactor.calculate_gamma">
+<span class="sig-name descname"><span class="pre">calculate_gamma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">concentrations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.calculate_gamma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.BoatReactor.calculate_gamma" title="Link to this definition"></a></dt>
+<dd><p>Fits the observed loss to the boat to a first order kinetic
+model to extract the uptake coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>concentrations</strong> (<em>numpy.ndarray</em>) – Reactant concentrations
+(arbitrary units).</p></li>
+<li><p><strong>exposure</strong> (<em>numpy.ndarray</em>) – Reactant exposure (s or cm).</p></li>
+<li><p><strong>exposure_units</strong> (<em>str</em>) – Units of exposure (s or cm).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>k, first order loss rate (s-1).
+float: r_value, correlation coefficient of the fit.
+float: gamma, uptake coefficient.
+tuple[float, float]: 95% confidence interval for gamma</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.BoatReactor.carrier_flow">
+<span class="sig-name descname"><span class="pre">carrier_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.carrier_flow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.BoatReactor.carrier_flow" title="Link to this definition"></a></dt>
+<dd><p>Performs and displays carrier gas transport calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delta_T_radial</strong> (<em>float</em>) – Radial temperature gradient (K).</p></li>
+<li><p><strong>delta_T_axial</strong> (<em>float</em>) – Axial temperature gradient (K).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated values.</p></li>
+<li><p><strong>radial_delta_T</strong> (<em>float</em>)</p></li>
+<li><p><strong>axial_delta_T</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.BoatReactor.flows">
+<span class="sig-name descname"><span class="pre">flows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.flows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.BoatReactor.flows" title="Link to this definition"></a></dt>
+<dd><p>Calculates Flow Tube flows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_FR</strong> (<em>float</em>) – Reactant flow rate (sccm).</p></li>
+<li><p><strong>reactant_carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) used
+to dilute the reactant.</p></li>
+<li><p><strong>carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) typically
+injected near the start of the flow tube.</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.BoatReactor.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carrier_FR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactant_diffusion_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_delta_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.BoatReactor.initialize" title="Link to this definition"></a></dt>
+<dd><p>Sets experimental conditions and calls calculation functions for
+numerous flow and diffusion parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_FR</strong> (<em>float</em>) – Reactant flow rate (sccm).</p></li>
+<li><p><strong>reactant_carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) used
+to dilute the reactant.</p></li>
+<li><p><strong>carrier_FR</strong> (<em>float</em>) – Carrier flow rate (sccm) typically
+injected near the start of the flow tube.</p></li>
+<li><p><strong>P</strong> (<em>float</em>) – Pressure.</p></li>
+<li><p><strong>P_units</strong> (<em>str</em>) – Pressure units.</p></li>
+<li><p><strong>T</strong> (<em>float</em>) – Temperature (C).</p></li>
+<li><p><strong>reactant_diffusion_rate</strong> (<em>float</em><em>, </em><em>optional</em>) – Reactant
+diffusion rate (cm2 s-1).</p></li>
+<li><p><strong>radial_delta_T</strong> (<em>float</em>) – Radial temperature gradient (K)
+(default = 1 K).</p></li>
+<li><p><strong>axial_delta_T</strong> (<em>float</em>) – Axial temperature gradient (K)
+(default = 1 K).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.BoatReactor.reactant_diffusion">
+<span class="sig-name descname"><span class="pre">reactant_diffusion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reactant_diffusion_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.reactant_diffusion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.BoatReactor.reactant_diffusion" title="Link to this definition"></a></dt>
+<dd><p>Performs and displays reactant diffusion calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reactant_diffusion_rate</strong> (<em>float</em>) – Reactant diffusion rate (cm2 s-1).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flowtube.BoatReactor.reactant_uptake">
+<span class="sig-name descname"><span class="pre">reactant_uptake</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hypothetical_gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_wall</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flowtube/boat_reactor.html#BoatReactor.reactant_uptake"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flowtube.BoatReactor.reactant_uptake" title="Link to this definition"></a></dt>
+<dd><p>Calculates reactant uptake to the boat and loss to flow tube
+walls.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hypothetical_gamma</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – Hypothetical
+uptake coefficient to calculate diffusion correction
+factor.</p></li>
+<li><p><strong>gamma_wall</strong> (<em>float</em>) – Wall uptake coefficient (default: 5e-6
+for halocarbon wax coating - Ivanov et al., 2021).</p></li>
+<li><p><strong>disp</strong> (<em>bool</em>) – Display calculated values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Loss to boat as ratio to inital amount (fraction).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="flowtube documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-right" title="flowtube" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Corey Pedersen.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

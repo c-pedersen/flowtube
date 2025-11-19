@@ -1,0 +1,573 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flowtube.flow_calc &mdash; flowtube 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            flowtube
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/flowtube.html">flowtube package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">flowtube</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">flowtube</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">flowtube.flow_calc</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for flowtube.flow_calc</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Conversion functions for flow rates and concentrations in flowtube</span>
+<span class="sd">package.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">tools</span>
+
+
+<div class="viewcode-block" id="basic_attrs">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.basic_attrs">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">basic_attrs</span><span class="p">(</span>
+    <span class="n">Protocol</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">P</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># Pressure in Pa</span>
+    <span class="n">T</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># Temperature in K</span></div>
+
+
+
+<div class="viewcode-block" id="carrier_attrs">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.carrier_attrs">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">carrier_attrs</span><span class="p">(</span>
+    <span class="n">basic_attrs</span><span class="p">,</span>
+    <span class="n">Protocol</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">carrier_dynamic_viscosity</span><span class="p">:</span> <span class="p">(</span>
+        <span class="nb">float</span>  <span class="c1"># Dynamic viscosity of the carrier gas (kg m-1 s-1)</span>
+    <span class="p">)</span>
+    <span class="n">carrier_density</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># Density of the carrier gas (kg m-3)</span></div>
+
+
+
+<div class="viewcode-block" id="full_attrs">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.full_attrs">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">full_attrs</span><span class="p">(</span>
+    <span class="n">carrier_attrs</span><span class="p">,</span>
+    <span class="n">Protocol</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">reactant_diffusion_rate</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># Diffusion rate of the reactant (cm2 s-1)</span>
+    <span class="n">reactant_molec_velocity</span><span class="p">:</span> <span class="p">(</span>
+        <span class="nb">float</span>  <span class="c1"># Thermal molecular velocity of the reactant (cm s-1)</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1">### Flow rate conversion functions ###</span>
+<div class="viewcode-block" id="sccm_to_ccm">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.sccm_to_ccm">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sccm_to_ccm</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">basic_attrs</span><span class="p">,</span>
+    <span class="n">FR</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert sccm to cm3 per min.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (basic_attrs): Object with basic attributes</span>
+<span class="sd">            (P in Pa, T in K).</span>
+<span class="sd">        FR (float): Flow rate in sccm.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Flow rate in cm3 min-1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">tools</span><span class="o">.</span><span class="n">STANDARD_PRESSURE_Pa</span> <span class="o">/</span> <span class="n">obj</span><span class="o">.</span><span class="n">P</span><span class="p">)</span> <span class="o">*</span> <span class="n">obj</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">tools</span><span class="o">.</span><span class="n">STANDARD_TEMPERATURE_K</span> <span class="o">*</span> <span class="n">FR</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ccm_to_sccm">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.ccm_to_sccm">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ccm_to_sccm</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">basic_attrs</span><span class="p">,</span>
+    <span class="n">FR</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert cm3 per min to sccm</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (basic_attrs): Object with basic attributes</span>
+<span class="sd">            (P in Pa, T in K).</span>
+<span class="sd">        FR (float): Flow rate in cm3 min-1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Flow rate to sccm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">P</span> <span class="o">/</span> <span class="n">tools</span><span class="o">.</span><span class="n">STANDARD_PRESSURE_Pa</span><span class="p">)</span> <span class="o">*</span> <span class="n">tools</span><span class="o">.</span><span class="n">STANDARD_TEMPERATURE_K</span> <span class="o">/</span> <span class="n">obj</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">FR</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="sccm_to_velocity">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.sccm_to_velocity">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sccm_to_velocity</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">basic_attrs</span><span class="p">,</span>
+    <span class="n">FR</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate flow velocity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (basic_attrs): Object with basic attributes</span>
+<span class="sd">            (P in Pa, T in K).</span>
+<span class="sd">        FR (float): Flow rate in sccm.</span>
+<span class="sd">        diameter (float): Diameter in cm.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Flow velocity in cm s-1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">sccm_to_ccm</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">FR</span><span class="p">)</span> <span class="o">/</span> <span class="n">tools</span><span class="o">.</span><span class="n">cross_sectional_area</span><span class="p">(</span><span class="n">diameter</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60</span></div>
+
+
+
+<span class="c1">### Physical calculations ###</span>
+<div class="viewcode-block" id="MR_to_molec">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.MR_to_molec">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">MR_to_molec</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">basic_attrs</span><span class="p">,</span>
+    <span class="n">conc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert mixing ratio in ppb to molecules cm-3.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (basic_attrs): Object with basic attributes</span>
+<span class="sd">            (P in Pa, T in K).</span>
+<span class="sd">        conc (float): Mixing ratio (ppb - mol mol-1).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Concentration in molec. cm-3.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">P</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">tools</span><span class="o">.</span><span class="n">UNIVERSAL_GAS_CONSTANT</span> <span class="o">*</span> <span class="n">obj</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">tools</span><span class="o">.</span><span class="n">AVOGADROS_NUMBER</span>
+        <span class="o">/</span> <span class="mi">100</span><span class="o">**</span><span class="mi">3</span>
+        <span class="o">*</span> <span class="n">conc</span>
+        <span class="o">*</span> <span class="mf">1e-9</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="molec_velocity">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.molec_velocity">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">molec_velocity</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">basic_attrs</span><span class="p">,</span>
+    <span class="n">molar_mass</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate thermal molecular velocity. Formula matched to values from</span>
+<span class="sd">    Knopf et al., Anal. Chem., 2015</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (basic_attrs): Object with basic attributes</span>
+<span class="sd">            (P in Pa, T in K).</span>
+<span class="sd">        molar_mass (float): Molar mass of the gas (g mol-1).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Thermal molecular velocity in cm s-1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="mi">8</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">tools</span><span class="o">.</span><span class="n">UNIVERSAL_GAS_CONSTANT</span> <span class="o">*</span> <span class="n">obj</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">molar_mass</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1">### Flow diagnostics calculations ###</span>
+<div class="viewcode-block" id="reynolds_number">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.reynolds_number">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reynolds_number</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">carrier_attrs</span><span class="p">,</span>
+    <span class="n">FR</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate Reynolds number for a gas flowing through a cylinder.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (carrier_attrs): Object with full attributes (P in Pa,</span>
+<span class="sd">            T in K, carrier_dynamic_viscosity in kg m-1 s-1,</span>
+<span class="sd">            carrier_density in kg m-3).</span>
+<span class="sd">        FR (float): Total flow rate in sccm.</span>
+<span class="sd">        diameter (float): Diameter of the cylinder (cm).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Reynolds number.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">carrier_density</span> <span class="o">/</span> <span class="mi">100</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">sccm_to_velocity</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">FR</span><span class="p">,</span> <span class="n">diameter</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">diameter</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">carrier_dynamic_viscosity</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="reynolds_number_irregular">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.reynolds_number_irregular">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reynolds_number_irregular</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">carrier_attrs</span><span class="p">,</span>
+    <span class="n">cross_sectional_area</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">wetted_perimeter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">FR</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate Reynolds number for a gas flowing through a cylinder.</span>
+<span class="sd">    Formula 6-14 from Holman and Bhattacharyya 2011.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (carrier_attrs): Object with full attributes (P in Pa,</span>
+<span class="sd">            T in K, carrier_dynamic_viscosity in kg m-1 s-1,</span>
+<span class="sd">            carrier_density in kg m-3).</span>
+<span class="sd">        cross_sectional_area (float): Cross sectional area of the flow</span>
+<span class="sd">            passage (cm2).</span>
+<span class="sd">        wetted_perimeter (float): Wetted perimeter of the flow passage</span>
+<span class="sd">            (cm).</span>
+<span class="sd">        FR (float): Total flow rate in sccm.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Reynolds number.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hydraulic_diameter</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">cross_sectional_area</span> <span class="o">/</span> <span class="n">wetted_perimeter</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">carrier_density</span> <span class="o">/</span> <span class="mi">100</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">sccm_to_ccm</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">FR</span><span class="p">)</span>
+        <span class="o">/</span> <span class="n">cross_sectional_area</span>
+        <span class="o">/</span> <span class="mi">60</span>
+        <span class="o">*</span> <span class="n">hydraulic_diameter</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">carrier_dynamic_viscosity</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="conductance">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.conductance">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">conductance</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">carrier_attrs</span><span class="p">,</span>
+    <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">length</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate conductance through cylinder - eq. 3.17 from Moore et al.,</span>
+<span class="sd">    2009.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (carrier_attrs): Object with full attributes (P in Pa,</span>
+<span class="sd">            T in K, carrier_dynamic_viscosity in kg m-1 s-1,</span>
+<span class="sd">            carrier_density in kg m-3).</span>
+<span class="sd">        diameter (float): Inner diameter (cm).</span>
+<span class="sd">        length (float): Length (cm).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Conductance in L s-1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="mi">32600</span>
+        <span class="o">*</span> <span class="n">diameter</span><span class="o">**</span><span class="mi">4</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">carrier_dynamic_viscosity</span> <span class="o">*</span> <span class="mf">1e7</span> <span class="o">*</span> <span class="n">length</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">obj</span><span class="o">.</span><span class="n">P</span>
+        <span class="o">/</span> <span class="n">tools</span><span class="o">.</span><span class="n">P_CF</span><span class="p">[</span><span class="s2">&quot;Torr&quot;</span><span class="p">]</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pressure_gradient">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.pressure_gradient">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pressure_gradient</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">basic_attrs</span><span class="p">,</span>
+    <span class="n">conductance</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">FR</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate pressure gradient - eqs. 3.9 &amp; 3.10 from Moore et al.,</span>
+<span class="sd">    2009.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (basic_attrs): Object with basic attributes</span>
+<span class="sd">            (P in Pa, T in K).</span>
+<span class="sd">        conductance (float): Conductance in L s-1.</span>
+<span class="sd">        flow_rate (float): Flow rate in sccm.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Pressure gradient ratio.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">sccm_to_ccm</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">FR</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">/</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">conductance</span></div>
+
+
+
+<div class="viewcode-block" id="buoyancy_parameters">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.buoyancy_parameters">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">buoyancy_parameters</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">carrier_attrs</span><span class="p">,</span>
+    <span class="n">delta_T</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">distance</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">Re</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate buoyancy parameters.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (carrier_attrs): Object with full attributes (P in Pa,</span>
+<span class="sd">            T in K, carrier_dynamic_viscosity in kg m-1 s-1,</span>
+<span class="sd">            carrier_density in kg m-3).</span>
+<span class="sd">        delta_T (float): Temperature difference (K).</span>
+<span class="sd">        distance (float): Distance over which the temperature difference</span>
+<span class="sd">            is measured (cm) (typically axial or radial).</span>
+<span class="sd">        Re (float): Reynolds number of the flow tube.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Buoyancy parameter (&gt;1 indicates the flow being driven by</span>
+<span class="sd">            buoyancy).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Grashof Number - eq. 9.12 from Incropera, et al., 2007</span>
+    <span class="n">grashof_number</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">9.81</span>
+        <span class="o">/</span> <span class="n">obj</span><span class="o">.</span><span class="n">T</span>
+        <span class="o">*</span> <span class="n">delta_T</span>
+        <span class="o">*</span> <span class="n">distance</span><span class="o">**</span><span class="mi">3</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">carrier_dynamic_viscosity</span> <span class="o">/</span> <span class="mi">100</span> <span class="o">/</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">carrier_density</span> <span class="o">/</span> <span class="mi">100</span><span class="o">**</span><span class="mi">3</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">grashof_number</span> <span class="o">/</span> <span class="n">Re</span><span class="o">**</span><span class="mi">2</span></div>
+
+
+
+<div class="viewcode-block" id="length_to_laminar">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.length_to_laminar">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">length_to_laminar</span><span class="p">(</span>
+    <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">Re</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Entrance length (cm) - length to achieve laminar profile - Bird et</span>
+<span class="sd">    al., 2002, page 52. Note that the scalar term can vary depending on</span>
+<span class="sd">    the source. Keyser, 1994 gives a value of 0.0565 for 99% attainment</span>
+<span class="sd">    of parabolic profile while Hanson and Kosciuch, 2003 provide a value</span>
+<span class="sd">    of 0.05 for 95% attainment. Using an exponential fit of the values,</span>
+<span class="sd">    it seems that the 0.035 figure that Bird et al., 2002 gives is for a</span>
+<span class="sd">    85% attainment. Choose whichever value is most appropriate for your</span>
+<span class="sd">    purposes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        diameter (float): Diameter of the cylinder (cm).</span>
+<span class="sd">        Re (float): Reynolds number of the flow tube.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Length to laminar profile (cm).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">diameter</span> <span class="o">*</span> <span class="n">Re</span></div>
+
+
+
+<div class="viewcode-block" id="mixing_time">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.mixing_time">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mixing_time</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">full_attrs</span><span class="p">,</span>
+    <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate mixing time (s) - Hanson and Lovejoy, Geophys. Res. Lett.,</span>
+<span class="sd">    1994.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (full_attrs): Object with full attributes (P in Pa, T in K,</span>
+<span class="sd">            reactant_diffusion_rate in cm2 s-1,</span>
+<span class="sd">            carrier_dynamic_viscosity in kg m-1 s-1,</span>
+<span class="sd">            carrier_density in kg m-3).</span>
+<span class="sd">        diameter (float): Diameter of the cylinder (cm).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Mixing time in seconds.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">diameter</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">obj</span><span class="o">.</span><span class="n">reactant_diffusion_rate</span><span class="p">)</span></div>
+
+
+
+<span class="c1">### KPS Method Calculations ###</span>
+<div class="viewcode-block" id="N_eff_Shw">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.N_eff_Shw">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">N_eff_Shw</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">full_attrs</span><span class="p">,</span>
+    <span class="n">length</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">FR</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the effective Sherwood number - eq. 11 from Knopf et al.,</span>
+<span class="sd">    2015.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (full_attrs): Object with full attributes (P in Pa, T in K,</span>
+<span class="sd">            reactant_diffusion_rate in cm2 s-1,</span>
+<span class="sd">            carrier_dynamic_viscosity in kg m-1 s-1,</span>
+<span class="sd">            carrier_density in kg m-3).</span>
+<span class="sd">        length (float): Length of the flow tube (cm).</span>
+<span class="sd">        FR (float): Total flow rate in cm3 min-1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Effective Sherwood number.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Axial Distance (unitless)</span>
+    <span class="c1"># - eq. 2 from Knopf et al., Anal. Chem., 2015</span>
+    <span class="n">z_star</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">length</span>
+        <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="o">/</span> <span class="mi">2</span>
+        <span class="o">*</span> <span class="n">obj</span><span class="o">.</span><span class="n">reactant_diffusion_rate</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">sccm_to_ccm</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">FR</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="mf">3.6568</span> <span class="o">+</span> <span class="mf">0.0978</span> <span class="o">/</span> <span class="p">(</span><span class="n">z_star</span> <span class="o">+</span> <span class="mf">0.0154</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Kn">
+<a class="viewcode-back" href="../../api/flowtube.html#flowtube.flow_calc.Kn">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Kn</span><span class="p">(</span>
+    <span class="n">mean_free_path</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">char_length</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate Knudsen number - eq. 8 from Knopf et al., 2015.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mean_free_path (float): Mean free path of the reactant (cm).</span>
+<span class="sd">        char_length (float): Characteristic length: diameter of cylinder</span>
+<span class="sd">            for a coated wall reactor (cm).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Knudsen number.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mean_free_path</span> <span class="o">/</span> <span class="n">char_length</span></div>
+
+
+<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">Citations:</span>
+<span class="sd">    </span>
+<span class="sd">Bird, R.B., Stewart, W.E., Lightfoot, E.N., 2002. Transport phenomena, </span>
+<span class="sd">2nd, Wiley international ed ed. J. Wiley, New York.</span>
+
+<span class="sd">Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and </span>
+<span class="sd">Penetration of Gas Molecules and Aerosol Particles through Laminar Flow </span>
+<span class="sd">Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87, 3746–3754. </span>
+<span class="sd">https://doi.org/10.1021/ac5042395</span>
+
+<span class="sd">Keyser, L.F., 1984. High-pressure flow kinetics. A study of the hydroxyl</span>
+<span class="sd">+ hydrogen chloride reaction from 2 to 100 torr. J. Phys. Chem. 88, </span>
+<span class="sd">4750–4758. https://doi.org/10.1021/j150664a061</span>
+
+<span class="sd">Hanson, D.R., Lovejoy, E.R., 1994. The uptake of N2O5 onto small </span>
+<span class="sd">sulfuric acid particles. Geophys. Res. Lett. 21, 2401–2404. </span>
+<span class="sd">https://doi.org/10.1029/94GL02288</span>
+
+<span class="sd">Holman, J. P., &amp; Bhattacharyya, S. (2011). Heat transfer in SI units </span>
+<span class="sd">(10th ed.). McGraw-Hill. p. 284</span>
+
+<span class="sd">Moore, J.H., Davis, C.C., Coplan, M.A., 2009. Building Scientific </span>
+<span class="sd">Apparatus, 4th ed. ed. Cambridge University Press, Leiden.</span>
+
+<span class="sd">Incropera, F.P., DeWitt, D.P., Bergman, T.L., Lavine, A.S. (Eds.), 2007.</span>
+<span class="sd">Fundamentals of heat and mass transfer, 6. ed. ed. Wiley, Hoboken, NJ.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Corey Pedersen.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
