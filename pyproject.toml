@@ -41,6 +41,9 @@ test = [
     "pytest >=7.0",
     "pytest-cov",
 ]
+dev = [
+    "sphinx>8.0.0"
+]
 
 [project.urls]
 Homepage = "https://github.com/c-pedersen/flowtube"
