@@ -70,7 +70,7 @@ fi
 
 # Run tests
 echo "Running tests..."
-pytest -q --cov=flowtube --cov-report=term-missing
+pytest -q --maxfail=1
 echo "Tests passed"
 echo ""
 
