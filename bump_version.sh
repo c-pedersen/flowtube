@@ -83,14 +83,14 @@ fi
 pip install -q -r docs/src/requirements.txt 2>/dev/null || true
 
 cd docs/src
-rm -rf _*
+rm -rf _build
 make html > /tmp/sphinx_build.log 2>&1
 if grep -qi "error" /tmp/sphinx_build.log; then
     echo "Error: Documentation build failed"
     cat /tmp/sphinx_build.log
     exit 1
 fi
-rm -r _*
+rm -r _build
 cd ../..
 
 echo "Documentation built successfully"
