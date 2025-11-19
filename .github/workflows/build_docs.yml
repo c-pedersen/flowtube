@@ -2,11 +2,6 @@ name: Build and Publish Documentation
 
 on:
   workflow_dispatch:
-    inputs:
-      ref:
-        description: "Branch, tag, or commit to build"
-        required: true
-        default: "v1.2.0"
 
 jobs:
   build-docs:
@@ -24,4 +19,4 @@ jobs:
         with:
           webhook_url: ${{ secrets.RTDS_WEBHOOK_URL }}
           webhook_token: ${{ secrets.RTDS_WEBHOOK_TOKEN }}
-          commit_ref: ${{ inputs.ref }}
+          commit_ref: v1.2.0
