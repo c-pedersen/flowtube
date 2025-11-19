@@ -70,12 +70,12 @@ fi
 
 # Run tests
 echo "Running tests..."
-pytest --cov=flowtube --cov-report=term-missing
+pytest -q --cov=flowtube --cov-report=term-missing
 echo "Tests passed"
 echo ""
 
-# Build documentation
-echo "Building documentation..."
+# Testing documentation
+echo "Testing documentation build..."
 if [ ! -d "docs/src" ]; then
     echo "Error: docs/src directory not found"
     exit 1
@@ -91,6 +91,7 @@ if grep -qi "error" /tmp/sphinx_build.log; then
     cat /tmp/sphinx_build.log
     exit 1
 fi
+rm -r _*
 cd ../..
 
 echo "Documentation built successfully"
