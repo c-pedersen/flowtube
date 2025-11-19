@@ -19,4 +19,4 @@ jobs:
         with:
           webhook_url: ${{ secrets.RTDS_WEBHOOK_URL }}
           webhook_token: ${{ secrets.RTDS_WEBHOOK_TOKEN }}
-          commit_ref: v1.2.0
+          commit_ref: "v1.2.0"
