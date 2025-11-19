@@ -10,7 +10,7 @@ research.
 
 from typing import TYPE_CHECKING
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 __author__ = "Corey Pedersen"
 __email__ = "coreyped@gmail.com"
 
