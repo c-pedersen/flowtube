@@ -67,17 +67,4 @@ jobs:
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
-
-  build-docs:
-    needs: build-and-publish  # Only build docs after successful publish
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Trigger Read the Docs build
-        uses: dfm/rtds-action@v1
-        with:
-          webhook_url: ${{ secrets.RTDS_WEBHOOK_URL }}
-          webhook_token: ${{ secrets.RTDS_WEBHOOK_TOKEN }}
-          commit_ref: ${{ github.ref_name }}
+          
