@@ -71,7 +71,6 @@ fi
 # Run tests
 echo "Running tests..."
 pytest -q --maxfail=1
-echo "Tests passed"
 echo ""
 
 # Testing documentation
@@ -84,7 +83,7 @@ fi
 pip install -q -r docs/src/requirements.txt 2>/dev/null || true
 
 cd docs/src
-rm -r _*
+rm -rf _*
 make html > /tmp/sphinx_build.log 2>&1
 if grep -qi "error" /tmp/sphinx_build.log; then
     echo "Error: Documentation build failed"
