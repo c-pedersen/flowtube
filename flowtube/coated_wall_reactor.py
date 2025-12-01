@@ -700,9 +700,9 @@ class CoatedWallReactor:
                 self.N_eff_Shw_insert,
                 self.Kn_insert,
                 hypothetical_gamma,
-                self.insert_length / self.insert_flow_velocity,
+                self.insert_length / self.insert_flow_velocity / 4,
             )
-            var_names += ["Insert Loss"]
+            var_names += ["Insert Loss - 1/4 Length"]
         else:
             self.uptake = kinetics.cylinder_loss(
                 self,
