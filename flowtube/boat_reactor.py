@@ -1,6 +1,6 @@
 import numpy as np
 import molmass as mm
-from numpy.typing import NDArray
+from numpy.typing import NDArray, ArrayLike
 import warnings
 
 from . import tools, diffusion_coef, viscosity_density, flow_calc, kinetics
@@ -555,7 +555,7 @@ class BoatReactor:
 
     def reactant_uptake(
         self,
-        hypothetical_gamma: NDArray[np.float64] | float,
+        hypothetical_gamma: ArrayLike | float | int,
         gamma_wall: float = 5e-6,
         disp: bool = True,
     ) -> None:
@@ -564,7 +564,7 @@ class BoatReactor:
         walls.
 
         Args:
-            hypothetical_gamma (float or numpy.ndarray): Hypothetical
+            hypothetical_gamma (ArrayLike or float or int): Hypothetical
                 uptake coefficient to calculate diffusion correction
                 factor.
             gamma_wall (float): Wall uptake coefficient (default: 5e-6
@@ -576,6 +576,16 @@ class BoatReactor:
         """
 
         ### Check for valid inputs ###
+        if not isinstance(hypothetical_gamma, (int, float)):
+            try:
+                hypothetical_gamma = np.asarray(hypothetical_gamma, dtype=np.float64)
+            except Exception as e:
+                raise TypeError("Gamma input must be int, float, or Array-like of int "
+                                f"or float; got {type(hypothetical_gamma)}") from e
+            
+            if hypothetical_gamma.ndim != 1:
+                raise ValueError("Gamma input must be 1-dimensional.")
+        
         # Check if hypothetical_gamma is between 0 and 1
         if np.min(hypothetical_gamma) < 0 or np.max(hypothetical_gamma) > 1:  # pyright: ignore[reportUnknownMemberType]
             raise ValueError("Hypothetical gamma must be between 0 and 1")
@@ -609,11 +619,12 @@ class BoatReactor:
         diff_corr = 1 - kinetics.correction_factor(
             self.N_eff_Shw_FT, self.Kn_FT, hypothetical_gamma
         )
-        if diff_corr > 0.05:
-            warnings.warn(
-                "Diffusion correction is > 5%. "
-                "Negligible diffusion may no longer be a valid assumption"
-            )
+        if not isinstance(diff_corr, np.ndarray):
+            if diff_corr > 0.05:
+                warnings.warn(
+                    "Diffusion correction is > 5%. "
+                    "Negligible diffusion may no longer be a valid assumption"
+                )
         var_names += [
             "Flow Tube Wall Diffusion Correction "
             "\n(must be small to neglect for boat reactor)"
@@ -667,7 +678,7 @@ class BoatReactor:
         units += ["%"]
 
         ### Display Values ###
-        if disp and not isinstance(var, np.ndarray):
+        if disp and not isinstance(hypothetical_gamma, np.ndarray):
             tools.table(
                 "Reactant Uptake",
                 var_names,
@@ -678,8 +689,8 @@ class BoatReactor:
 
     def calculate_gamma(
         self,
-        concentrations: NDArray[np.float64],
-        exposure: NDArray[np.float64],
+        concentrations: ArrayLike,
+        exposure: ArrayLike,
         exposure_units: str,
     ) -> tuple[float, float, float, tuple[float, float]]:
         """
@@ -687,9 +698,9 @@ class BoatReactor:
         model to extract the uptake coefficient.
 
         Args:
-            concentrations (numpy.ndarray): Reactant concentrations
+            concentrations (ArrayLike): Reactant concentrations
                 (arbitrary units).
-            exposure (numpy.ndarray): Reactant exposure (s or cm).
+            exposure (ArrayLike): Reactant exposure (s or cm).
             exposure_units (str): Units of exposure (s or cm).
 
         Returns:
