@@ -183,7 +183,7 @@ def test_fitting_non_arraylike_inputs(Reactor, build_reactor):
             exposure_units="s",
         )
     
-    with pytest.raises(TypeError, match=r"*inputs must have the same length"):
+    with pytest.raises(ValueError, match=r"inputs must have the same length"):
         obj.calculate_gamma(
             concentrations=np.array([0.01, 0.03]),
             exposure=[0.1, 0.2, 0.3],

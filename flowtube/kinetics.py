@@ -189,20 +189,22 @@ def fit_first_order_kinetics(
     ### Check for valid inputs ###
     try:
         concentrations = np.asarray(concentrations, dtype=np.float64)
-        if concentrations.ndim != 1:
-            raise ValueError("Concentration input must be 1-dimensional.")
-        if (concentrations < 0).any():
-            raise ValueError("Concentrations must be non-negative")
     except Exception as e:
         raise TypeError("Concentration input must be array-like; "
                         f"got {type(concentrations)}") from e
+    if concentrations.ndim != 1:
+        raise ValueError("Concentration input must be 1-dimensional.")
+    if (concentrations < 0).any():
+        raise ValueError("Concentrations must be non-negative")
+    
     try:
         exposure = np.asarray(exposure, dtype=np.float64)
-        if exposure.ndim != 1:
-            raise ValueError("Exposure input must be 1-dimensional.")
     except Exception as e:
         raise TypeError("Exposure input must be array-like; "
                         f"got {type(exposure)}") from e
+    if exposure.ndim != 1:
+        raise ValueError("Exposure input must be 1-dimensional.")
+    
     if len(concentrations) != len(exposure):
         raise ValueError("Concentration and exposure inputs must have the same length.")
     
