@@ -1,6 +1,10 @@
 """
 Handles the calculation of the diffusion coefficient of a binary gas
 mixture.
+
+Citations
+    Reid, R.C., Prausnitz, J.M., Poling, B.E., 1987. The Properties of Gases
+    and Liquids, 4th ed. McGraw-Hill, New York.
 """
 
 import numpy as np
@@ -55,7 +59,7 @@ e_ks: dict[str, float] = {
 
 def non_polar_Lennard_Jones_potential(e_k: float, T: float) -> float:
     """
-    Calculation of non-polar Lennard-Jones Potential for a binary gas 
+    Calculation of non-polar Lennard-Jones Potential for a binary gas
     mixture. Formulas 11-3.4 to 11-3.6 in Reid et al., 1987
 
     Args:
@@ -79,12 +83,12 @@ def non_polar_Lennard_Jones_potential(e_k: float, T: float) -> float:
 def binary_diffusion_coefficient(obj: required_attrs) -> float:
     """
     Calculation of non-polar diffusion coefficient for a low pressure
-    binary gas mixture. Supported gases: Ar, He, Air, Br2, Cl2, HBr, 
-    HCl, HI, H2O, I2, NO, N2, and O2. Formulas 11-3.1 to 11-3.2 in Reid 
+    binary gas mixture. Supported gases: Ar, He, Air, Br2, Cl2, HBr,
+    HCl, HI, H2O, I2, NO, N2, and O2. Formulas 11-3.1 to 11-3.2 in Reid
     et al., 1987
 
     Args:
-        object (required_attrs): Object with required attributes 
+        object (required_attrs): Object with required attributes
         (P in Pa, T in K, reactant_gas, carrier_gas).
 
     Returns:
@@ -116,11 +120,3 @@ def binary_diffusion_coefficient(obj: required_attrs) -> float:
         * obj.T**1.5
         / ((obj.P / tools.STANDARD_PRESSURE_Pa) * m**0.5 * mean_sigma**2 * Omega_D)
     )
-
-
-"""
-Citations
-
-Reid, R.C., Prausnitz, J.M., Poling, B.E., 1987. The Properties of Gases
-and Liquids, 4th ed. McGraw-Hill, New York.
-"""

@@ -1,6 +1,33 @@
 """
 Conversion functions for flow rates and concentrations in flowtube
 package.
+
+Citations:
+    Bird, R.B., Stewart, W.E., Lightfoot, E.N., 2002. Transport
+    phenomena, 2nd, Wiley international ed ed. J. Wiley, New York.
+
+    Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
+    Penetration of Gas Molecules and Aerosol Particles through Laminar
+    Flow Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87,
+    3746–3754. https://doi.org/10.1021/ac5042395
+
+    Keyser, L.F., 1984. High-pressure flow kinetics. A study of the
+    hydroxyl + hydrogen chloride reaction from 2 to 100 torr. J. Phys.
+    Chem. 88, 4750–4758. https://doi.org/10.1021/j150664a061
+
+    Hanson, D.R., Lovejoy, E.R., 1994. The uptake of N2O5 onto small
+    sulfuric acid particles. Geophys. Res. Lett. 21, 2401–2404.
+    https://doi.org/10.1029/94GL02288
+
+    Holman, J. P., & Bhattacharyya, S. (2011). Heat transfer in SI units
+    (10th ed.). McGraw-Hill. p. 284
+
+    Moore, J.H., Davis, C.C., Coplan, M.A., 2009. Building Scientific
+    Apparatus, 4th ed. ed. Cambridge University Press, Leiden.
+
+    Incropera, F.P., DeWitt, D.P., Bergman, T.L., Lavine, A.S. (Eds.),
+    2007. Fundamentals of heat and mass transfer, 6. ed. ed. Wiley,
+    Hoboken, NJ.
 """
 
 from typing import Protocol
@@ -385,33 +412,3 @@ def Kn(
     """
 
     return 2 * mean_free_path / char_length
-
-
-""" 
-Citations:
-    
-Bird, R.B., Stewart, W.E., Lightfoot, E.N., 2002. Transport phenomena, 
-2nd, Wiley international ed ed. J. Wiley, New York.
-
-Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and 
-Penetration of Gas Molecules and Aerosol Particles through Laminar Flow 
-Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87, 3746–3754. 
-https://doi.org/10.1021/ac5042395
-
-Keyser, L.F., 1984. High-pressure flow kinetics. A study of the hydroxyl
-+ hydrogen chloride reaction from 2 to 100 torr. J. Phys. Chem. 88, 
-4750–4758. https://doi.org/10.1021/j150664a061
-
-Hanson, D.R., Lovejoy, E.R., 1994. The uptake of N2O5 onto small 
-sulfuric acid particles. Geophys. Res. Lett. 21, 2401–2404. 
-https://doi.org/10.1029/94GL02288
-
-Holman, J. P., & Bhattacharyya, S. (2011). Heat transfer in SI units 
-(10th ed.). McGraw-Hill. p. 284
-
-Moore, J.H., Davis, C.C., Coplan, M.A., 2009. Building Scientific 
-Apparatus, 4th ed. ed. Cambridge University Press, Leiden.
-
-Incropera, F.P., DeWitt, D.P., Bergman, T.L., Lavine, A.S. (Eds.), 2007.
-Fundamentals of heat and mass transfer, 6. ed. ed. Wiley, Hoboken, NJ.
-"""

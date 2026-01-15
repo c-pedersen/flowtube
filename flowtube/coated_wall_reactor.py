@@ -1,3 +1,32 @@
+"""
+Main coated wall reactor class and associated calculations.
+
+Citations:
+    Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
+    Penetration of Gas Molecules and Aerosol Particles through Laminar
+    Flow Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87,
+    3746–3754. https://doi.org/10.1021/ac5042395
+
+    Hanson, D.R., Ravishankara, A.R., 1993. Uptake of hydrochloric acid
+    and hypochlorous acid onto sulfuric acid: solubilities,
+    diffusivities, and reaction. J. Phys. Chem. 97, 12309–12319.
+    https://doi.org/10.1021/j100149a035
+
+    Fuchs, N.A., Sutugin, A.G., 1971. HIGH-DISPERSED AEROSOLS, in: Hidy,
+    G.M., Brock, J.R. (Eds.), Topics in Current Aerosol Research,
+    International Reviews in Aerosol Physics and Chemistry. Pergamon,
+    p. 1. https://doi.org/10.1016/B978-0-08-016674-2.50006-6
+
+    Ivanov, A.V., Molina, M.J., Park, J., 2021. Experimental study on
+    HCl uptake by MgCl2 and sea salt under humid conditions. J Mass
+    Spectrom 56, e4601. https://doi.org/10.1002/jms.4601
+
+    Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and
+    evaluation of gas phase diffusion coefficients of reactive trace
+    gases in the atmosphere: volume 1. Inorganic compounds. Atmos. Chem.
+    Phys. 14, 9233–9247. https://doi.org/10.5194/acp-14-9233-2014
+"""
+
 import numpy as np
 import molmass as mm
 from numpy.typing import NDArray, ArrayLike
@@ -627,9 +656,11 @@ class CoatedWallReactor:
             try:
                 hypothetical_gamma = np.asarray(hypothetical_gamma, dtype=np.float64)
             except Exception as e:
-                raise TypeError("Gamma input must be int, float, or Array-like of int "
-                                f"or float; got {type(hypothetical_gamma)}") from e
-            
+                raise TypeError(
+                    "Gamma input must be int, float, or Array-like of int "
+                    f"or float; got {type(hypothetical_gamma)}"
+                ) from e
+
             if hypothetical_gamma.ndim != 1:
                 raise ValueError("Gamma input must be 1-dimensional.")
 
@@ -756,7 +787,7 @@ class CoatedWallReactor:
         concentrations: ArrayLike,
         exposure: ArrayLike,
         exposure_units: str,
-    ) -> tuple[float, float, float, tuple[float, float]]:
+    ) -> tuple[float, float, float, float, float]:
         """
         Fits the observed loss to the boat to a first order kinetic
         model to extract the uptake coefficient.
@@ -771,7 +802,8 @@ class CoatedWallReactor:
             float: k, first order loss rate (s-1).
             float: r_value, correlation coefficient of the fit.
             float: gamma, uptake coefficient.
-            tuple[float, float]: 95% confidence interval for gamma
+            float: gamma_lower, lower bound of 95% confidence interval for gamma.
+            float: gamma_upper, upper bound of 95% confidence interval for gamma.
         """
         # Check which inner diameter to use
         if self.insert_length > 0:
@@ -805,32 +837,4 @@ class CoatedWallReactor:
             diameter=diameter,
         )
 
-        return k, r_value, gamma, (gamma_lower, gamma_upper)
-
-
-""" 
-Citations:
-    
-Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and 
-Penetration of Gas Molecules and Aerosol Particles through Laminar Flow 
-Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87, 3746–3754. 
-https://doi.org/10.1021/ac5042395
-
-Hanson, D., Kosciuch, E., 2003. The NH3 Mass Accommodation Coefficient 
-for Uptake onto Sulfuric Acid Solutions. J. Phys. Chem. A 107, 
-2199–2208. https://doi.org/10.1021/jp021570j
-
-Fuchs, N.A., Sutugin, A.G., 1971. HIGH-DISPERSED AEROSOLS, in: Hidy,
-G.M., Brock, J.R. (Eds.), Topics in Current Aerosol Research, 
-International Reviews in Aerosol Physics and Chemistry. Pergamon, p. 1.
-https://doi.org/10.1016/B978-0-08-016674-2.50006-6
-
-Ivanov, A.V., Molina, M.J., Park, J., 2021. Experimental study on HCl 
-uptake by MgCl2 and sea salt under humid conditions. J Mass Spectrom 56,
-e4601. https://doi.org/10.1002/jms.4601
-
-Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and evaluation of
-gas phase diffusion coefficients of reactive trace gases in the 
-atmosphere: volume 1. Inorganic compounds. Atmos. Chem. Phys. 14, 
-9233–9247. https://doi.org/10.5194/acp-14-9233-2014
-"""
+        return k, r_value, gamma, gamma_lower, gamma_upper

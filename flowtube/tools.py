@@ -1,5 +1,15 @@
 """
 Constants and unit conversions.
+
+Constants:
+    STANDARD_TEMPERATURE_K: Standard temperature in Kelvin.
+    STANDARD_PRESSURE_Pa: Standard pressure in Pascal.
+    UNIVERSAL_GAS_CONSTANT: Universal gas constant in kg m2 s-2 K-1
+        mol-1.
+    BOLTZMANN_CONSTANT: Boltzmann constant in kg m2 s-2 K-1.
+    AVOGADROS_NUMBER: Avogadro's number in mol-1.
+    P_CF: Conversion factors to Pascal for Torr, bar, mbar, hPa, and Pa
+        pressure units.
 """
 
 import numpy as np
@@ -8,11 +18,28 @@ from tabulate import tabulate
 from requests.structures import CaseInsensitiveDict
 
 
+### Constants ###
+STANDARD_TEMPERATURE_K = 273.15  # K
+STANDARD_PRESSURE_Pa = 101325  # Pa
+UNIVERSAL_GAS_CONSTANT = 8.3145  # kg m2 s-2 K-1 mol-1
+BOLTZMANN_CONSTANT = 1.380649e-23  # kg m2 s-2 K-1
+AVOGADROS_NUMBER = 6.0221408e23  # mol-1
+P_CF = CaseInsensitiveDict(
+    {
+        "Torr": 133.322,
+        "bar": 1e5,
+        "mbar": 100,
+        "hPa": 100,
+        "Pa": 1,
+    }
+)  # conversion factors to Pa
+
+
 ### Unit conversions ###
 def T_in_K(
     T: float,
 ) -> float:
-    """Convert celcius to Kelvin.
+    """Convert Celcius to Kelvin.
 
     Args:
         T (float): Temperature in Celcius.
@@ -63,11 +90,11 @@ def partial_cylinder_area(
     width: float,
 ) -> tuple[float, float]:
     """
-    Calculate the cross-sectional area and perimeter of a partial 
-    cylinder ("boat") given its height and width. Assumes the partial 
-    cylinder is a segment of a circle with given width as chord length 
-    and that the height is less than the diameter of the circle. 
-    Calculations based on: 
+    Calculate the cross-sectional area and perimeter of a partial
+    cylinder ("boat") given its height and width. Assumes the partial
+    cylinder is a segment of a circle with given width as chord length
+    and that the height is less than the diameter of the circle.
+    Calculations based on:
     https://mathworld.wolfram.com/CircularSegment.html and
     https://www.vcalc.com/wiki/KurtHeckman/Circle-area-of-an-arc-segment-h.
 
@@ -137,20 +164,3 @@ def table(
     width = len(table.splitlines()[0])
     print(f"\033[1m{title}\033[0m".center(width))
     print(table)
-
-
-### Constants ###
-STANDARD_TEMPERATURE_K = 273.15  # K
-STANDARD_PRESSURE_Pa = 101325  # Pa
-UNIVERSAL_GAS_CONSTANT = 8.3145  # kg m2 s-2 K-1 mol-1
-BOLTZMANN_CONSTANT = 1.380649e-23  # kg m2 s-2 K-1
-AVOGADROS_NUMBER = 6.0221408e23  # mol-1
-P_CF = CaseInsensitiveDict(
-    {
-        "Torr": 133.322,
-        "bar": 1e5,
-        "mbar": 100,
-        "hPa": 100,
-        "Pa": 1,
-    }
-)  # conversion factors to Pa
