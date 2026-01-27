@@ -740,11 +740,13 @@ class BoatReactor:
             diameter = self.FT_ID * self.geometric_correction
 
         # Fit data to first order kinetics
-        slope, intercept, r_value, _p_value, std_err = kinetics.fit_first_order_kinetics(
-            obj=self,
-            concentrations=concentrations,
-            exposure=exposure,
-            exposure_units=exposure_units,
+        slope, intercept, r_value, _p_value, std_err = (
+            kinetics.fit_first_order_kinetics(
+                obj=self,
+                concentrations=concentrations,
+                exposure=exposure,
+                exposure_units=exposure_units,
+            )
         )
         k = -slope
 
