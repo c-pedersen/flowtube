@@ -787,7 +787,7 @@ class CoatedWallReactor:
         concentrations: ArrayLike,
         exposure: ArrayLike,
         exposure_units: str,
-    ) -> tuple[float, float, float, float, float]:
+    ) -> tuple[float, float, float, float, float, float]:
         """
         Fits the observed loss to the boat to a first order kinetic
         model to extract the uptake coefficient.
@@ -800,6 +800,7 @@ class CoatedWallReactor:
 
         Returns:
             float: k, first order loss rate (s-1).
+            float: intercept, y-intercept of the fit.
             float: r_value, correlation coefficient of the fit.
             float: gamma, uptake coefficient.
             float: gamma_lower, lower bound of 95% confidence interval for gamma.
@@ -812,7 +813,7 @@ class CoatedWallReactor:
             diameter = self.FT_ID
 
         # Fit data to first order kinetics
-        slope, _, r_value, _, std_err = kinetics.fit_first_order_kinetics(
+        slope, intercept, r_value, _, std_err = kinetics.fit_first_order_kinetics(
             obj=self,
             concentrations=concentrations,
             exposure=exposure,
@@ -837,4 +838,10 @@ class CoatedWallReactor:
             diameter=diameter,
         )
 
-        return k, r_value, gamma, gamma_lower, gamma_upper
+        if gamma_lower < 0 or gamma_upper > 1:
+            warnings.warn(
+                "Calculated confidence interval for gamma is unphysical. "
+                "This is typically due to limited data or low correlation."
+            )
+
+        return k, intercept, r_value, gamma, gamma_lower, gamma_upper
