@@ -146,6 +146,8 @@ class BoatReactor:
             self.boat_perimeter = tools.partial_cylinder_area(
                 boat_effective_radius, boat_effective_radius * 2
             )[0]
+        else:
+            self.boat_perimeter = boat_perimeter
 
     def initialize(
         self,
