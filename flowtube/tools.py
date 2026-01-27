@@ -39,10 +39,10 @@ P_CF = CaseInsensitiveDict(
 def T_in_K(
     T: float,
 ) -> float:
-    """Convert Celcius to Kelvin.
+    """Convert Celsius to Kelvin.
 
     Args:
-        T (float): Temperature in Celcius.
+        T (float): Temperature in Celsius.
 
     Returns:
         float: Temperature in Kelvin.
