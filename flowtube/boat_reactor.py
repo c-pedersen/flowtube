@@ -45,10 +45,10 @@ class BoatReactor:
         reactant_gas: str,
         carrier_gas: str,
         reactant_MR: float,
-        boat_width: float,
-        boat_height: float,
+        boat_liquid_width: float,
         boat_length: float,
-        boat_wall_thickness: float,
+        boat_cross_section: float,
+        boat_perimeter: float | None = None,
     ) -> None:
         """
         Handles calculations relevant to flow rate, flow diagnostics,
@@ -74,10 +74,12 @@ class BoatReactor:
             carrier_gas (str): Molecular formula of carrier gas
                 (supported: Ar, He, N2, O2).
             reactant_MR (float): Reactant mixing ratio (mol mol-1).
-            boat_width (float): Width (cm) of boat reactor.
-            boat_height (float): Height (cm) of boat reactor.
+            boat_liquid_width (float): Width (cm) of liquid in boat.
             boat_length (float): Length (cm) of boat reactor.
-            boat_wall_thickness (float): Wall thickness (cm).
+            boat_cross_section (float): Cross-sectional area (cm^2) of
+                boat.
+            boat_perimeter (float), optional: Wetted perimeter (cm) of
+                boat. Defaults to half cylinder profile.
 
         Returns:
             None
@@ -102,15 +104,13 @@ class BoatReactor:
             )
 
         # Check physicality of insert dimensions
-        if (
-            boat_length < 0
-            or boat_height < 0
-            or boat_width < 0
-            or boat_wall_thickness < 0
-        ):
+        if boat_length < 0 or boat_liquid_width < 0 or boat_cross_section < 0:
             raise ValueError("Boat dimensions must be positive")
-        elif boat_height > FT_ID or boat_width > FT_ID:
-            raise ValueError("Boat width or height cannot be larger than flow tube ID")
+        elif boat_liquid_width > FT_ID or boat_cross_section > np.pi * (FT_ID / 2) ** 2:
+            raise ValueError(
+                "Boat liquid width or cross-sectional area cannot be "
+                "larger than the flow tube's'"
+            )
         elif boat_length > FT_length:
             raise ValueError("Boat length cannot be larger than flow tube length")
 
@@ -138,10 +138,14 @@ class BoatReactor:
         self.reactant_gas = reactant_gas
         self.carrier_gas = carrier_gas
         self.reactant_MR = reactant_MR
-        self.boat_height = boat_height
-        self.boat_width = boat_width
+        self.boat_liquid_width = boat_liquid_width
+        self.boat_cross_section = boat_cross_section
         self.boat_length = boat_length
-        self.boat_wall_thickness = boat_wall_thickness
+        if boat_perimeter is None:
+            boat_effective_radius = np.sqrt(2 * boat_cross_section / np.pi)
+            self.boat_perimeter = tools.partial_cylinder_area(
+                boat_effective_radius, boat_effective_radius * 2
+            )[0]
 
     def initialize(
         self,
@@ -278,10 +282,7 @@ class BoatReactor:
             self, total_reactant_FR, self.injector_ID
         )
 
-        # Calculate the cross-sectional area of the boat reactor and flow tube
-        self.boat_perimeter, self.boat_cross_section = tools.partial_cylinder_area(
-            self.boat_height, self.boat_width
-        )
+        # Calculate the cross-sectional area
         self.net_cross_section = (
             tools.cross_sectional_area(self.FT_ID) - self.boat_cross_section
         )
@@ -342,9 +343,7 @@ class BoatReactor:
         units += ["cm s-1"]
 
         # Residence Time over the boat
-        self.residence_time = (
-            self.boat_length - self.boat_wall_thickness * 2
-        ) / self.flow_velocity
+        self.residence_time = self.boat_length / self.flow_velocity
         var_names += ["Residence Time Over Boat"]
         var += [self.residence_time]
         var_fmts += [".3g"]
@@ -632,19 +631,11 @@ class BoatReactor:
         units: list[str] = []
 
         # Boat surface area and volume
-        liquid_width = self.boat_width - self.boat_wall_thickness * 2
-        liquid_length = self.boat_length - self.boat_wall_thickness * 2
-        liquid_height = self.boat_height - self.boat_wall_thickness
-        liquid_surface_area = liquid_width * liquid_length
-        _, liquid_cross_section = tools.partial_cylinder_area(
-            liquid_height,
-            liquid_width,
-        )
-        liquid_volume = liquid_cross_section * liquid_length
-        var_names += ["Boat Surface Area", "Boat Volume"]
-        var += [liquid_surface_area, liquid_volume]
-        var_fmts += [".1f", ".1f"]
-        units += ["cm2", "cm3"]
+        liquid_surface_area = self.boat_liquid_width * self.boat_length
+        var_names += ["Boat Surface Area"]
+        var += [liquid_surface_area]
+        var_fmts += [".1f"]
+        units += ["cm2"]
 
         # Diffusion Correction - see kinetics.py for details
         diff_corr = 1 - kinetics.correction_factor(
@@ -666,9 +657,7 @@ class BoatReactor:
 
         # Geometric correction for boat geometry – Hanson and Ravishankara, 1993
         cylinder_SA_V_ratio = 4 / self.FT_ID
-        actual_SA_V_ratio = liquid_surface_area / (
-            self.net_cross_section * liquid_length
-        )
+        actual_SA_V_ratio = self.boat_liquid_width / self.net_cross_section
         self.geometric_correction = cylinder_SA_V_ratio / actual_SA_V_ratio
         var_names += ["Boat geometry correction factor"]
         var += [self.geometric_correction]

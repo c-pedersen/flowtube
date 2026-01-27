@@ -29,10 +29,9 @@ def make_constructor_kwargs():
         elif Reactor is BoatReactor:
             base.update(
                 dict(
-                    boat_width=2.0,
-                    boat_height=0.963,
+                    boat_liquid_width=2.0,
                     boat_length=53.8,
-                    boat_wall_thickness=0.11,
+                    boat_cross_section=3.0,
                 )
             )
         base.update(overrides)

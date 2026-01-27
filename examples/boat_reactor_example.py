@@ -19,10 +19,9 @@ def main():
         # HBr, HCl, HI, H2O, I2, NO, N2, and O2)
         carrier_gas="N2",  # Carrier gas formula (options are Ar, He, N2, O2)
         reactant_MR=1e-6,  # Reactant mixing ratio (mol/mol)
-        boat_width=2.0,  # Boat width (cm)
-        boat_height=0.963,  # Boat height (cm)
+        boat_liquid_width=2.0,  # Boat width (cm)
+        boat_cross_section=3.0,  # Boat cross-sectional area (cm2)
         boat_length=53.8,  # Boat length (cm)
-        boat_wall_thickness=0.11,  # Boat wall thickness (cm)
     )
 
     # Initialize with experimental conditions
