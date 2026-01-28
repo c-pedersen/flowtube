@@ -138,7 +138,7 @@ def test_reactant_uptake_gammas(Reactor, build_reactor):
 
     obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
     obj.reactant_uptake(hypothetical_gamma=[1e-7], disp=False)
-    obj.reactant_uptake(hypothetical_gamma=[1e-7, 1e-8])
+    obj.reactant_uptake(hypothetical_gamma=[1e-7, 1e-8], disp=False)
     
     with pytest.raises(
         TypeError, match=r"Gamma input must be int, float, or Array-like of int"):
