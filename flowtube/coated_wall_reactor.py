@@ -789,7 +789,7 @@ class CoatedWallReactor:
         exposure_units: str,
     ) -> tuple[float, float, float, float, float, float]:
         """
-        Fits the observed loss to the boat to a first order kinetic
+        Fits the observed loss to the coated wall to a first order kinetic
         model to extract the uptake coefficient.
 
         Args:
