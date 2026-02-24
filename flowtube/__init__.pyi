@@ -56,12 +56,23 @@ class CoatedWallReactor:
         carrier_FR: float,
         disp: bool = ...,
     ) -> None: ...
+
+    total_FR: float
+    net_cross_section: float
+    flow_velocity: float
+    residence_time: float
+
     def carrier_flow(
         self,
         radial_delta_T: float = ...,
         axial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
+
+    carrier_dynamic_viscosity: float
+    carrier_density: float
+    Re: float
+
     def reactant_diffusion(self, disp: bool = ...) -> None: ...
     def reactant_uptake(
         self,
@@ -69,6 +80,10 @@ class CoatedWallReactor:
         gamma_wall: float = ...,
         disp: bool = ...,
     ) -> tuple[NDArray[np.float64] | float, NDArray[np.float64] | float]: ...
+
+    k: float
+    uptake: float
+
     def calculate_gamma(
         self,
         concentrations: NDArray[np.float64],
@@ -78,7 +93,7 @@ class CoatedWallReactor:
 
 class BoatReactor:
     """
-    Handles calculations relevant to flow rate, diagnostics, transport, 
+    Handles calculations relevant to flow rate, diagnostics, transport,
     and uptake for a boat reactor.
     """
 
@@ -117,7 +132,7 @@ class BoatReactor:
         P_units: str,
         T: float,
         reactant_diffusion_rate: float = ...,
-        radial_delta_T: float = ..., 
+        radial_delta_T: float = ...,
         axial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
@@ -128,12 +143,23 @@ class BoatReactor:
         carrier_FR: float,
         disp: bool = ...,
     ) -> None: ...
+
+    total_FR: float
+    net_cross_section: float
+    flow_velocity: float
+    residence_time: float
+
     def carrier_flow(
         self,
         radial_delta_T: float = ...,
         axial_delta_T: float = ...,
         disp: bool = True,
     ) -> None: ...
+
+    carrier_dynamic_viscosity: float
+    carrier_density: float
+    Re: float
+
     def reactant_diffusion(self, disp: bool = ...) -> None: ...
     def reactant_uptake(
         self,
@@ -141,6 +167,11 @@ class BoatReactor:
         gamma_wall: float = 5e-6,
         disp: bool = True,
     ) -> NDArray[np.float64] | float: ...
+
+    geometric_correction: float
+    k: float
+    uptake: float
+
     def calculate_gamma(
         self,
         concentrations: NDArray[np.float64],
