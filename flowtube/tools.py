@@ -14,16 +14,24 @@ Constants:
 
 import numpy as np
 import pandas as pd
+import molmass as mm
 from tabulate import tabulate
 from requests.structures import CaseInsensitiveDict
 
 
 ### Constants ###
+# Physical constants
 STANDARD_TEMPERATURE_K = 273.15  # K
 STANDARD_PRESSURE_Pa = 101325  # Pa
 UNIVERSAL_GAS_CONSTANT = 8.3145  # kg m2 s-2 K-1 mol-1
 BOLTZMANN_CONSTANT = 1.380649e-23  # kg m2 s-2 K-1
 AVOGADROS_NUMBER = 6.0221408e23  # mol-1
+
+# Conversion factors and calculated constants
+MOLES_PER_SCCM = (
+    STANDARD_PRESSURE_Pa * (1e-2) ** 3 / UNIVERSAL_GAS_CONSTANT / STANDARD_TEMPERATURE_K
+)
+
 P_CF = CaseInsensitiveDict(
     {
         "Torr": 133.322,
@@ -33,6 +41,59 @@ P_CF = CaseInsensitiveDict(
         "Pa": 1,
     }
 )  # conversion factors to Pa
+
+
+### Concentrations conversions ###
+def permeation_rate_to_MR(
+    flow_rate: float,
+    permeation_rate: float,
+    reactant_gas: str,
+) -> float:
+    """Convert permeation rate to mixing ratio.
+
+    Args:
+        flow_rate (float): Flow rate through permeation in sccm.
+        permeation_rate (float): Permeation rate in ng/min.
+        reactant_gas (str): Molecular formula of reactant gas.
+
+    Returns:
+        float: Reactant volumetric mixing ratio (mol mol-1).
+    """
+    # Molar mass (g mol-1)
+    molar_mass = float(mm.Formula(reactant_gas).mass)
+
+    # Convert permeation rate to mol / min
+    mol_per_min = (permeation_rate * 1e-9) / molar_mass
+
+    # Calculate mol / min of total flow
+    total_mol_per_min = flow_rate * MOLES_PER_SCCM
+
+    return mol_per_min / total_mol_per_min
+
+
+def vapor_pressure_to_MR(
+    vapor_pressure: float,
+    P_units: str,
+) -> float:
+    """
+    Convert vapor pressure to mixing ratio. Assumes the carrier gas
+    becomes fully saturated with the volatile substance.
+
+    Args:
+        vapor_pressure (float): Vapor pressure in Pa.
+        P_units (str): Units of vapor pressure.
+
+    Returns:
+        float: Reactant volumetric mixing ratio (mol mol-1).
+    """
+    # Convert vapor pressure to Pa if necessary
+    if P_units != "Pa":
+        vapor_pressure = P_in_Pa(vapor_pressure, P_units)
+
+    # Calculate mol / min of reactant
+    mol_per_sccm = vapor_pressure / STANDARD_PRESSURE_Pa * MOLES_PER_SCCM
+
+    return mol_per_sccm / MOLES_PER_SCCM
 
 
 ### Unit conversions ###

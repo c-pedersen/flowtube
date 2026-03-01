@@ -18,7 +18,8 @@ def main():
         reactant_gas="HCl",  # Reactant gas formula (options are Ar, He, Air, Br2, Cl2',
         # HBr, HCl, HI, H2O, I2, NO, N2, and O2)
         carrier_gas="N2",  # Carrier gas formula (options are Ar, He, N2, O2)
-        reactant_MR=1e-6,  # Reactant mixing ratio (mol/mol)
+        reactant_conc_type="ppm",  # Type of reactant concentration input (ppm, ng/min, or Pa)
+        reactant_conc=1e-66,  # Reactant concentration
         boat_liquid_width=2.0,  # Boat width (cm)
         boat_cross_section=3.0,  # Boat cross-sectional area (cm2)
         boat_length=53.8,  # Boat length (cm)
@@ -37,7 +38,7 @@ def main():
 
     # Calculate uptake with a hypothetical uptake coefficient
     print("\nCalculating uptake with hypothetical gamma = 1E-7...")
-    boat.reactant_uptake(hypothetical_gamma=1E-7)
+    boat.reactant_uptake(hypothetical_gamma=1e-7)
 
 
 if __name__ == "__main__":

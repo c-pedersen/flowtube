@@ -24,7 +24,8 @@ def test_Knopf_et_al_2015_parameters_do_not_raise(
         injector_OD=0.5,
         reactant_gas="O3",
         carrier_gas="He",
-        reactant_MR=1,
+        reactant_conc_type="ppm",
+        reactant_conc=1e6,
     )
     init_kwargs = make_init_kwargs(
         CoatedWallReactor,
@@ -72,7 +73,8 @@ def test_Knopf_et_al_2015_parameters_do_not_raise(
         injector_OD=0.5,
         reactant_gas="OH",
         carrier_gas="He",
-        reactant_MR=1,
+        reactant_conc_type="ppm",
+        reactant_conc=1e6,
     )
     init_kwargs = make_init_kwargs(
         CoatedWallReactor,

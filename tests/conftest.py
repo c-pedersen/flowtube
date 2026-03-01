@@ -21,7 +21,8 @@ def make_constructor_kwargs():
             injector_OD=1.20,
             reactant_gas="HCl",
             carrier_gas="N2",
-            reactant_MR=1e-6,
+            reactant_conc_type="ppm",
+            reactant_conc=30,
         )
         # Class-specific ctor args
         if Reactor is CoatedWallReactor:

@@ -44,7 +44,8 @@ class CoatedWallReactor:
         injector_OD: float,
         reactant_gas: str,
         carrier_gas: str,
-        reactant_MR: float,
+        reactant_conc_type: str,
+        reactant_conc: float,
         insert_ID: float = 0,
         insert_length: float = 0,
     ) -> None:
@@ -68,7 +69,11 @@ class CoatedWallReactor:
                 NO, N2, and O2).
             carrier_gas (str): Molecular formula of carrier gas
                 (supported: Ar, He, N2, O2).
-            reactant_MR (float): Reactant mixing ratio (mol mol-1).
+            reactant_conc_type (str): Type of reactant concentration
+                input. Options: "ppm" or "ppb" for mixing ratio,
+                "ng/min" for permeation rate, "Pa" for vapor pressure.
+            reactant_conc (float): Reactant concentration (ppm, ng/min,
+                or Pa).
             insert_ID (float, optional): Inner diameter (cm) of insert.
             insert_length (float, optional): Length (cm) of insert.
 
@@ -114,9 +119,14 @@ class CoatedWallReactor:
         elif injector_ID == 0 or injector_OD == 0:
             raise ValueError("Injector dimensions must be non-zero")
 
-        # Check mixing ratio
-        if reactant_MR < 0 or reactant_MR > 1:
-            raise ValueError("Reactant mixing ratio must be between 0 and 1")
+        # Check reactant concentration inputs
+        if reactant_conc < 0:
+            raise ValueError("Reactant concentration must be non-negative")
+        if reactant_conc_type not in ["ppm", "ng/min", "Pa", "Torr", "bar", "mbar"]:
+            raise ValueError(
+                "Unsupported reactant concentration type. "
+                "Supported types: 'ppm', 'ng/min', 'Pa', 'Torr', 'bar', 'mbar'"
+            )
 
         # Initialize variables
         self.FT_ID = FT_ID
@@ -124,8 +134,9 @@ class CoatedWallReactor:
         self.injector_ID = injector_ID
         self.injector_OD = injector_OD
         self.reactant_gas = reactant_gas
+        self.reactant_conc_type = reactant_conc_type
+        self.reactant_conc = reactant_conc
         self.carrier_gas = carrier_gas
-        self.reactant_MR = reactant_MR
         self.insert_ID = insert_ID
         self.insert_length = insert_length
 
@@ -191,6 +202,23 @@ class CoatedWallReactor:
             raise ValueError("Temperature must be above absolute zero (-273.15 C)")
         if radial_delta_T < 0 or axial_delta_T < 0:
             raise ValueError("Temperature gradients must be positive")
+
+        # Calculate reactant mixing ratio from input concentration
+        if self.reactant_conc_type == "ppm":
+            self.reactant_MR = self.reactant_conc * 1e-6
+        elif self.reactant_conc_type == "ppb":
+            self.reactant_MR = self.reactant_conc * 1e-9
+        elif self.reactant_conc_type == "ng/min":
+            self.reactant_MR = tools.permeation_rate_to_MR(
+                flow_rate=reactant_FR,
+                permeation_rate=self.reactant_conc,
+                reactant_gas=self.reactant_gas,
+            )
+        elif self.reactant_conc_type in ["Pa", "Torr", "bar", "mbar"]:
+            self.reactant_MR = tools.vapor_pressure_to_MR(
+                vapor_pressure=self.reactant_conc,
+                P_units=self.reactant_conc_type,
+            )
 
         self.P = tools.P_in_Pa(P, P_units)
         self.T = tools.T_in_K(T)

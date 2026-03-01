@@ -2,8 +2,8 @@
 """
 Example usage of flowtube package for coated wall reactor calculations.
 
-If insert diameter and length are not specified, the entire flow tube 
-will be treated as a coated wall reactor with the specified inner 
+If insert diameter and length are not specified, the entire flow tube
+will be treated as a coated wall reactor with the specified inner
 diameter and length. If they insert dimensions are specified, the insert
 will be treated as the coated wall reactor with the specified inner
 diameter and length.
@@ -24,7 +24,8 @@ def main():
         reactant_gas="HCl",  # Reactant gas formula (options are Ar, He, Air, Br2, Cl2',
         # HBr, HCl, HI, H2O, I2, NO, N2, and O2)
         carrier_gas="N2",  # Carrier gas formula (options are Ar, He, N2, O2)
-        reactant_MR=1e-6,  # Reactant mixing ratio (mol/mol)
+        reactant_conc_type="ppm",  # Type of reactant concentration input (ppm, ng/min, or Pa)
+        reactant_conc=1e-6,  # Reactant concentration
         insert_ID=1.5,  # OPTIONAL: Insert inner diameter (cm)
         insert_length=20.0,  # OPTIONAL: Insert length (cm)
     )
