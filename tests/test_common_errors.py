@@ -1,7 +1,6 @@
 # tests/test_common_errors.py
 import pytest
-from flowtube import CoatedWallReactor
-from flowtube import BoatReactor
+from flowtube import CoatedWallReactor, BoatReactor
 import numpy as np
 
 """ Tests for common errors across Reactor classes. """
@@ -112,20 +111,16 @@ def test_temperature_below_physical_limit(Reactor, build_reactor, make_init_kwar
 
 @pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
 def test_mixing_ratio_bounds(Reactor, make_constructor_kwargs, build_reactor):
-    # >1 is invalid
-    kwargs = make_constructor_kwargs(Reactor, reactant_MR=1.01)
-    with pytest.raises(ValueError, match=r"(mixing|MR).*0.*1"):
-        build_reactor(Reactor, constructor_overrides=kwargs)
-
     # <0 is invalid
-    kwargs = make_constructor_kwargs(Reactor, reactant_MR=-0.01)
-    with pytest.raises(ValueError, match=r"(mixing|MR).*0.*1"):
+    kwargs = make_constructor_kwargs(Reactor, reactant_conc=-0.01)
+    with pytest.raises(
+        ValueError, match=r"Reactant concentration must be non-negative"
+    ):
         build_reactor(Reactor, constructor_overrides=kwargs)
 
 
 @pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
 def test_fitting(Reactor, build_reactor):
-    # init error: negative flow in initialize
     obj, _, _ = build_reactor(Reactor, call_initialize=False)
     with pytest.raises(RuntimeError, match=r"Must call*"):
         obj.calculate_gamma(
@@ -133,6 +128,24 @@ def test_fitting(Reactor, build_reactor):
             exposure=np.array([0.1, 0.2, 0.3]),
             exposure_units="s",
         )
+
+
+@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+def test_reactant_uptake_gammas(Reactor, build_reactor):
+    obj, _, _ = build_reactor(Reactor)
+
+    obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
+    obj.reactant_uptake(hypothetical_gamma=[1e-7], disp=False)
+    obj.reactant_uptake(hypothetical_gamma=[1e-7, 1e-8], disp=False)
+
+    with pytest.raises(
+        TypeError, match=r"Gamma input must be int, float, or Array-like of int"
+    ):
+        obj.reactant_uptake(hypothetical_gamma="test", disp=False)
+    with pytest.raises(
+        TypeError, match=r"Gamma input must be int, float, or Array-like of int"
+    ):
+        obj.reactant_uptake(hypothetical_gamma=["test", "test2"])
 
 
 @pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
@@ -160,18 +173,19 @@ def test_fitting_negative_concentrations(Reactor, build_reactor):
 
 
 @pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
-def test_fitting_non_numpy_inputs(Reactor, build_reactor):
+def test_fitting_non_arraylike_inputs(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
     obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
-    with pytest.raises(TypeError, match=r"Concentrations must be a numpy array"):
+    with pytest.raises(TypeError, match=r"Exposure input must be array-like"):
         obj.calculate_gamma(
             concentrations=[0.01, 0.02, 0.03],
-            exposure=np.array([0.1, 0.2, 0.3]),
+            exposure=["test"],
             exposure_units="s",
         )
-    with pytest.raises(TypeError, match=r"Exposure must be a numpy array"):
+
+    with pytest.raises(ValueError, match=r"inputs must have the same length"):
         obj.calculate_gamma(
-            concentrations=np.array([0.01, 0.02, 0.03]),
+            concentrations=np.array([0.01, 0.03]),
             exposure=[0.1, 0.2, 0.3],
             exposure_units="s",
         )

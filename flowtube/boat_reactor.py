@@ -1,6 +1,35 @@
+"""
+Main boat reactor class and associated calculations.
+
+Citations:
+    Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
+    Penetration of Gas Molecules and Aerosol Particles through Laminar
+    Flow Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87,
+    3746–3754. https://doi.org/10.1021/ac5042395
+
+    Hanson, D.R., Ravishankara, A.R., 1993. Uptake of hydrochloric acid
+    and hypochlorous acid onto sulfuric acid: solubilities,
+    diffusivities, and reaction. J. Phys. Chem. 97, 12309–12319.
+    https://doi.org/10.1021/j100149a035
+
+    Fuchs, N.A., Sutugin, A.G., 1971. HIGH-DISPERSED AEROSOLS, in: Hidy,
+    G.M., Brock, J.R. (Eds.), Topics in Current Aerosol Research,
+    International Reviews in Aerosol Physics and Chemistry. Pergamon,
+    p. 1. https://doi.org/10.1016/B978-0-08-016674-2.50006-6
+
+    Ivanov, A.V., Molina, M.J., Park, J., 2021. Experimental study on
+    HCl uptake by MgCl2 and sea salt under humid conditions. J Mass
+    Spectrom 56, e4601. https://doi.org/10.1002/jms.4601
+
+    Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and
+    evaluation of gas phase diffusion coefficients of reactive trace
+    gases in the atmosphere: volume 1. Inorganic compounds. Atmos. Chem.
+    Phys. 14, 9233–9247. https://doi.org/10.5194/acp-14-9233-2014
+"""
+
 import numpy as np
 import molmass as mm
-from numpy.typing import NDArray
+from numpy.typing import NDArray, ArrayLike
 import warnings
 
 from . import tools, diffusion_coef, viscosity_density, flow_calc, kinetics
@@ -15,11 +44,12 @@ class BoatReactor:
         injector_OD: float,
         reactant_gas: str,
         carrier_gas: str,
-        reactant_MR: float,
-        boat_width: float,
-        boat_height: float,
+        reactant_conc_type: str,
+        reactant_conc: float,
+        boat_liquid_width: float,
         boat_length: float,
-        boat_wall_thickness: float,
+        boat_cross_section: float,
+        boat_perimeter: float | None = None,
     ) -> None:
         """
         Handles calculations relevant to flow rate, flow diagnostics,
@@ -44,11 +74,17 @@ class BoatReactor:
                 diffusion coefficient).
             carrier_gas (str): Molecular formula of carrier gas
                 (supported: Ar, He, N2, O2).
-            reactant_MR (float): Reactant mixing ratio (mol mol-1).
-            boat_width (float): Width (cm) of boat reactor.
-            boat_height (float): Height (cm) of boat reactor.
+            reactant_conc_type (str): Type of reactant concentration
+                input. Options: "ppm" or "ppb" for mixing ratio,
+                "ng/min" for permeation rate, "Pa" for vapor pressure.
+            reactant_conc (float): Reactant concentration (ppm, ng/min,
+                or Pa).
+            boat_liquid_width (float): Width (cm) of liquid in boat.
             boat_length (float): Length (cm) of boat reactor.
-            boat_wall_thickness (float): Wall thickness (cm).
+            boat_cross_section (float): Cross-sectional area (cm^2) of
+                boat.
+            boat_perimeter (float), optional: Wetted perimeter (cm) of
+                boat. Defaults to half cylinder profile.
 
         Returns:
             None
@@ -72,18 +108,19 @@ class BoatReactor:
                 f"Supported gases: {', '.join(viscosity_density.a.keys())}"
             )
 
-        # Check physicality of insert dimensions
-        if (
-            boat_length < 0
-            or boat_height < 0
-            or boat_width < 0
-            or boat_wall_thickness < 0
-        ):
+        # Check physicality of boat dimensions
+        if boat_length < 0 or boat_liquid_width < 0 or boat_cross_section < 0:
             raise ValueError("Boat dimensions must be positive")
-        elif boat_height > FT_ID or boat_width > FT_ID:
-            raise ValueError("Boat width or height cannot be larger than flow tube ID")
+        elif boat_liquid_width > FT_ID or boat_cross_section > np.pi * (FT_ID / 2) ** 2:
+            raise ValueError(
+                "Boat liquid width cannot be larger than the flow tube ID, and "
+                "boat cross-sectional area cannot be larger than the flow tube "
+                "cross-sectional area"
+            )
         elif boat_length > FT_length:
             raise ValueError("Boat length cannot be larger than flow tube length")
+        if boat_perimeter is not None and boat_perimeter < 0:
+            raise ValueError("Boat perimeter must be positive")
 
         # Check physicality of injector dimensions
         if injector_ID < 0 or injector_OD < 0:
@@ -97,9 +134,23 @@ class BoatReactor:
         elif injector_ID == 0 or injector_OD == 0:
             raise ValueError("Injector dimensions must be non-zero")
 
-        # Check mixing ratio
-        if reactant_MR < 0 or reactant_MR > 1:
-            raise ValueError("Reactant mixing ratio must be between 0 and 1")
+        # Check reactant concentration inputs
+        if reactant_conc < 0:
+            raise ValueError("Reactant concentration must be non-negative")
+        if reactant_conc_type not in [
+            "ppm",
+            "ppb",
+            "ng/min",
+            "Pa",
+            "hPa",
+            "Torr",
+            "bar",
+            "mbar",
+        ]:
+            raise ValueError(
+                "Unsupported reactant concentration type. "
+                "Supported types: 'ppm', 'ppb', 'ng/min', 'Pa', 'hPa', 'Torr', 'bar', 'mbar'"
+            )
 
         # Initialize variables
         self.FT_ID = FT_ID
@@ -108,11 +159,18 @@ class BoatReactor:
         self.injector_OD = injector_OD
         self.reactant_gas = reactant_gas
         self.carrier_gas = carrier_gas
-        self.reactant_MR = reactant_MR
-        self.boat_height = boat_height
-        self.boat_width = boat_width
+        self.reactant_conc_type = reactant_conc_type
+        self.reactant_conc = reactant_conc
+        self.boat_liquid_width = boat_liquid_width
+        self.boat_cross_section = boat_cross_section
         self.boat_length = boat_length
-        self.boat_wall_thickness = boat_wall_thickness
+        if boat_perimeter is None:
+            boat_effective_radius = np.sqrt(2 * boat_cross_section / np.pi)
+            self.boat_perimeter = tools.partial_cylinder_area(
+                boat_effective_radius, boat_effective_radius * 2
+            )[0]
+        else:
+            self.boat_perimeter = boat_perimeter
 
     def initialize(
         self,
@@ -176,6 +234,28 @@ class BoatReactor:
             raise ValueError("Temperature must be above absolute zero (-273.15 C)")
         if radial_delta_T < 0 or axial_delta_T < 0:
             raise ValueError("Temperature gradients must be positive")
+
+        # Calculate reactant mixing ratio from input concentration
+        if self.reactant_conc_type == "ppm":
+            self.reactant_MR = self.reactant_conc * 1e-6
+        elif self.reactant_conc_type == "ppb":
+            self.reactant_MR = self.reactant_conc * 1e-9
+        elif self.reactant_conc_type == "ng/min":
+            self.reactant_MR = tools.permeation_rate_to_MR(
+                flow_rate=reactant_FR,
+                permeation_rate=self.reactant_conc,
+                reactant_gas=self.reactant_gas,
+            )
+        elif self.reactant_conc_type in ["Pa", "Torr", "bar", "mbar"]:
+            self.reactant_MR = tools.vapor_pressure_to_MR(
+                vapor_pressure=self.reactant_conc,
+                P_units=self.reactant_conc_type,
+            )
+        if self.reactant_MR < 0 or self.reactant_MR > 1:
+            raise ValueError(
+                "Issue calculating reactant mixing ratio."
+                "Mixing ratio must be between 0 and 1"
+            )
 
         self.P = tools.P_in_Pa(P, P_units)
         self.T = tools.T_in_K(T)
@@ -249,10 +329,7 @@ class BoatReactor:
             self, total_reactant_FR, self.injector_ID
         )
 
-        # Calculate the cross-sectional area of the boat reactor and flow tube
-        self.boat_perimeter, self.boat_cross_section = tools.partial_cylinder_area(
-            self.boat_height, self.boat_width
-        )
+        # Calculate the cross-sectional area
         self.net_cross_section = (
             tools.cross_sectional_area(self.FT_ID) - self.boat_cross_section
         )
@@ -313,9 +390,7 @@ class BoatReactor:
         units += ["cm s-1"]
 
         # Residence Time over the boat
-        self.residence_time = (
-            self.boat_length - self.boat_wall_thickness * 2
-        ) / self.flow_velocity
+        self.residence_time = self.boat_length / self.flow_velocity
         var_names += ["Residence Time Over Boat"]
         var += [self.residence_time]
         var_fmts += [".3g"]
@@ -555,7 +630,7 @@ class BoatReactor:
 
     def reactant_uptake(
         self,
-        hypothetical_gamma: NDArray[np.float64] | float,
+        hypothetical_gamma: ArrayLike | float | int,
         gamma_wall: float = 5e-6,
         disp: bool = True,
     ) -> None:
@@ -564,7 +639,7 @@ class BoatReactor:
         walls.
 
         Args:
-            hypothetical_gamma (float or numpy.ndarray): Hypothetical
+            hypothetical_gamma (ArrayLike or float or int): Hypothetical
                 uptake coefficient to calculate diffusion correction
                 factor.
             gamma_wall (float): Wall uptake coefficient (default: 5e-6
@@ -576,6 +651,18 @@ class BoatReactor:
         """
 
         ### Check for valid inputs ###
+        if not isinstance(hypothetical_gamma, (int, float)):
+            try:
+                hypothetical_gamma = np.asarray(hypothetical_gamma, dtype=np.float64)
+            except Exception as e:
+                raise TypeError(
+                    "Gamma input must be int, float, or Array-like of int "
+                    f"or float; got {type(hypothetical_gamma)}"
+                ) from e
+
+            if hypothetical_gamma.ndim != 1:
+                raise ValueError("Gamma input must be 1-dimensional.")
+
         # Check if hypothetical_gamma is between 0 and 1
         if np.min(hypothetical_gamma) < 0 or np.max(hypothetical_gamma) > 1:  # pyright: ignore[reportUnknownMemberType]
             raise ValueError("Hypothetical gamma must be between 0 and 1")
@@ -591,29 +678,22 @@ class BoatReactor:
         units: list[str] = []
 
         # Boat surface area and volume
-        liquid_width = self.boat_width - self.boat_wall_thickness * 2
-        liquid_length = self.boat_length - self.boat_wall_thickness * 2
-        liquid_height = self.boat_height - self.boat_wall_thickness
-        liquid_surface_area = liquid_width * liquid_length
-        _, liquid_cross_section = tools.partial_cylinder_area(
-            liquid_height,
-            liquid_width,
-        )
-        liquid_volume = liquid_cross_section * liquid_length
-        var_names += ["Boat Surface Area", "Boat Volume"]
-        var += [liquid_surface_area, liquid_volume]
-        var_fmts += [".1f", ".1f"]
-        units += ["cm2", "cm3"]
+        liquid_surface_area = self.boat_liquid_width * self.boat_length
+        var_names += ["Boat Surface Area"]
+        var += [liquid_surface_area]
+        var_fmts += [".1f"]
+        units += ["cm2"]
 
         # Diffusion Correction - see kinetics.py for details
         diff_corr = 1 - kinetics.correction_factor(
             self.N_eff_Shw_FT, self.Kn_FT, hypothetical_gamma
         )
-        if diff_corr > 0.05:
-            warnings.warn(
-                "Diffusion correction is > 5%. "
-                "Negligible diffusion may no longer be a valid assumption"
-            )
+        if not isinstance(diff_corr, np.ndarray):
+            if diff_corr > 0.05:
+                warnings.warn(
+                    "Diffusion correction is > 5%. "
+                    "Negligible diffusion may no longer be a valid assumption"
+                )
         var_names += [
             "Flow Tube Wall Diffusion Correction "
             "\n(must be small to neglect for boat reactor)"
@@ -624,9 +704,7 @@ class BoatReactor:
 
         # Geometric correction for boat geometry – Hanson and Ravishankara, 1993
         cylinder_SA_V_ratio = 4 / self.FT_ID
-        actual_SA_V_ratio = liquid_surface_area / (
-            self.net_cross_section * liquid_length
-        )
+        actual_SA_V_ratio = self.boat_liquid_width / self.net_cross_section
         self.geometric_correction = cylinder_SA_V_ratio / actual_SA_V_ratio
         var_names += ["Boat geometry correction factor"]
         var += [self.geometric_correction]
@@ -667,7 +745,7 @@ class BoatReactor:
         units += ["%"]
 
         ### Display Values ###
-        if disp and not isinstance(var, np.ndarray):
+        if disp and not isinstance(hypothetical_gamma, np.ndarray):
             tools.table(
                 "Reactant Uptake",
                 var_names,
@@ -678,25 +756,27 @@ class BoatReactor:
 
     def calculate_gamma(
         self,
-        concentrations: NDArray[np.float64],
-        exposure: NDArray[np.float64],
+        concentrations: ArrayLike,
+        exposure: ArrayLike,
         exposure_units: str,
-    ) -> tuple[float, float, float, tuple[float, float]]:
+    ) -> tuple[float, float, float, float, float, float]:
         """
         Fits the observed loss to the boat to a first order kinetic
         model to extract the uptake coefficient.
 
         Args:
-            concentrations (numpy.ndarray): Reactant concentrations
+            concentrations (ArrayLike): Reactant concentrations
                 (arbitrary units).
-            exposure (numpy.ndarray): Reactant exposure (s or cm).
+            exposure (ArrayLike): Reactant exposure (s or cm).
             exposure_units (str): Units of exposure (s or cm).
 
         Returns:
             float: k, first order loss rate (s-1).
+            float: intercept, y-intercept of the fit.
             float: r_value, correlation coefficient of the fit.
             float: gamma, uptake coefficient.
-            tuple[float, float]: 95% confidence interval for gamma
+            float: gamma_lower, lower bound of 95% confidence interval for gamma.
+            float: gamma_upper, upper bound of 95% confidence interval for gamma.
         """
 
         # Check for geometric correction and apply
@@ -707,11 +787,13 @@ class BoatReactor:
             diameter = self.FT_ID * self.geometric_correction
 
         # Fit data to first order kinetics
-        slope, _, r_value, _, std_err = kinetics.fit_first_order_kinetics(
-            obj=self,
-            concentrations=concentrations,
-            exposure=exposure,
-            exposure_units=exposure_units,
+        slope, intercept, r_value, _p_value, std_err = (
+            kinetics.fit_first_order_kinetics(
+                obj=self,
+                concentrations=concentrations,
+                exposure=exposure,
+                exposure_units=exposure_units,
+            )
         )
         k = -slope
 
@@ -732,33 +814,10 @@ class BoatReactor:
             diameter=diameter,
         )
 
-        return k, r_value, gamma, (gamma_lower, gamma_upper)
+        if gamma_lower < 0 or gamma_upper > 1:
+            warnings.warn(
+                "Calculated confidence interval for gamma is unphysical. "
+                "This is typically due to limited data or low correlation."
+            )
 
-
-""" 
-Citations:
-    
-Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and 
-Penetration of Gas Molecules and Aerosol Particles through Laminar Flow 
-Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87, 3746–3754. 
-https://doi.org/10.1021/ac5042395
-
-Hanson, D.R., Ravishankara, A.R., 1993. Uptake of hydrochloric acid and 
-hypochlorous acid onto sulfuric acid: solubilities, diffusivities, and 
-reaction. J. Phys. Chem. 97, 12309–12319. 
-https://doi.org/10.1021/j100149a035
-
-Fuchs, N.A., Sutugin, A.G., 1971. HIGH-DISPERSED AEROSOLS, in: Hidy, 
-G.M., Brock, J.R. (Eds.), Topics in Current Aerosol Research, 
-International Reviews in Aerosol Physics and Chemistry. Pergamon, p. 1. 
-https://doi.org/10.1016/B978-0-08-016674-2.50006-6
-
-Ivanov, A.V., Molina, M.J., Park, J., 2021. Experimental study on HCl 
-uptake by MgCl2 and sea salt under humid conditions. J Mass Spectrom 56,
- e4601. https://doi.org/10.1002/jms.4601
-
-Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and evaluation of
-gas phase diffusion coefficients of reactive trace gases in the 
-atmosphere: volume 1. Inorganic compounds. Atmos. Chem. Phys. 14, 
-9233–9247. https://doi.org/10.5194/acp-14-9233-2014
-"""
+        return k, intercept, r_value, gamma, gamma_lower, gamma_upper

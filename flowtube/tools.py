@@ -1,21 +1,111 @@
 """
 Constants and unit conversions.
+
+Constants:
+    STANDARD_TEMPERATURE_K: Standard temperature in Kelvin.
+    STANDARD_PRESSURE_Pa: Standard pressure in Pascal.
+    UNIVERSAL_GAS_CONSTANT: Universal gas constant in kg m2 s-2 K-1
+        mol-1.
+    BOLTZMANN_CONSTANT: Boltzmann constant in kg m2 s-2 K-1.
+    AVOGADROS_NUMBER: Avogadro's number in mol-1.
+    P_CF: Conversion factors to Pascal for Torr, bar, mbar, hPa, and Pa
+        pressure units.
 """
 
 import numpy as np
 import pandas as pd
+import molmass as mm
 from tabulate import tabulate
 from requests.structures import CaseInsensitiveDict
+
+
+### Constants ###
+# Physical constants
+STANDARD_TEMPERATURE_K = 273.15  # K
+STANDARD_PRESSURE_Pa = 101325  # Pa
+UNIVERSAL_GAS_CONSTANT = 8.3145  # kg m2 s-2 K-1 mol-1
+BOLTZMANN_CONSTANT = 1.380649e-23  # kg m2 s-2 K-1
+AVOGADROS_NUMBER = 6.0221408e23  # mol-1
+
+# Conversion factors and calculated constants
+MOLES_PER_SCCM = (
+    STANDARD_PRESSURE_Pa * (1e-2) ** 3 / UNIVERSAL_GAS_CONSTANT / STANDARD_TEMPERATURE_K
+)
+
+P_CF = CaseInsensitiveDict(
+    {
+        "Torr": 133.322,
+        "bar": 1e5,
+        "mbar": 100,
+        "hPa": 100,
+        "Pa": 1,
+    }
+)  # conversion factors to Pa
+
+
+### Concentrations conversions ###
+def permeation_rate_to_MR(
+    flow_rate: float,
+    permeation_rate: float,
+    reactant_gas: str,
+) -> float:
+    """Convert permeation rate to mixing ratio.
+
+    Args:
+        flow_rate (float): Flow rate through permeation in sccm.
+        permeation_rate (float): Permeation rate in ng/min.
+        reactant_gas (str): Molecular formula of reactant gas.
+
+    Returns:
+        float: Reactant volumetric mixing ratio (mol mol-1).
+    """
+    # Molar mass (g mol-1)
+    molar_mass = float(mm.Formula(reactant_gas).mass)
+
+    # Convert permeation rate to mol / min
+    mol_per_min = (permeation_rate * 1e-9) / molar_mass
+
+    # Calculate mol / min of total flow
+    total_mol_per_min = flow_rate * MOLES_PER_SCCM
+
+    return mol_per_min / total_mol_per_min
+
+
+def vapor_pressure_to_MR(
+    vapor_pressure: float,
+    P_units: str,
+) -> float:
+    """
+    Convert vapor pressure to mixing ratio. Assumes the carrier gas
+    becomes fully saturated with the volatile substance.
+
+    Args:
+        vapor_pressure (float): Vapor pressure in Pa.
+        P_units (str): Units of vapor pressure.
+
+    Returns:
+        float: Reactant volumetric mixing ratio (mol mol-1).
+    """
+    # Convert vapor pressure to Pa if necessary
+    if P_units != "Pa":
+        vapor_pressure_Pa = P_in_Pa(vapor_pressure, P_units)
+    else:
+        vapor_pressure_Pa = vapor_pressure
+
+    # Calculate mol / min of reactant
+    mol_per_sccm = vapor_pressure_Pa / STANDARD_PRESSURE_Pa * MOLES_PER_SCCM
+
+    return mol_per_sccm / MOLES_PER_SCCM
 
 
 ### Unit conversions ###
 def T_in_K(
     T: float,
 ) -> float:
-    """Convert celcius to Kelvin.
+    """Convert Celsius to Kelvin.
 
     Args:
-        T (float): Temperature in Celcius.
+        T (float): Temperature in Celsius.
 
     Returns:
         float: Temperature in Kelvin.
@@ -63,11 +153,11 @@ def partial_cylinder_area(
     width: float,
 ) -> tuple[float, float]:
     """
-    Calculate the cross-sectional area and perimeter of a partial 
-    cylinder ("boat") given its height and width. Assumes the partial 
-    cylinder is a segment of a circle with given width as chord length 
-    and that the height is less than the diameter of the circle. 
-    Calculations based on: 
+    Calculate the cross-sectional area and perimeter of a partial
+    cylinder ("boat") given its height and width. Assumes the partial
+    cylinder is a segment of a circle with given width as chord length
+    and that the height is less than the diameter of the circle.
+    Calculations based on:
     https://mathworld.wolfram.com/CircularSegment.html and
     https://www.vcalc.com/wiki/KurtHeckman/Circle-area-of-an-arc-segment-h.
 
@@ -137,20 +227,3 @@ def table(
     width = len(table.splitlines()[0])
     print(f"\033[1m{title}\033[0m".center(width))
     print(table)
-
-
-### Constants ###
-STANDARD_TEMPERATURE_K = 273.15  # K
-STANDARD_PRESSURE_Pa = 101325  # Pa
-UNIVERSAL_GAS_CONSTANT = 8.3145  # kg m2 s-2 K-1 mol-1
-BOLTZMANN_CONSTANT = 1.380649e-23  # kg m2 s-2 K-1
-AVOGADROS_NUMBER = 6.0221408e23  # mol-1
-P_CF = CaseInsensitiveDict(
-    {
-        "Torr": 133.322,
-        "bar": 1e5,
-        "mbar": 100,
-        "hPa": 100,
-        "Pa": 1,
-    }
-)  # conversion factors to Pa

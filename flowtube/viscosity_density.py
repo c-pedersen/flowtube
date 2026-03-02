@@ -1,12 +1,25 @@
 """
-Handles the calculation of the viscosity and density of a variety of 
+Handles the calculation of the viscosity and density of a variety of
 pure gases.
+
+Citations
+    “A8: Van Der Waal’s Constants for Real Gases.” Chemistry LibreTexts,
+    November 14, 2024. Accessed August 6, 2025.
+    https://chem.libretexts.org/Ancillary_Materials/Reference/Reference_Tables/Atomic_and_Molecular_Properties/A8%3A_van_der_Waal’s_Constants_for_Real_Gases.
+
+    “NIST Chemistry Webbook, SRD 69.” Thermophysical Properties of Fluid
+    Systems. Accessed August 6, 2025.
+    https://webbook.nist.gov/chemistry/fluid/.
+
+    Reid, R.C., Prausnitz, J.M., Poling, B.E., 1987. The Properties of
+    Gases and Liquids, 4th ed. McGraw-Hill, New York.
 """
 
 import numpy as np
-import molmass as mm  # pyright: ignore[reportMissingImports]
+import molmass as mm
 import math
 from typing import Protocol
+from warnings import warn
 
 from . import tools
 
@@ -36,11 +49,11 @@ def real_density(
     gas: str,
 ) -> float:
     """
-    Calculates the real density of a gas using van der Waal's equation 
+    Calculates the real density of a gas using van der Waal's equation
     of state.
 
     Args:
-        obj (basic_attrs): Object with basic attributes 
+        obj (basic_attrs): Object with basic attributes
             (P in Pa, T in K).
         gas (str): Molecular formula of gas (supported: Ar, He, N2, O2).
 
@@ -53,12 +66,12 @@ def real_density(
         raise ValueError(f"Unsupported gas. Supported gases: {', '.join(a.keys())}")
 
     # Molar mass (g mol-1)
-    m = float(mm.Formula(gas).mass)  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+    m = float(mm.Formula(gas).mass)
 
     # Calculate pressure from Pa to bar
     P_bar = obj.P / tools.P_CF["bar"]
 
-    # Coefficients for van der Waal's equation of state solved for the 
+    # Coefficients for van der Waal's equation of state solved for the
     # inverse density (cubic function)
     coefficients = [
         P_bar,
@@ -68,10 +81,10 @@ def real_density(
     ]
 
     # Find the roots of the cubic function
-    roots = np.roots(coefficients)  # pyright: ignore[reportUnknownMemberType]
+    roots = np.roots(coefficients)
 
     # Find the real root and convert to kg m-3
-    density = 1 / np.real(roots[roots.imag == 0][0]) * m  # pyright: ignore[reportUnknownMemberType]
+    density = 1 / np.real(roots[roots.imag == 0][0]) * m
 
     # Check if the density is negative, which is unphysical
     if density < 0:
@@ -88,11 +101,11 @@ def dynamic_viscosity(
     gas: str,
 ) -> float:
     """
-    Estimate absolute/dynamic viscosity of pure gases using the 
+    Estimate absolute/dynamic viscosity of pure gases using the
     corresponding states method from Reid et al., 1987.
 
     Args:
-        obj (basic_attrs): Object with basic attributes 
+        obj (basic_attrs): Object with basic attributes
             (P in Pa, T in K).
         gas (str): Molecular formula of gas (supported: Ar, He, N2, O2).
 
@@ -104,12 +117,12 @@ def dynamic_viscosity(
         raise ValueError(f"Unsupported gas. Supported gases: {', '.join(a.keys())}")
 
     # Molar mass (g mol-1)
-    m = float(mm.Formula(gas).mass)  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+    m = float(mm.Formula(gas).mass)
 
     # Give warning if a polar gas is attempted
     if mu[gas] >= 0.022:
-        UserWarning(
-            "Polar gases not supported. See eqs. 9-4.16 & 9-4.17 from Reid et al., " \
+        warn(
+            "Polar gases not supported. See eqs. 9-4.16 & 9-4.17 from Reid et al., "
             "1987 to implement."
         )
 
@@ -145,19 +158,3 @@ def dynamic_viscosity(
     nu = nu_xi / xi / 1e7
 
     return nu
-
-
-"""
-Citations
-
-“A8: Van Der Waal’s Constants for Real Gases.” Chemistry LibreTexts, 
-November 14, 2024. Accessed August 6, 2025. 
-https://chem.libretexts.org/Ancillary_Materials/Reference/Reference_Tables/Atomic_and_Molecular_Properties/A8%3A_van_der_Waal’s_Constants_for_Real_Gases. 
-
-“NIST Chemistry Webbook, SRD 69.” Thermophysical Properties of Fluid 
-Systems. Accessed August 6, 2025. 
-https://webbook.nist.gov/chemistry/fluid/. 
-
-Reid, R.C., Prausnitz, J.M., Poling, B.E., 1987. The Properties of Gases
-and Liquids, 4th ed. McGraw-Hill, New York.
-"""

@@ -1,6 +1,35 @@
+"""
+Main coated wall reactor class and associated calculations.
+
+Citations:
+    Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
+    Penetration of Gas Molecules and Aerosol Particles through Laminar
+    Flow Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87,
+    3746–3754. https://doi.org/10.1021/ac5042395
+
+    Hanson, D.R., Ravishankara, A.R., 1993. Uptake of hydrochloric acid
+    and hypochlorous acid onto sulfuric acid: solubilities,
+    diffusivities, and reaction. J. Phys. Chem. 97, 12309–12319.
+    https://doi.org/10.1021/j100149a035
+
+    Fuchs, N.A., Sutugin, A.G., 1971. HIGH-DISPERSED AEROSOLS, in: Hidy,
+    G.M., Brock, J.R. (Eds.), Topics in Current Aerosol Research,
+    International Reviews in Aerosol Physics and Chemistry. Pergamon,
+    p. 1. https://doi.org/10.1016/B978-0-08-016674-2.50006-6
+
+    Ivanov, A.V., Molina, M.J., Park, J., 2021. Experimental study on
+    HCl uptake by MgCl2 and sea salt under humid conditions. J Mass
+    Spectrom 56, e4601. https://doi.org/10.1002/jms.4601
+
+    Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and
+    evaluation of gas phase diffusion coefficients of reactive trace
+    gases in the atmosphere: volume 1. Inorganic compounds. Atmos. Chem.
+    Phys. 14, 9233–9247. https://doi.org/10.5194/acp-14-9233-2014
+"""
+
 import numpy as np
 import molmass as mm
-from numpy.typing import NDArray
+from numpy.typing import NDArray, ArrayLike
 import warnings
 
 from . import tools, diffusion_coef, viscosity_density, flow_calc, kinetics
@@ -15,7 +44,8 @@ class CoatedWallReactor:
         injector_OD: float,
         reactant_gas: str,
         carrier_gas: str,
-        reactant_MR: float,
+        reactant_conc_type: str,
+        reactant_conc: float,
         insert_ID: float = 0,
         insert_length: float = 0,
     ) -> None:
@@ -39,7 +69,11 @@ class CoatedWallReactor:
                 NO, N2, and O2).
             carrier_gas (str): Molecular formula of carrier gas
                 (supported: Ar, He, N2, O2).
-            reactant_MR (float): Reactant mixing ratio (mol mol-1).
+            reactant_conc_type (str): Type of reactant concentration
+                input. Options: "ppm" or "ppb" for mixing ratio,
+                "ng/min" for permeation rate, "Pa" for vapor pressure.
+            reactant_conc (float): Reactant concentration (ppm, ng/min,
+                or Pa).
             insert_ID (float, optional): Inner diameter (cm) of insert.
             insert_length (float, optional): Length (cm) of insert.
 
@@ -85,9 +119,14 @@ class CoatedWallReactor:
         elif injector_ID == 0 or injector_OD == 0:
             raise ValueError("Injector dimensions must be non-zero")
 
-        # Check mixing ratio
-        if reactant_MR < 0 or reactant_MR > 1:
-            raise ValueError("Reactant mixing ratio must be between 0 and 1")
+        # Check reactant concentration inputs
+        if reactant_conc < 0:
+            raise ValueError("Reactant concentration must be non-negative")
+        if reactant_conc_type not in ["ppm", "ppb", "ng/min", "Pa", "hPa", "Torr", "bar", "mbar"]:
+            raise ValueError(
+                "Unsupported reactant concentration type. "
+                "Supported types: 'ppm', 'ppb', 'ng/min', 'Pa', 'hPa', 'Torr', 'bar', 'mbar'"
+            )
 
         # Initialize variables
         self.FT_ID = FT_ID
@@ -95,8 +134,9 @@ class CoatedWallReactor:
         self.injector_ID = injector_ID
         self.injector_OD = injector_OD
         self.reactant_gas = reactant_gas
+        self.reactant_conc_type = reactant_conc_type
+        self.reactant_conc = reactant_conc
         self.carrier_gas = carrier_gas
-        self.reactant_MR = reactant_MR
         self.insert_ID = insert_ID
         self.insert_length = insert_length
 
@@ -162,6 +202,28 @@ class CoatedWallReactor:
             raise ValueError("Temperature must be above absolute zero (-273.15 C)")
         if radial_delta_T < 0 or axial_delta_T < 0:
             raise ValueError("Temperature gradients must be positive")
+
+        # Calculate reactant mixing ratio from input concentration
+        if self.reactant_conc_type == "ppm":
+            self.reactant_MR = self.reactant_conc * 1e-6
+        elif self.reactant_conc_type == "ppb":
+            self.reactant_MR = self.reactant_conc * 1e-9
+        elif self.reactant_conc_type == "ng/min":
+            self.reactant_MR = tools.permeation_rate_to_MR(
+                flow_rate=reactant_FR,
+                permeation_rate=self.reactant_conc,
+                reactant_gas=self.reactant_gas,
+            )
+        elif self.reactant_conc_type in ["Pa", "Torr", "bar", "mbar"]:
+            self.reactant_MR = tools.vapor_pressure_to_MR(
+                vapor_pressure=self.reactant_conc,
+                P_units=self.reactant_conc_type,
+            )
+        if self.reactant_MR < 0 or self.reactant_MR > 1:
+            raise ValueError(
+                "Issue calculating reactant mixing ratio."
+                "Mixing ratio must be between 0 and 1"
+            )
 
         self.P = tools.P_in_Pa(P, P_units)
         self.T = tools.T_in_K(T)
@@ -601,7 +663,7 @@ class CoatedWallReactor:
 
     def reactant_uptake(
         self,
-        hypothetical_gamma: NDArray[np.float64] | float,
+        hypothetical_gamma: ArrayLike | float | int,
         gamma_wall: float = 5e-6,
         disp: bool = True,
     ) -> None:
@@ -610,7 +672,7 @@ class CoatedWallReactor:
         flow tube walls.
 
         Args:
-            hypothetical_gamma (float or numpy.ndarray): Hypothetical
+            hypothetical_gamma (ArrayLike or float or int): Hypothetical
                 uptake coefficient to calculate diffusion correction
                 factor.
             gamma_wall (float): Wall uptake coefficient (default: 5e-6
@@ -623,8 +685,20 @@ class CoatedWallReactor:
         """
 
         ### Check for valid inputs ###
+        if not isinstance(hypothetical_gamma, (int, float)):
+            try:
+                hypothetical_gamma = np.asarray(hypothetical_gamma, dtype=np.float64)
+            except Exception as e:
+                raise TypeError(
+                    "Gamma input must be int, float, or Array-like of int "
+                    f"or float; got {type(hypothetical_gamma)}"
+                ) from e
+
+            if hypothetical_gamma.ndim != 1:
+                raise ValueError("Gamma input must be 1-dimensional.")
+
         # Check if hypothetical_gamma is between 0 and 1
-        if np.min(hypothetical_gamma) < 0 or np.max(hypothetical_gamma) > 1:  # pyright: ignore[reportUnknownMemberType]
+        if np.min(hypothetical_gamma) < 0 or np.max(hypothetical_gamma) > 1:
             raise ValueError("Hypothetical gamma must be between 0 and 1")
 
         # Check if gamma_wall is between 0 and 1
@@ -700,9 +774,9 @@ class CoatedWallReactor:
                 self.N_eff_Shw_insert,
                 self.Kn_insert,
                 hypothetical_gamma,
-                self.insert_length / self.insert_flow_velocity,
+                self.insert_length / self.insert_flow_velocity / 4,
             )
-            var_names += ["Insert Loss"]
+            var_names += ["Insert Loss - 1/4 Length"]
         else:
             self.uptake = kinetics.cylinder_loss(
                 self,
@@ -732,7 +806,7 @@ class CoatedWallReactor:
         units += ["%"]
 
         ### Display Values ###
-        if disp and not isinstance(var, np.ndarray):
+        if disp and not isinstance(hypothetical_gamma, np.ndarray):
             tools.table(
                 "Reactant Uptake",
                 var_names,
@@ -743,25 +817,27 @@ class CoatedWallReactor:
 
     def calculate_gamma(
         self,
-        concentrations: NDArray[np.float64],
-        exposure: NDArray[np.float64],
+        concentrations: ArrayLike,
+        exposure: ArrayLike,
         exposure_units: str,
-    ) -> tuple[float, float, float, tuple[float, float]]:
+    ) -> tuple[float, float, float, float, float, float]:
         """
-        Fits the observed loss to the boat to a first order kinetic
+        Fits the observed loss to the coated wall to a first order kinetic
         model to extract the uptake coefficient.
 
         Args:
-            concentrations (numpy.ndarray): Reactant concentrations
+            concentrations (ArrayLike): Reactant concentrations
                 (arbitrary units).
-            exposure (numpy.ndarray): Reactant exposure (s or cm).
+            exposure (ArrayLike): Reactant exposure (s or cm).
             exposure_units (str): Units of exposure (s or cm).
 
         Returns:
             float: k, first order loss rate (s-1).
+            float: intercept, y-intercept of the fit.
             float: r_value, correlation coefficient of the fit.
             float: gamma, uptake coefficient.
-            tuple[float, float]: 95% confidence interval for gamma
+            float: gamma_lower, lower bound of 95% confidence interval for gamma.
+            float: gamma_upper, upper bound of 95% confidence interval for gamma.
         """
         # Check which inner diameter to use
         if self.insert_length > 0:
@@ -770,7 +846,7 @@ class CoatedWallReactor:
             diameter = self.FT_ID
 
         # Fit data to first order kinetics
-        slope, _, r_value, _, std_err = kinetics.fit_first_order_kinetics(
+        slope, intercept, r_value, _, std_err = kinetics.fit_first_order_kinetics(
             obj=self,
             concentrations=concentrations,
             exposure=exposure,
@@ -795,32 +871,10 @@ class CoatedWallReactor:
             diameter=diameter,
         )
 
-        return k, r_value, gamma, (gamma_lower, gamma_upper)
+        if gamma_lower < 0 or gamma_upper > 1:
+            warnings.warn(
+                "Calculated confidence interval for gamma is unphysical. "
+                "This is typically due to limited data or low correlation."
+            )
 
-
-""" 
-Citations:
-    
-Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and 
-Penetration of Gas Molecules and Aerosol Particles through Laminar Flow 
-Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87, 3746–3754. 
-https://doi.org/10.1021/ac5042395
-
-Hanson, D., Kosciuch, E., 2003. The NH3 Mass Accommodation Coefficient 
-for Uptake onto Sulfuric Acid Solutions. J. Phys. Chem. A 107, 
-2199–2208. https://doi.org/10.1021/jp021570j
-
-Fuchs, N.A., Sutugin, A.G., 1971. HIGH-DISPERSED AEROSOLS, in: Hidy,
-G.M., Brock, J.R. (Eds.), Topics in Current Aerosol Research, 
-International Reviews in Aerosol Physics and Chemistry. Pergamon, p. 1.
-https://doi.org/10.1016/B978-0-08-016674-2.50006-6
-
-Ivanov, A.V., Molina, M.J., Park, J., 2021. Experimental study on HCl 
-uptake by MgCl2 and sea salt under humid conditions. J Mass Spectrom 56,
-e4601. https://doi.org/10.1002/jms.4601
-
-Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and evaluation of
-gas phase diffusion coefficients of reactive trace gases in the 
-atmosphere: volume 1. Inorganic compounds. Atmos. Chem. Phys. 14, 
-9233–9247. https://doi.org/10.5194/acp-14-9233-2014
-"""
+        return k, intercept, r_value, gamma, gamma_lower, gamma_upper

@@ -1,10 +1,16 @@
 """
 Kinetics calculations for flow tube experiments.
+
+Citations:
+    Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
+    Penetration of Gas Molecules and Aerosol Particles through Laminar
+    Flow Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87,
+    3746–3754. https://doi.org/10.1021/ac5042395
 """
 
 from .flow_calc import full_attrs, carrier_attrs
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import NDArray, ArrayLike
 from scipy.stats import linregress
 
 
@@ -161,49 +167,67 @@ def gamma_from_k(
 
 def fit_first_order_kinetics(
     obj: carrier_attrs,
-    concentrations: NDArray[np.float64],
-    exposure: NDArray[np.float64],
+    concentrations: ArrayLike,
+    exposure: ArrayLike,
     exposure_units: str,
 ) -> tuple[float, float, float, float, float]:
     """
-    Fits the observed loss to a first order kinetic model to extract the 
+    Fits the observed loss to a first order kinetic model to extract the
     uptake coefficient.
 
     Args:
-        obj (full_attrs): Object with full attributes (P in Pa, T in K,
-            reactant_diffusion_rate in cm2 s-1,
+        obj (carrier_attrs): Object with carrier attributes
+            (flow_velocity in cm s-1 needed).
             carrier_dynamic_viscosity in kg m-1 s-1,
             carrier_density in kg m-3).
-        concentrations (NDArray[np.float64]): Array of observed
+        concentrations (ArrayLike): Array of observed
             concentrations (unitless).
-        exposure (NDArray[np.float64]): Array of exposures (s or cm).
-        exposure_units (str): Units of exposure ("s", "sec", "second", 
+        exposure (ArrayLike): Array of exposures (s or cm).
+        exposure_units (str): Units of exposure ("s", "sec", "second",
             "seconds", "cm", "centimeter", "centimeters").
 
     Returns:
-        tuple[float, float, float, float, float]: Tuple containing the
-            slope, intercept, r-value, p-value, and standard error of 
-            the regression.
+        float: Slope of the linear regression.
+        float: Intercept of the linear regression.
+        float: R-value of the linear regression.
+        float: P-value of the linear regression.
+        float: Standard error of the linear regression.
     """
 
     ### Check for valid inputs ###
-    if not isinstance(concentrations, np.ndarray):
-        raise TypeError("Concentrations must be a numpy array")
-    if not isinstance(exposure, np.ndarray):
-        raise TypeError("Exposure must be a numpy array")
+    try:
+        concentrations = np.asarray(concentrations, dtype=np.float64)
+    except Exception as e:
+        raise TypeError(
+            f"Concentration input must be array-like; got {type(concentrations)}"
+        ) from e
+    if concentrations.ndim != 1:
+        raise ValueError("Concentration input must be 1-dimensional.")
     if (concentrations < 0).any():
         raise ValueError("Concentrations must be non-negative")
-    
+
+    try:
+        exposure = np.asarray(exposure, dtype=np.float64)
+    except Exception as e:
+        raise TypeError(
+            f"Exposure input must be array-like; got {type(exposure)}"
+        ) from e
+    if exposure.ndim != 1:
+        raise ValueError("Exposure input must be 1-dimensional.")
+
+    if len(concentrations) != len(exposure):
+        raise ValueError("Concentration and exposure inputs must have the same length.")
+
     # Find which flow velocity to use
     if hasattr(obj, "insert_flow_velocity"):
-        flow_velocity = obj.insert_flow_velocity # pyright: ignore[reportAttributeAccessIssue]
+        flow_velocity = obj.insert_flow_velocity  # pyright: ignore[reportAttributeAccessIssue]
     elif hasattr(obj, "flow_velocity"):
-        flow_velocity = obj.flow_velocity # pyright: ignore[reportAttributeAccessIssue]
+        flow_velocity = obj.flow_velocity  # pyright: ignore[reportAttributeAccessIssue]
     elif hasattr(obj, "FT_flow_velocity"):
-        flow_velocity = obj.FT_flow_velocity # pyright: ignore[reportAttributeAccessIssue]
+        flow_velocity = obj.FT_flow_velocity  # pyright: ignore[reportAttributeAccessIssue]
     else:
         raise RuntimeError("Must call initialize() prior to fitting")
-    
+
     # Convert exposure to time
     if exposure_units in ["s", "sec", "second", "seconds"]:
         exposure_time = exposure
@@ -219,13 +243,3 @@ def fit_first_order_kinetics(
     log_concentrations = np.log(concentrations)
 
     return linregress(exposure_time, log_concentrations)
-
-
-""" 
-Citations:
-
-Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and 
-Penetration of Gas Molecules and Aerosol Particles through Laminar Flow 
-Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87, 3746–3754. 
-https://doi.org/10.1021/ac5042395
-"""

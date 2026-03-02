@@ -21,7 +21,8 @@ def make_constructor_kwargs():
             injector_OD=1.20,
             reactant_gas="HCl",
             carrier_gas="N2",
-            reactant_MR=1e-6,
+            reactant_conc_type="ppm",
+            reactant_conc=30,
         )
         # Class-specific ctor args
         if Reactor is CoatedWallReactor:
@@ -29,10 +30,9 @@ def make_constructor_kwargs():
         elif Reactor is BoatReactor:
             base.update(
                 dict(
-                    boat_width=2.0,
-                    boat_height=0.963,
+                    boat_liquid_width=2.0,
                     boat_length=53.8,
-                    boat_wall_thickness=0.11,
+                    boat_cross_section=3.0,
                 )
             )
         base.update(overrides)
