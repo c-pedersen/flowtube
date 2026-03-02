@@ -16,9 +16,10 @@ Citations
 """
 
 import numpy as np
-import molmass as mm  # pyright: ignore[reportMissingImports]
+import molmass as mm
 import math
 from typing import Protocol
+from warnings import warn
 
 from . import tools
 
@@ -65,7 +66,7 @@ def real_density(
         raise ValueError(f"Unsupported gas. Supported gases: {', '.join(a.keys())}")
 
     # Molar mass (g mol-1)
-    m = float(mm.Formula(gas).mass)  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+    m = float(mm.Formula(gas).mass)
 
     # Calculate pressure from Pa to bar
     P_bar = obj.P / tools.P_CF["bar"]
@@ -80,10 +81,10 @@ def real_density(
     ]
 
     # Find the roots of the cubic function
-    roots = np.roots(coefficients)  # pyright: ignore[reportUnknownMemberType]
+    roots = np.roots(coefficients)
 
     # Find the real root and convert to kg m-3
-    density = 1 / np.real(roots[roots.imag == 0][0]) * m  # pyright: ignore[reportUnknownMemberType]
+    density = 1 / np.real(roots[roots.imag == 0][0]) * m
 
     # Check if the density is negative, which is unphysical
     if density < 0:
@@ -116,11 +117,11 @@ def dynamic_viscosity(
         raise ValueError(f"Unsupported gas. Supported gases: {', '.join(a.keys())}")
 
     # Molar mass (g mol-1)
-    m = float(mm.Formula(gas).mass)  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+    m = float(mm.Formula(gas).mass)
 
     # Give warning if a polar gas is attempted
     if mu[gas] >= 0.022:
-        UserWarning(
+        warn(
             "Polar gases not supported. See eqs. 9-4.16 & 9-4.17 from Reid et al., "
             "1987 to implement."
         )

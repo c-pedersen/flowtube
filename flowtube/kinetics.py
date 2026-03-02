@@ -176,8 +176,8 @@ def fit_first_order_kinetics(
     uptake coefficient.
 
     Args:
-        obj (full_attrs): Object with full attributes (P in Pa, T in K,
-            reactant_diffusion_rate in cm2 s-1,
+        obj (carrier_attrs): Object with carrier attributes
+            (flow_velocity in cm s-1 needed).
             carrier_dynamic_viscosity in kg m-1 s-1,
             carrier_density in kg m-3).
         concentrations (ArrayLike): Array of observed

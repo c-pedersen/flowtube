@@ -8,7 +8,7 @@ Citations
 """
 
 import numpy as np
-import molmass as mm  # pyright: ignore[reportMissingImports]
+import molmass as mm
 from typing import Protocol
 
 from . import tools
@@ -102,8 +102,8 @@ def binary_diffusion_coefficient(obj: required_attrs) -> float:
         )
 
     # Combined molar mass (g mol-1)
-    m1 = float(mm.Formula(obj.reactant_gas).mass)  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
-    m2 = float(mm.Formula(obj.carrier_gas).mass)  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+    m1 = float(mm.Formula(obj.reactant_gas).mass)
+    m2 = float(mm.Formula(obj.carrier_gas).mass)
     m: float = 2 / (1 / m1 + 1 / m2)
 
     # Mean Lennard-Jones Length (Å)

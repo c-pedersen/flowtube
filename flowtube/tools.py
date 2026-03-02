@@ -88,10 +88,12 @@ def vapor_pressure_to_MR(
     """
     # Convert vapor pressure to Pa if necessary
     if P_units != "Pa":
-        vapor_pressure = P_in_Pa(vapor_pressure, P_units)
+        vapor_pressure_Pa = P_in_Pa(vapor_pressure, P_units)
+    else:
+        vapor_pressure_Pa = vapor_pressure
 
     # Calculate mol / min of reactant
-    mol_per_sccm = vapor_pressure / STANDARD_PRESSURE_Pa * MOLES_PER_SCCM
+    mol_per_sccm = vapor_pressure_Pa / STANDARD_PRESSURE_Pa * MOLES_PER_SCCM
 
     return mol_per_sccm / MOLES_PER_SCCM
 

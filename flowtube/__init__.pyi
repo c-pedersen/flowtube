@@ -20,7 +20,8 @@ class CoatedWallReactor:
     injector_OD: float
     reactant_gas: str
     carrier_gas: str
-    reactant_MR: float
+    reactant_conc_type: str
+    reactant_conc: float
     insert_ID: float
     insert_length: float
 
@@ -32,7 +33,8 @@ class CoatedWallReactor:
         injector_OD: float,
         reactant_gas: str,
         carrier_gas: str,
-        reactant_MR: float,
+        reactant_conc_type: str,
+        reactant_conc: float,
         insert_ID: float = ...,
         insert_length: float = ...,
     ) -> None: ...
@@ -73,13 +75,15 @@ class CoatedWallReactor:
     carrier_density: float
     Re: float
 
-    def reactant_diffusion(self, disp: bool = ...) -> None: ...
+    def reactant_diffusion(
+        self, reactant_diffusion_rate: float = ..., disp: bool = ...
+    ) -> None: ...
     def reactant_uptake(
         self,
         hypothetical_gamma: NDArray[np.float64] | float,
         gamma_wall: float = ...,
         disp: bool = ...,
-    ) -> tuple[NDArray[np.float64] | float, NDArray[np.float64] | float]: ...
+    ) -> None: ...
 
     k: float
     uptake: float
@@ -103,7 +107,8 @@ class BoatReactor:
     injector_OD: float
     reactant_gas: str
     carrier_gas: str
-    reactant_MR: float
+    reactant_conc_type: str
+    reactant_conc: float
     boat_width: float
     boat_height: float
     boat_length: float
@@ -117,11 +122,12 @@ class BoatReactor:
         injector_OD: float,
         reactant_gas: str,
         carrier_gas: str,
-        reactant_MR: float,
-        boat_width: float,
-        boat_height: float,
+        reactant_conc_type: str,
+        reactant_conc: float,
+        boat_liquid_width: float,
         boat_length: float,
-        boat_wall_thickness: float,
+        boat_cross_section: float,
+        boat_perimeter: float | None = ...,
     ) -> None: ...
     def initialize(
         self,
@@ -160,13 +166,15 @@ class BoatReactor:
     carrier_density: float
     Re: float
 
-    def reactant_diffusion(self, disp: bool = ...) -> None: ...
+    def reactant_diffusion(
+        self, reactant_diffusion_rate: float = ..., disp: bool = ...
+    ) -> None: ...
     def reactant_uptake(
         self,
         hypothetical_gamma: NDArray[np.float64] | float,
         gamma_wall: float = 5e-6,
         disp: bool = True,
-    ) -> NDArray[np.float64] | float: ...
+    ) -> None: ...
 
     geometric_correction: float
     k: float

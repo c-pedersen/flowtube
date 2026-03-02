@@ -219,6 +219,11 @@ class CoatedWallReactor:
                 vapor_pressure=self.reactant_conc,
                 P_units=self.reactant_conc_type,
             )
+        if self.reactant_MR < 0 or self.reactant_MR > 1:
+            raise ValueError(
+                "Issue calculating reactant mixing ratio."
+                "Mixing ratio must be between 0 and 1"
+            )
 
         self.P = tools.P_in_Pa(P, P_units)
         self.T = tools.T_in_K(T)

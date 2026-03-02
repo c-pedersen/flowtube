@@ -108,7 +108,7 @@ class BoatReactor:
                 f"Supported gases: {', '.join(viscosity_density.a.keys())}"
             )
 
-        # Check physicality of insert dimensions
+        # Check physicality of boat dimensions
         if boat_length < 0 or boat_liquid_width < 0 or boat_cross_section < 0:
             raise ValueError("Boat dimensions must be positive")
         elif boat_liquid_width > FT_ID or boat_cross_section > np.pi * (FT_ID / 2) ** 2:
@@ -118,6 +118,8 @@ class BoatReactor:
             )
         elif boat_length > FT_length:
             raise ValueError("Boat length cannot be larger than flow tube length")
+        if boat_perimeter is not None and boat_perimeter < 0:
+            raise ValueError("Boat perimeter must be positive")
 
         # Check physicality of injector dimensions
         if injector_ID < 0 or injector_OD < 0:
@@ -238,6 +240,11 @@ class BoatReactor:
             self.reactant_MR = tools.vapor_pressure_to_MR(
                 vapor_pressure=self.reactant_conc,
                 P_units=self.reactant_conc_type,
+            )
+        if self.reactant_MR < 0 or self.reactant_MR > 1:
+            raise ValueError(
+                "Issue calculating reactant mixing ratio."
+                "Mixing ratio must be between 0 and 1"
             )
 
         self.P = tools.P_in_Pa(P, P_units)

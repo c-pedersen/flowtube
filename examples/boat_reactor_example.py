@@ -19,7 +19,7 @@ def main():
         # HBr, HCl, HI, H2O, I2, NO, N2, and O2)
         carrier_gas="N2",  # Carrier gas formula (options are Ar, He, N2, O2)
         reactant_conc_type="ppm",  # Type of reactant concentration input (ppm, ng/min, or Pa)
-        reactant_conc=1e-66,  # Reactant concentration
+        reactant_conc=1,  # Reactant concentration
         boat_liquid_width=2.0,  # Boat width (cm)
         boat_cross_section=3.0,  # Boat cross-sectional area (cm2)
         boat_length=53.8,  # Boat length (cm)
