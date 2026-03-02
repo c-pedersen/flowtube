@@ -122,10 +122,10 @@ class CoatedWallReactor:
         # Check reactant concentration inputs
         if reactant_conc < 0:
             raise ValueError("Reactant concentration must be non-negative")
-        if reactant_conc_type not in ["ppm", "ng/min", "Pa", "Torr", "bar", "mbar"]:
+        if reactant_conc_type not in ["ppm", "ppb", "ng/min", "Pa", "hPa", "Torr", "bar", "mbar"]:
             raise ValueError(
                 "Unsupported reactant concentration type. "
-                "Supported types: 'ppm', 'ng/min', 'Pa', 'Torr', 'bar', 'mbar'"
+                "Supported types: 'ppm', 'ppb', 'ng/min', 'Pa', 'hPa', 'Torr', 'bar', 'mbar'"
             )
 
         # Initialize variables

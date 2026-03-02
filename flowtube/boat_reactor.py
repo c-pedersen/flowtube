@@ -113,8 +113,9 @@ class BoatReactor:
             raise ValueError("Boat dimensions must be positive")
         elif boat_liquid_width > FT_ID or boat_cross_section > np.pi * (FT_ID / 2) ** 2:
             raise ValueError(
-                "Boat liquid width or cross-sectional area cannot be "
-                "larger than the flow tube's'"
+                "Boat liquid width cannot be larger than the flow tube ID, and "
+                "boat cross-sectional area cannot be larger than the flow tube "
+                "cross-sectional area"
             )
         elif boat_length > FT_length:
             raise ValueError("Boat length cannot be larger than flow tube length")
@@ -136,10 +137,19 @@ class BoatReactor:
         # Check reactant concentration inputs
         if reactant_conc < 0:
             raise ValueError("Reactant concentration must be non-negative")
-        if reactant_conc_type not in ["ppm", "ng/min", "Pa", "Torr", "bar", "mbar"]:
+        if reactant_conc_type not in [
+            "ppm",
+            "ppb",
+            "ng/min",
+            "Pa",
+            "hPa",
+            "Torr",
+            "bar",
+            "mbar",
+        ]:
             raise ValueError(
                 "Unsupported reactant concentration type. "
-                "Supported types: 'ppm', 'ng/min', 'Pa', 'Torr', 'bar', 'mbar'"
+                "Supported types: 'ppm', 'ppb', 'ng/min', 'Pa', 'hPa', 'Torr', 'bar', 'mbar'"
             )
 
         # Initialize variables
