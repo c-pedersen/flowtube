@@ -5,11 +5,11 @@ Citations:
     Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
     Penetration of Gas Molecules and Aerosol Particles through Laminar
     Flow Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87,
-    3746–3754. https://doi.org/10.1021/ac5042395
+    3746-3754. https://doi.org/10.1021/ac5042395
 
     Hanson, D.R., Ravishankara, A.R., 1993. Uptake of hydrochloric acid
     and hypochlorous acid onto sulfuric acid: solubilities,
-    diffusivities, and reaction. J. Phys. Chem. 97, 12309–12319.
+    diffusivities, and reaction. J. Phys. Chem. 97, 12309-12319.
     https://doi.org/10.1021/j100149a035
 
     Fuchs, N.A., Sutugin, A.G., 1971. HIGH-DISPERSED AEROSOLS, in: Hidy,
@@ -24,7 +24,7 @@ Citations:
     Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and
     evaluation of gas phase diffusion coefficients of reactive trace
     gases in the atmosphere: volume 1. Inorganic compounds. Atmos. Chem.
-    Phys. 14, 9233–9247. https://doi.org/10.5194/acp-14-9233-2014
+    Phys. 14, 9233-9247. https://doi.org/10.5194/acp-14-9233-2014
 """
 
 import numpy as np
