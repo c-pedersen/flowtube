@@ -63,14 +63,14 @@ def diffusion_limited_uptake_coefficient(
     return diameter / obj.reactant_molec_velocity * k_diff
 
 
-def correction_factor(
+def correction_factor_from_gamma(
     N_eff_Shw: float,
     Kn: float,
     gamma: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
-    Calculate correction factor for uptake coefficient - eq. 20 from
-    Knopf et al., 2015.
+    Calculate correction factor (gamma_eff/gamma)for uptake coefficient 
+    - eq. 15 from Knopf et al., 2015.
 
     Args:
         N_eff_Shw (float): Effective Sherwood number (unitless).
@@ -83,6 +83,28 @@ def correction_factor(
     """
 
     return 1 / (1 + gamma * 3 / (2 * N_eff_Shw * Kn))
+
+
+def correction_factor_from_effective_gamma(
+    N_eff_Shw: float,
+    Kn: float,
+    effective_gamma: NDArray[np.float64] | float,
+) -> NDArray[np.float64] | float:
+    """
+    Calculate correction factor (gamma_eff/gamma) for uptake coefficient 
+    - eq. 20 from Knopf et al., 2015.
+
+    Args:
+        N_eff_Shw (float): Effective Sherwood number (unitless).
+        Kn (float): Knudsen number (unitless).
+        effective_gamma (float): Effective uptake coefficient
+            (unitless).
+
+    Returns:
+        float: Correction factor (unitless).
+    """
+
+    return 1 - (effective_gamma * 3 / (2 * N_eff_Shw * Kn))
 
 
 def observed_loss_rate(
