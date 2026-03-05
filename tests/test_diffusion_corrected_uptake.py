@@ -1,6 +1,5 @@
 # tests/test_diffusion_corrected_uptake.py
 import pytest
-import warnings
 import numpy as np
 from flowtube.coated_wall_reactor import CoatedWallReactor
 from flowtube.kinetics import correction_factor_from_effective_gamma
