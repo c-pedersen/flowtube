@@ -52,14 +52,6 @@ NEW_VERSION="$MAJOR.$MINOR.$PATCH"
 echo "New version: $NEW_VERSION"
 echo ""
 
-# Check if on main branch
-CURRENT_BRANCH=$(git branch --show-current)
-if [ "$CURRENT_BRANCH" != "main" ]; then
-    echo "Error: You must be on the main branch"
-    echo "Current branch: $CURRENT_BRANCH"
-    exit 1
-fi
-
 # Check for uncommitted changes
 if [ -n "$(git status --porcelain)" ]; then
     echo "Error: You have uncommitted changes"
