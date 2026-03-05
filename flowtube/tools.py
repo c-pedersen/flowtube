@@ -2,13 +2,14 @@
 Constants and unit conversions.
 
 Constants:
+
 - STANDARD_TEMPERATURE_K: Standard temperature in Kelvin.
 - STANDARD_PRESSURE_Pa: Standard pressure in Pascal.
 - UNIVERSAL_GAS_CONSTANT: Universal gas constant in kg m2 s-2 K-1 mol-1.
 - BOLTZMANN_CONSTANT: Boltzmann constant in kg m2 s-2 K-1.
 - AVOGADROS_NUMBER: Avogadro's number in mol-1.
-- P_CF: Conversion factors to Pascal for Torr, bar, mbar, hPa, and Pa
-pressure units.
+- P_CF: Conversion factors to Pascal for Torr, bar, mbar, hPa, and Pa pressure units.
+
 """
 
 import numpy as np

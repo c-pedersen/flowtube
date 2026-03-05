@@ -5,7 +5,7 @@ Citations:
     Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
     Penetration of Gas Molecules and Aerosol Particles through Laminar
     Flow Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87,
-    3746–3754. https://doi.org/10.1021/ac5042395
+    3746-3754. https://doi.org/10.1021/ac5042395
 
     Hanson, D.R., Ravishankara, A.R., 1993. Uptake of hydrochloric acid
     and hypochlorous acid onto sulfuric acid: solubilities,
