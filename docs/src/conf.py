@@ -7,18 +7,13 @@ import re
 sys.path.insert(0, os.path.abspath("../.."))
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',  # For Google/NumPy style docstrings
-    'sphinx.ext.viewcode',  # Add source code links
-    'sphinx.ext.autosummary',  # Generate summary tables
-    'sphinx_autodoc_typehints',
+    "sphinx.ext.napoleon",  # For Google/NumPy style docstrings
+    "sphinx.ext.viewcode",  # Add source code links
+    "sphinx_autodoc_typehints",
+    "sphinx_mdinclude",
+    "autoapi.extension",
+    "nbsphinx",
 ]
-
-autosummary_generate = True
-autodoc_typehints = "description"
-
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "flowtube"
 copyright = "2025, Corey Pedersen"
@@ -34,25 +29,20 @@ else:
 
 version = release.rsplit(".", 1)[0]  # Short version (e.g., "1.2")
 
-# -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+    "show-module-summary",
+]
+autoapi_dirs = ["../../flowtube/"]
 
-# Autodoc settings
-autodoc_default_options = {
-    'members': True,
-    'member-order': 'bysource',
-    'special-members': '__init__',
-    'undoc-members': True,
-    'exclude-members': '__weakref__'
-}
-
-autosummary_generate = True  # Turn on autosummary
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
 
-templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- Options for HTML output -------------------------------------------------
-html_theme = 'sphinx_rtd_theme'
-html_static_path = []
+html_theme = "sphinx_rtd_theme"
+html_static_path = ["_static"]
