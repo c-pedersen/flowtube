@@ -1,15 +1,17 @@
-Welcome to flowtube's documentation!
-====================================
+.. mdinclude:: ../../README.md
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :caption: Example Usage
+   :hidden:
 
-   api
+   01_example_usage.ipynb
 
-Indices and tables
-==================
+.. toctree::
+   :caption: Versions
+   :hidden:
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   changelog
+
+.. toctree::
+   :caption: API Reference
+   :hidden:
