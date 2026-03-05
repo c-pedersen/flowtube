@@ -27,10 +27,9 @@ fi
 echo "Current version: $CURRENT_VERSION"
 
 # Parse version components
-IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
-MAJOR=${VERSION_PARTS[0]}
-MINOR=${VERSION_PARTS[1]}
-PATCH=${VERSION_PARTS[2]}
+MAJOR=$(echo "$CURRENT_VERSION" | cut -d. -f1)
+MINOR=$(echo "$CURRENT_VERSION" | cut -d. -f2)
+PATCH=$(echo "$CURRENT_VERSION" | cut -d. -f3)
 
 # Calculate new version
 case $BUMP_TYPE in
@@ -52,14 +51,6 @@ esac
 NEW_VERSION="$MAJOR.$MINOR.$PATCH"
 echo "New version: $NEW_VERSION"
 echo ""
-
-# Check if on main branch
-CURRENT_BRANCH=$(git branch --show-current)
-if [ "$CURRENT_BRANCH" != "main" ]; then
-    echo "Error: You must be on the main branch"
-    echo "Current branch: $CURRENT_BRANCH"
-    exit 1
-fi
 
 # Check for uncommitted changes
 if [ -n "$(git status --porcelain)" ]; then
