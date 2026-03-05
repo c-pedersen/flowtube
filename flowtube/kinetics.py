@@ -69,8 +69,8 @@ def correction_factor_from_gamma(
     gamma: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
-    Calculate correction factor for uptake coefficient - eq. 15 from
-    Knopf et al., 2015.
+    Calculate correction factor (gamma_eff/gamma)for uptake coefficient 
+    - eq. 15 from Knopf et al., 2015.
 
     Args:
         N_eff_Shw (float): Effective Sherwood number (unitless).
@@ -91,8 +91,8 @@ def correction_factor_from_effective_gamma(
     effective_gamma: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
-    Calculate correction factor for uptake coefficient - eq. 20 from
-    Knopf et al., 2015.
+    Calculate correction factor (gamma_eff/gamma) for uptake coefficient 
+    - eq. 20 from Knopf et al., 2015.
 
     Args:
         N_eff_Shw (float): Effective Sherwood number (unitless).
@@ -104,7 +104,7 @@ def correction_factor_from_effective_gamma(
         float: Correction factor (unitless).
     """
 
-    return 1 / (1 - effective_gamma * 3 / (2 * N_eff_Shw * Kn))
+    return 1 - (effective_gamma * 3 / (2 * N_eff_Shw * Kn))
 
 
 def observed_loss_rate(

@@ -902,8 +902,20 @@ class CoatedWallReactor:
         Returns:
             float: Diffusion-corrected uptake coefficient.
         """
+        # Validate effective_gamma input
+        if effective_gamma < 0 or effective_gamma > 1:
+            raise ValueError("Effective gamma must be between 0 and 1")
+
+        # Use insert if present, otherwise use flow tube values
+        if self.insert_length > 0:
+            N_eff_Shw = self.N_eff_Shw_insert
+            Kn = self.Kn_insert
+        else:
+            N_eff_Shw = self.N_eff_Shw_FT
+            Kn = self.Kn_FT
+
         Cg = kinetics.correction_factor_from_effective_gamma(
-            N_eff_Shw=self.N_eff_Shw_FT, Kn=self.Kn_FT, effective_gamma=effective_gamma
+            N_eff_Shw=N_eff_Shw, Kn=Kn, effective_gamma=effective_gamma
         )
 
         gamma = effective_gamma / Cg
