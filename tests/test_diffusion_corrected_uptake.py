@@ -12,7 +12,7 @@ def test_diffusion_corrected_uptake_no_insert(build_reactor):
     the observed effective gamma.  The true gamma must satisfy:
 
         gamma = effective_gamma / Cg
-        Cg    = 1 / (1 - effective_gamma * 3 / (2 * N_eff_Shw_FT * Kn_FT))
+        Cg    = 1 - (effective_gamma * 3 / (2 * N_eff_Shw_FT * Kn_FT))
     """
     obj, _, _ = build_reactor(CoatedWallReactor)
 
@@ -33,8 +33,8 @@ def test_diffusion_corrected_uptake_no_insert(build_reactor):
 def test_diffusion_corrected_uptake_with_insert(build_reactor):
     """
     When an insert is present the reactor exposes both flow-tube and insert
-    correction parameters.  diffusion_corrected_uptake_coefficient must use
-    the *flow-tube* parameters (N_eff_Shw_FT, Kn_FT), not the insert ones.
+    correction parameters. diffusion_corrected_uptake_coefficient must use
+    the insert parameters, not the flowtube ones.
     """
     obj, _, _ = build_reactor(
         CoatedWallReactor,
@@ -48,34 +48,34 @@ def test_diffusion_corrected_uptake_with_insert(build_reactor):
     effective_gamma = 1e-4
     result = obj.diffusion_corrected_uptake_coefficient(effective_gamma)
 
-    # Result must match the FT-based formula …
+    # Result must differ from the FT-based formula …
     Cg_ft = correction_factor_from_effective_gamma(
         N_eff_Shw=obj.N_eff_Shw_FT,
         Kn=obj.Kn_FT,
         effective_gamma=effective_gamma,
     )
-    assert np.isclose(result, effective_gamma / Cg_ft)
+    assert not np.isclose(result, effective_gamma / Cg_ft)
 
-    # … and must differ from what insert-based parameters would give
+    # … and match what insert-based parameters would give
     Cg_insert = correction_factor_from_effective_gamma(
         N_eff_Shw=obj.N_eff_Shw_insert,
         Kn=obj.Kn_insert,
         effective_gamma=effective_gamma,
     )
-    assert not np.isclose(result, effective_gamma / Cg_insert)
+    assert np.isclose(result, effective_gamma / Cg_insert)
 
 
-def test_diffusion_correction_reduces_gamma(build_reactor):
+def test_diffusion_correction_increases_gamma(build_reactor):
     """
-    In the typical diffusion-limited regime the correction factor Cg > 1,
-    so the true gamma must be *smaller* than the observed effective gamma.
+    In the typical diffusion-limited regime the correction factor Cg < 1,
+    so the true gamma must be *larger* than the observed effective gamma.
     """
     obj, _, _ = build_reactor(CoatedWallReactor)
 
     effective_gamma = 1e-4
     result = obj.diffusion_corrected_uptake_coefficient(effective_gamma)
 
-    assert result < effective_gamma
+    assert result > effective_gamma
 
 
 def test_diffusion_corrected_uptake_warns_unphysical(build_reactor):
