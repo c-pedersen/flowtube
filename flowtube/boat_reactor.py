@@ -77,8 +77,7 @@ class BoatReactor:
             reactant_conc_type (str): Type of reactant concentration
                 input. Options: "ppm" or "ppb" for mixing ratio,
                 "ng/min" for permeation rate, "Pa" for vapor pressure.
-            reactant_conc (float): Reactant concentration (ppm, ng/min,
-                or Pa).
+            reactant_conc (float): Reactant concentration value.
             boat_liquid_width (float): Width (cm) of liquid in boat.
             boat_length (float): Length (cm) of boat reactor.
             boat_cross_section (float): Cross-sectional area (cm^2) of
@@ -547,6 +546,8 @@ class BoatReactor:
                     raise ValueError(
                         f"Must input reactant diffusion rate for {self.reactant_gas}"
                     )
+            elif isinstance(reactant_diffusion_rate, (int, np.integer)):
+                reactant_diffusion_rate = float(reactant_diffusion_rate)
             else:
                 raise TypeError("Reactant diffusion rate must be a number")
 
@@ -685,7 +686,7 @@ class BoatReactor:
         units += ["cm2"]
 
         # Diffusion Correction - see kinetics.py for details
-        diff_corr = 1 - kinetics.correction_factor(
+        diff_corr = 1 - kinetics.correction_factor_from_gamma(
             self.N_eff_Shw_FT, self.Kn_FT, hypothetical_gamma
         )
         if not isinstance(diff_corr, np.ndarray):

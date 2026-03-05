@@ -72,8 +72,7 @@ class CoatedWallReactor:
             reactant_conc_type (str): Type of reactant concentration
                 input. Options: "ppm" or "ppb" for mixing ratio,
                 "ng/min" for permeation rate, "Pa" for vapor pressure.
-            reactant_conc (float): Reactant concentration (ppm, ng/min,
-                or Pa).
+            reactant_conc (float): Reactant concentration value.
             insert_ID (float, optional): Inner diameter (cm) of insert.
             insert_length (float, optional): Length (cm) of insert.
 
@@ -122,7 +121,16 @@ class CoatedWallReactor:
         # Check reactant concentration inputs
         if reactant_conc < 0:
             raise ValueError("Reactant concentration must be non-negative")
-        if reactant_conc_type not in ["ppm", "ppb", "ng/min", "Pa", "hPa", "Torr", "bar", "mbar"]:
+        if reactant_conc_type not in [
+            "ppm",
+            "ppb",
+            "ng/min",
+            "Pa",
+            "hPa",
+            "Torr",
+            "bar",
+            "mbar",
+        ]:
             raise ValueError(
                 "Unsupported reactant concentration type. "
                 "Supported types: 'ppm', 'ppb', 'ng/min', 'Pa', 'hPa', 'Torr', 'bar', 'mbar'"
@@ -535,6 +543,8 @@ class CoatedWallReactor:
                     raise ValueError(
                         f"Must input reactant diffusion rate for {self.reactant_gas}"
                     )
+            elif isinstance(reactant_diffusion_rate, (int, np.integer)):
+                reactant_diffusion_rate = float(reactant_diffusion_rate)
             else:
                 raise TypeError("Reactant diffusion rate must be a number")
 
@@ -725,12 +735,12 @@ class CoatedWallReactor:
         # Diffusion Correction Factor - gamma_eff / gamma
         # - eq. 15 from Knopf et al., Anal. Chem., 2015
         if self.insert_length > 0:
-            self.C_g = kinetics.correction_factor(
+            self.C_g = kinetics.correction_factor_from_gamma(
                 self.N_eff_Shw_insert, self.Kn_insert, hypothetical_gamma
             )
             var_names += ["Insert Diffusion Correction Factor (γ_eff/γ)"]
         else:
-            self.C_g = kinetics.correction_factor(
+            self.C_g = kinetics.correction_factor_from_gamma(
                 self.N_eff_Shw_FT, self.Kn_FT, hypothetical_gamma
             )
             var_names += ["Flow Tube Diffusion Correction Factor (γ_eff/γ)"]
@@ -823,7 +833,7 @@ class CoatedWallReactor:
     ) -> tuple[float, float, float, float, float, float]:
         """
         Fits the observed loss to the coated wall to a first order kinetic
-        model to extract the uptake coefficient.
+        model to extract the effective uptake coefficient.
 
         Args:
             concentrations (ArrayLike): Reactant concentrations
@@ -835,7 +845,7 @@ class CoatedWallReactor:
             float: k, first order loss rate (s-1).
             float: intercept, y-intercept of the fit.
             float: r_value, correlation coefficient of the fit.
-            float: gamma, uptake coefficient.
+            float: gamma, effective uptake coefficient.
             float: gamma_lower, lower bound of 95% confidence interval for gamma.
             float: gamma_upper, upper bound of 95% confidence interval for gamma.
         """
@@ -878,3 +888,29 @@ class CoatedWallReactor:
             )
 
         return k, intercept, r_value, gamma, gamma_lower, gamma_upper
+
+    def diffusion_corrected_uptake_coefficient(
+        self,
+        effective_gamma: float,
+    ) -> float:
+        """
+        Calculate the diffusion-corrected uptake coefficient.
+
+        Args:
+            effective_gamma (float): Effective uptake coefficient.
+
+        Returns:
+            float: Diffusion-corrected uptake coefficient.
+        """
+        Cg = kinetics.correction_factor_from_effective_gamma(
+            N_eff_Shw=self.N_eff_Shw_FT, Kn=self.Kn_FT, effective_gamma=effective_gamma
+        )
+
+        gamma = effective_gamma / Cg
+
+        if gamma < 0 or gamma > 1:
+            warnings.warn(
+                "Calculated diffusion-corrected gamma is unphysical. "
+                "This is typically due to low effective gamma or high diffusion correction factor."
+            )
+        return gamma  # pyright: ignore[reportReturnType]
