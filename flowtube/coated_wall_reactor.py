@@ -226,6 +226,8 @@ class CoatedWallReactor:
             self.reactant_MR = tools.vapor_pressure_to_MR(
                 vapor_pressure=self.reactant_conc,
                 P_units=self.reactant_conc_type,
+                system_pressure=P,
+                P_units_system=P_units,
             )
         if self.reactant_MR < 0 or self.reactant_MR > 1:
             raise ValueError(
