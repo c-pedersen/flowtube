@@ -340,19 +340,19 @@ class CoatedWallReactor:
         units += ["sccm"]
 
         # Reactant Concentrations (ppb)
-        injector_conc = reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
-        FT_conc = reactant_FR / self.total_FR * self.reactant_MR * 1e9
-        FT_conc_molec = flow_calc.MR_to_molec(self, FT_conc)
+        self.injector_conc = reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
+        self.FT_conc = reactant_FR / self.total_FR * self.reactant_MR * 1e9
+        self.FT_conc_molec = flow_calc.MR_to_molec(self, self.FT_conc)
         var_names += [f"Injector {self.reactant_gas} Concentration"]
-        var += [injector_conc]
+        var += [self.injector_conc]
         var_fmts += [".3g"]
         units += ["ppb"]
         var_names += [f"Flow Tube {self.reactant_gas} Concentration"]
-        var += [FT_conc]
+        var += [self.FT_conc]
         var_fmts += [".3g"]
         units += ["ppb"]
         var_names += [f"Flow Tube {self.reactant_gas} Concentration"]
-        var += [FT_conc_molec]
+        var += [self.FT_conc_molec]
         var_fmts += [".2e"]
         units += ["molec. cm-3"]
 
