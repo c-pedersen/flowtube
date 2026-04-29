@@ -3,7 +3,7 @@ Main coated wall reactor class and associated calculations.
 
 Citations:
     Bertram, A.K., Ivanov, A.V., Hunter, M., Molina, L.T., Molina, M.J.,
-    2001. The Reaction Probability of OH on Organic Surfaces of 
+    2001. The Reaction Probability of OH on Organic Surfaces of
     Tropospheric Interest. J. Phys. Chem. A 105, 9415-9421.
     https://doi.org/10.1021/jp0114034
 
@@ -106,14 +106,18 @@ class CoatedWallReactor:
             )
 
         # Check physicality of insert dimensions
-        if insert_ID < 0 or insert_length < 0:
-            raise ValueError("Insert ID and length must be positive")
+        if insert_ID < 0 or insert_length < 0 or insert_OD < 0:
+            raise ValueError("Insert ID, OD, and length must be positive")
         elif insert_ID > FT_ID or insert_OD > FT_ID:
             raise ValueError("Insert cannot be larger than flow tube ID")
         elif insert_length > FT_length:
             raise ValueError("Insert length cannot be larger than flow tube length")
-        elif np.isnan(insert_ID) != np.isnan(insert_OD) or np.isnan(insert_ID) != (insert_length == 0):
-            raise ValueError("Insert dimensions must all be specified or all be unspecified")
+        elif np.isnan(insert_ID) != np.isnan(insert_OD) or np.isnan(insert_ID) != (
+            insert_length == 0
+        ):
+            raise ValueError(
+                "Insert dimensions must all be specified or all be unspecified"
+            )
 
         # Check physicality of injector dimensions
         if injector_ID < 0 or injector_OD < 0:
@@ -375,15 +379,22 @@ class CoatedWallReactor:
         var_fmts += [".3g"]
         units += ["cm s-1"]
 
-        # Insert flow velocity 
+        # Insert flow velocity
         # - accounts for flow around outside of insert and through inside of insert
         if self.insert_length > 0:
             net_cross_section = (
-                tools.cross_sectional_area(self.FT_ID) 
-                - tools.cross_sectional_area(self.insert_OD) 
-                + tools.cross_sectional_area(self.insert_ID))
+                tools.cross_sectional_area(self.FT_ID)
+                - tools.cross_sectional_area(self.insert_OD)
+                + tools.cross_sectional_area(self.insert_ID)
+            )
+            if net_cross_section <= 0:
+                raise ValueError(
+                    "Invalid insert geometry: insert dimensions must leave a positive net flow cross-section."
+                )
 
-            self.insert_flow_velocity = flow_calc.sccm_to_ccm(self, self.total_FR) / net_cross_section / 60
+            self.insert_flow_velocity = (
+                flow_calc.sccm_to_ccm(self, self.total_FR) / net_cross_section / 60
+            )
             var_names += ["Insert Velocity"]
             var += [self.insert_flow_velocity]
             var_fmts += [".3g"]
@@ -718,7 +729,7 @@ class CoatedWallReactor:
             gamma_wall (float): Wall uptake coefficient (default: 5e-6
                 for halocarbon wax coating - Ivanov et al., J. Mass
                 Spectrom., 2021).
-            exposure_time (float, default: 10): Time in minutes over 
+            exposure_time (float, default: 10): Time in minutes over
                 which the surface is exposed to the reactant.
             disp (bool): Display calculated values.
 
@@ -738,6 +749,10 @@ class CoatedWallReactor:
 
             if hypothetical_gamma.ndim != 1:
                 raise ValueError("Gamma input must be 1-dimensional.")
+            
+        # Check exposure time
+        if exposure_time <= 0:
+            raise ValueError("Exposure time must be a positive number.")
 
         # Check if hypothetical_gamma is between 0 and 1
         if np.min(hypothetical_gamma) < 0 or np.max(hypothetical_gamma) > 1:
@@ -849,11 +864,17 @@ class CoatedWallReactor:
 
         # Fraction of unreacted surface sites after exposure to reactant gas
         # - see Bertram et al., J. Phys. Chem. A, 2001
-        collision_frequency = self.FT_conc_molec * self.reactant_molec_velocity / 4  # molecules cm-2 s-1
+        collision_frequency = (
+            self.FT_conc_molec * self.reactant_molec_velocity / 4
+        )  # molecules cm-2 s-1
         N_tot = 1e15  # number of reaction sites per cm2, assumed
-        F = np.exp(-hypothetical_gamma * collision_frequency * exposure_time * 60 / N_tot)
-        var_names += [f"Fraction of unreacted surface sites after a {exposure_time:.1f} \n"
-                      f"minute exposure (assumes a solid surface)"]
+        F = np.exp(
+            -hypothetical_gamma * collision_frequency * exposure_time * 60 / N_tot
+        )
+        var_names += [
+            f"Fraction of unreacted surface sites after a {exposure_time:.1f} \n"
+            f"minute exposure (assumes a solid surface)"
+        ]
         var += [F * 100]
         var_fmts += [".2g"]
         units += ["%"]
