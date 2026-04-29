@@ -2,6 +2,11 @@
 Main coated wall reactor class and associated calculations.
 
 Citations:
+    Bertram, A.K., Ivanov, A.V., Hunter, M., Molina, L.T., Molina, M.J.,
+    2001. The Reaction Probability of OH on Organic Surfaces of 
+    Tropospheric Interest. J. Phys. Chem. A 105, 9415-9421.
+    https://doi.org/10.1021/jp0114034
+
     Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
     Penetration of Gas Molecules and Aerosol Particles through Laminar
     Flow Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87,
@@ -698,6 +703,7 @@ class CoatedWallReactor:
     def reactant_uptake(
         self,
         hypothetical_gamma: ArrayLike | float | int,
+        exposure_time: float = 10,
         gamma_wall: float = 5e-6,
         disp: bool = True,
     ) -> None:
@@ -712,6 +718,8 @@ class CoatedWallReactor:
             gamma_wall (float): Wall uptake coefficient (default: 5e-6
                 for halocarbon wax coating - Ivanov et al., J. Mass
                 Spectrom., 2021).
+            exposure_time (float, default: 10): Time in minutes over 
+                which the surface is exposed to the reactant.
             disp (bool): Display calculated values.
 
         Returns:
@@ -836,6 +844,17 @@ class CoatedWallReactor:
         )
         var_names += ["Estimated Wall Loss"]
         var += [reactant_wall_loss * 100]
+        var_fmts += [".2g"]
+        units += ["%"]
+
+        # Fraction of unreacted surface sites after exposure to reactant gas
+        # - see Bertram et al., J. Phys. Chem. A, 2001
+        collision_frequency = self.FT_conc_molec * self.reactant_molec_velocity / 4  # molecules cm-2 s-1
+        N_tot = 1e15  # number of reaction sites per cm2, assumed
+        F = np.exp(-hypothetical_gamma * collision_frequency * exposure_time * 60 / N_tot)
+        var_names += [f"Fraction of unreacted surface sites after a {exposure_time:.1f} \n"
+                      f"minute exposure (assumes a solid surface)"]
+        var += [F * 100]
         var_fmts += [".2g"]
         units += ["%"]
 

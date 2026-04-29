@@ -5,6 +5,7 @@ Changelog
 -------------------
 - Fixed critical error in vapor pressure to mixing ratio conversion function that caused incorrect results.
 - Fixed critical issue with documentation build
+- Added feature to `coated_wall_reactor` module to calculate fraction of unreacted surface sites after a given exposure time
 - Added support for accounting for flow around the outside of inserts in the `coated_wall_reactor` module when computing insert flow velocity
 - Minor improvements
 
