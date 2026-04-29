@@ -2,6 +2,11 @@
 Main coated wall reactor class and associated calculations.
 
 Citations:
+    Bertram, A.K., Ivanov, A.V., Hunter, M., Molina, L.T., Molina, M.J.,
+    2001. The Reaction Probability of OH on Organic Surfaces of
+    Tropospheric Interest. J. Phys. Chem. A 105, 9415-9421.
+    https://doi.org/10.1021/jp0114034
+
     Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
     Penetration of Gas Molecules and Aerosol Particles through Laminar
     Flow Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87,
@@ -46,7 +51,8 @@ class CoatedWallReactor:
         carrier_gas: str,
         reactant_conc_type: str,
         reactant_conc: float,
-        insert_ID: float = 0,
+        insert_ID: float = np.nan,
+        insert_OD: float = np.nan,
         insert_length: float = 0,
     ) -> None:
         """
@@ -74,6 +80,7 @@ class CoatedWallReactor:
                 "ng/min" for permeation rate, "Pa" for vapor pressure.
             reactant_conc (float): Reactant concentration value.
             insert_ID (float, optional): Inner diameter (cm) of insert.
+            insert_OD (float, optional): Outer diameter (cm) of insert.
             insert_length (float, optional): Length (cm) of insert.
 
         Returns:
@@ -99,12 +106,18 @@ class CoatedWallReactor:
             )
 
         # Check physicality of insert dimensions
-        if insert_ID < 0 or insert_length < 0:
-            raise ValueError("Insert ID and length must be positive")
-        elif insert_ID > FT_ID:
-            raise ValueError("Insert ID cannot be larger than flow tube ID")
+        if insert_ID < 0 or insert_length < 0 or insert_OD < 0:
+            raise ValueError("Insert ID, OD, and length must be positive")
+        elif insert_ID > FT_ID or insert_OD > FT_ID:
+            raise ValueError("Insert cannot be larger than flow tube ID")
         elif insert_length > FT_length:
             raise ValueError("Insert length cannot be larger than flow tube length")
+        elif np.isnan(insert_ID) != np.isnan(insert_OD) or np.isnan(insert_ID) != (
+            insert_length == 0
+        ):
+            raise ValueError(
+                "Insert dimensions must all be specified or all be unspecified"
+            )
 
         # Check physicality of injector dimensions
         if injector_ID < 0 or injector_OD < 0:
@@ -146,6 +159,7 @@ class CoatedWallReactor:
         self.reactant_conc = reactant_conc
         self.carrier_gas = carrier_gas
         self.insert_ID = insert_ID
+        self.insert_OD = insert_OD
         self.insert_length = insert_length
 
     def initialize(
@@ -226,6 +240,8 @@ class CoatedWallReactor:
             self.reactant_MR = tools.vapor_pressure_to_MR(
                 vapor_pressure=self.reactant_conc,
                 P_units=self.reactant_conc_type,
+                system_pressure=P,
+                P_units_system=P_units,
             )
         if self.reactant_MR < 0 or self.reactant_MR > 1:
             raise ValueError(
@@ -338,41 +354,65 @@ class CoatedWallReactor:
         units += ["sccm"]
 
         # Reactant Concentrations (ppb)
-        injector_conc = reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
-        FT_conc = reactant_FR / self.total_FR * self.reactant_MR * 1e9
-        FT_conc_molec = flow_calc.MR_to_molec(self, FT_conc)
+        self.injector_conc = reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
+        self.FT_conc = reactant_FR / self.total_FR * self.reactant_MR * 1e9
+        self.FT_conc_molec = flow_calc.MR_to_molec(self, self.FT_conc)
         var_names += [f"Injector {self.reactant_gas} Concentration"]
-        var += [injector_conc]
+        var += [self.injector_conc]
         var_fmts += [".3g"]
         units += ["ppb"]
         var_names += [f"Flow Tube {self.reactant_gas} Concentration"]
-        var += [FT_conc]
+        var += [self.FT_conc]
         var_fmts += [".3g"]
         units += ["ppb"]
         var_names += [f"Flow Tube {self.reactant_gas} Concentration"]
-        var += [FT_conc_molec]
+        var += [self.FT_conc_molec]
         var_fmts += [".2e"]
         units += ["molec. cm-3"]
 
-        # Total Flow Velocities
+        # Flow Tube Flow Velocity
         self.FT_flow_velocity = flow_calc.sccm_to_velocity(
             self, self.total_FR, self.FT_ID
         )
-        if self.insert_length > 0:
-            self.insert_flow_velocity = flow_calc.sccm_to_velocity(
-                self, self.total_FR, self.insert_ID
-            )
         var_names += ["Flow Tube Velocity"]
         var += [self.FT_flow_velocity]
         var_fmts += [".3g"]
         units += ["cm s-1"]
 
-        # Residence Time
+        # Insert flow velocity
+        # - accounts for flow around outside of insert and through inside of insert
+        if self.insert_length > 0:
+            net_cross_section = (
+                tools.cross_sectional_area(self.FT_ID)
+                - tools.cross_sectional_area(self.insert_OD)
+                + tools.cross_sectional_area(self.insert_ID)
+            )
+            if net_cross_section <= 0:
+                raise ValueError(
+                    "Invalid insert geometry: insert dimensions must leave a positive net flow cross-section."
+                )
+
+            self.insert_flow_velocity = (
+                flow_calc.sccm_to_ccm(self, self.total_FR) / net_cross_section / 60
+            )
+            var_names += ["Insert Velocity"]
+            var += [self.insert_flow_velocity]
+            var_fmts += [".3g"]
+            units += ["cm s-1"]
+
+        # Residence Times
         self.FT_residence_time = self.FT_length / self.FT_flow_velocity
         var_names += ["Flow Tube Residence Time"]
         var += [self.FT_residence_time]
         var_fmts += [".3g"]
         units += ["s"]
+
+        if self.insert_length > 0:
+            self.insert_residence_time = self.insert_length / self.insert_flow_velocity
+            var_names += ["Insert Residence Time"]
+            var += [self.insert_residence_time]
+            var_fmts += [".3g"]
+            units += ["s"]
 
         ### Display Values ###
         if disp:
@@ -674,6 +714,7 @@ class CoatedWallReactor:
     def reactant_uptake(
         self,
         hypothetical_gamma: ArrayLike | float | int,
+        exposure_time: float = 10,
         gamma_wall: float = 5e-6,
         disp: bool = True,
     ) -> None:
@@ -688,6 +729,8 @@ class CoatedWallReactor:
             gamma_wall (float): Wall uptake coefficient (default: 5e-6
                 for halocarbon wax coating - Ivanov et al., J. Mass
                 Spectrom., 2021).
+            exposure_time (float, default: 10): Time in minutes over
+                which the surface is exposed to the reactant.
             disp (bool): Display calculated values.
 
         Returns:
@@ -706,6 +749,10 @@ class CoatedWallReactor:
 
             if hypothetical_gamma.ndim != 1:
                 raise ValueError("Gamma input must be 1-dimensional.")
+            
+        # Check exposure time
+        if exposure_time <= 0:
+            raise ValueError("Exposure time must be a positive number.")
 
         # Check if hypothetical_gamma is between 0 and 1
         if np.min(hypothetical_gamma) < 0 or np.max(hypothetical_gamma) > 1:
@@ -815,6 +862,23 @@ class CoatedWallReactor:
         var_fmts += [".2g"]
         units += ["%"]
 
+        # Fraction of unreacted surface sites after exposure to reactant gas
+        # - see Bertram et al., J. Phys. Chem. A, 2001
+        collision_frequency = (
+            self.FT_conc_molec * self.reactant_molec_velocity / 4
+        )  # molecules cm-2 s-1
+        N_tot = 1e15  # number of reaction sites per cm2, assumed
+        F = np.exp(
+            -hypothetical_gamma * collision_frequency * exposure_time * 60 / N_tot
+        )
+        var_names += [
+            f"Fraction of unreacted surface sites after a {exposure_time:.1f} \n"
+            f"minute exposure (assumes a solid surface)"
+        ]
+        var += [F * 100]
+        var_fmts += [".2g"]
+        units += ["%"]
+
         ### Display Values ###
         if disp and not isinstance(hypothetical_gamma, np.ndarray):
             tools.table(
@@ -825,7 +889,7 @@ class CoatedWallReactor:
                 units,
             )
 
-    def calculate_gamma(
+    def calculate_gamma_effective(
         self,
         concentrations: ArrayLike,
         exposure: ArrayLike,

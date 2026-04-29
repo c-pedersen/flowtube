@@ -12,6 +12,7 @@ Constants:
 
 """
 
+from warnings import warn
 import numpy as np
 import pandas as pd
 import molmass as mm
@@ -74,14 +75,18 @@ def permeation_rate_to_MR(
 def vapor_pressure_to_MR(
     vapor_pressure: float,
     P_units: str,
+    system_pressure: float,
+    P_units_system: str,
 ) -> float:
     """
     Convert vapor pressure to mixing ratio. Assumes the carrier gas
     becomes fully saturated with the volatile substance.
 
     Args:
-        vapor_pressure (float): Vapor pressure in Pa.
+        vapor_pressure (float): Vapor pressure.
         P_units (str): Units of vapor pressure.
+        system_pressure (float): System pressure.
+        P_units_system (str): Units of system pressure.
 
     Returns:
         float: Reactant volumetric mixing ratio (mol mol-1).
@@ -92,10 +97,24 @@ def vapor_pressure_to_MR(
     else:
         vapor_pressure_Pa = vapor_pressure
 
-    # Calculate mol / min of reactant
-    mol_per_sccm = vapor_pressure_Pa / STANDARD_PRESSURE_Pa * MOLES_PER_SCCM
+    # Convert system pressure to Pa if necessary
+    if P_units_system != "Pa":
+        system_pressure_Pa = P_in_Pa(system_pressure, P_units_system)
+    else:
+        system_pressure_Pa = system_pressure
 
-    return mol_per_sccm / MOLES_PER_SCCM
+    if vapor_pressure_Pa < 0 or not np.isfinite(vapor_pressure_Pa):
+        raise ValueError("Vapor pressure must be non-negative and finite.")
+    if system_pressure_Pa <= 0 or not np.isfinite(system_pressure_Pa):
+        raise ValueError("System pressure must be positive and finite.")
+    if vapor_pressure_Pa > system_pressure_Pa:
+        raise ValueError("Vapor pressure cannot exceed system pressure.")
+    if vapor_pressure_Pa > system_pressure_Pa * 0.01:
+        warn("Vapor pressure is greater than 1% of system pressure. "
+             "This may lead to non-ideal behavior and inaccurate mixing ratio calculation.")
+
+    # Calculate mixing ratio as the ratio of vapor pressure to system pressure
+    return vapor_pressure_Pa / system_pressure_Pa
 
 
 ### Unit conversions ###

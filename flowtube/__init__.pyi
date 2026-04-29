@@ -23,6 +23,7 @@ class CoatedWallReactor:
     reactant_conc_type: str
     reactant_conc: float
     insert_ID: float
+    insert_OD: float
     insert_length: float
 
     def __init__(
@@ -36,6 +37,7 @@ class CoatedWallReactor:
         reactant_conc_type: str,
         reactant_conc: float,
         insert_ID: float = ...,
+        insert_OD: float = ...,
         insert_length: float = ...,
     ) -> None: ...
     def initialize(
@@ -180,12 +182,16 @@ class BoatReactor:
     k: float
     uptake: float
 
-    def calculate_gamma(
+    def calculate_gamma_effective(
         self,
         concentrations: NDArray[np.float64],
         exposure: NDArray[np.float64],
         exposure_units: str,
     ) -> tuple[float, float, float, float, float]: ...
+    def diffusion_corrected_uptake_coefficient(
+        self,
+        effective_gamma: float,
+    ) -> float: ...
 
 __version__: str
 __author__: str

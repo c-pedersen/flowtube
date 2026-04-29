@@ -249,6 +249,8 @@ class BoatReactor:
             self.reactant_MR = tools.vapor_pressure_to_MR(
                 vapor_pressure=self.reactant_conc,
                 P_units=self.reactant_conc_type,
+                system_pressure=P,
+                P_units_system=P_units,
             )
         if self.reactant_MR < 0 or self.reactant_MR > 1:
             raise ValueError(
@@ -363,19 +365,19 @@ class BoatReactor:
         units += ["sccm"]
 
         # Reactant Concentrations (ppb)
-        injector_conc = reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
-        FT_conc = reactant_FR / self.total_FR * self.reactant_MR * 1e9
-        FT_conc_molec = flow_calc.MR_to_molec(self, FT_conc)
+        self.injector_conc = reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
+        self.FT_conc = reactant_FR / self.total_FR * self.reactant_MR * 1e9
+        self.FT_conc_molec = flow_calc.MR_to_molec(self, self.FT_conc)
         var_names += [f"Injector {self.reactant_gas} Concentration"]
-        var += [injector_conc]
+        var += [self.injector_conc]
         var_fmts += [".3g"]
         units += ["ppb"]
         var_names += [f"Flow Tube {self.reactant_gas} Concentration"]
-        var += [FT_conc]
+        var += [self.FT_conc]
         var_fmts += [".3g"]
         units += ["ppb"]
         var_names += [f"Flow Tube {self.reactant_gas} Concentration"]
-        var += [FT_conc_molec]
+        var += [self.FT_conc_molec]
         var_fmts += [".2e"]
         units += ["molec. cm-3"]
 
@@ -755,7 +757,7 @@ class BoatReactor:
                 units,
             )
 
-    def calculate_gamma(
+    def calculate_gamma_effective(
         self,
         concentrations: ArrayLike,
         exposure: ArrayLike,
@@ -783,7 +785,7 @@ class BoatReactor:
         # Check for geometric correction and apply
         # (see geometric_correction in reactant_uptake)
         if not hasattr(self, "geometric_correction"):
-            raise RuntimeError("Must call reactant_uptake() before calculate_gamma()")
+            raise RuntimeError("Must call reactant_uptake() before calculate_gamma_effective()")
         else:
             diameter = self.FT_ID * self.geometric_correction
 
