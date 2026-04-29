@@ -36,6 +36,7 @@ class CoatedWallReactor:
         reactant_conc_type: str,
         reactant_conc: float,
         insert_ID: float = ...,
+        insert_OD: float = ...,
         insert_length: float = ...,
     ) -> None: ...
     def initialize(

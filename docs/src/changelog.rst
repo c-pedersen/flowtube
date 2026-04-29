@@ -5,7 +5,8 @@ Changelog
 -------------------
 - Fixed critical error in vapor pressure to mixing ratio conversion function that caused incorrect results.
 - Fixed critical issue with documentation build
-- Minor improvments
+- Added support for accounting for flow around the outside of inserts in the `coated_wall_reactor` module when computing insert flow velocity
+- Minor improvements
 
 1.3.0
 -------------------

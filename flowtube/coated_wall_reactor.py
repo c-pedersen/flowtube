@@ -46,7 +46,8 @@ class CoatedWallReactor:
         carrier_gas: str,
         reactant_conc_type: str,
         reactant_conc: float,
-        insert_ID: float = 0,
+        insert_ID: float = np.nan,
+        insert_OD: float = np.nan,
         insert_length: float = 0,
     ) -> None:
         """
@@ -74,6 +75,7 @@ class CoatedWallReactor:
                 "ng/min" for permeation rate, "Pa" for vapor pressure.
             reactant_conc (float): Reactant concentration value.
             insert_ID (float, optional): Inner diameter (cm) of insert.
+            insert_OD (float, optional): Outer diameter (cm) of insert.
             insert_length (float, optional): Length (cm) of insert.
 
         Returns:
@@ -101,10 +103,12 @@ class CoatedWallReactor:
         # Check physicality of insert dimensions
         if insert_ID < 0 or insert_length < 0:
             raise ValueError("Insert ID and length must be positive")
-        elif insert_ID > FT_ID:
-            raise ValueError("Insert ID cannot be larger than flow tube ID")
+        elif insert_ID > FT_ID or insert_OD > FT_ID:
+            raise ValueError("Insert cannot be larger than flow tube ID")
         elif insert_length > FT_length:
             raise ValueError("Insert length cannot be larger than flow tube length")
+        elif np.isnan(insert_ID) != np.isnan(insert_OD) or np.isnan(insert_ID) != (insert_length == 0):
+            raise ValueError("Insert dimensions must all be specified or all be unspecified")
 
         # Check physicality of injector dimensions
         if injector_ID < 0 or injector_OD < 0:
@@ -146,6 +150,7 @@ class CoatedWallReactor:
         self.reactant_conc = reactant_conc
         self.carrier_gas = carrier_gas
         self.insert_ID = insert_ID
+        self.insert_OD = insert_OD
         self.insert_length = insert_length
 
     def initialize(
@@ -356,28 +361,42 @@ class CoatedWallReactor:
         var_fmts += [".2e"]
         units += ["molec. cm-3"]
 
-        # Total Flow Velocities
+        # Flow Tube Flow Velocity
         self.FT_flow_velocity = flow_calc.sccm_to_velocity(
             self, self.total_FR, self.FT_ID
         )
-        if self.insert_length > 0:
-            self.insert_flow_velocity = flow_calc.sccm_to_velocity(
-                self, self.total_FR, self.insert_ID
-            )
-            var_names += ["Insert Velocity"]
-            var += [self.insert_flow_velocity]
-        else:
-            var_names += ["Flow Tube Velocity"]
-            var += [self.FT_flow_velocity]
+        var_names += ["Flow Tube Velocity"]
+        var += [self.FT_flow_velocity]
         var_fmts += [".3g"]
         units += ["cm s-1"]
 
-        # Residence Time
+        # Insert flow velocity 
+        # - accounts for flow around outside of insert and through inside of insert
+        if self.insert_length > 0:
+            net_cross_section = (
+                tools.cross_sectional_area(self.FT_ID) 
+                - tools.cross_sectional_area(self.insert_OD) 
+                + tools.cross_sectional_area(self.insert_ID))
+
+            self.insert_flow_velocity = flow_calc.sccm_to_ccm(self, self.total_FR) / net_cross_section / 60
+            var_names += ["Insert Velocity"]
+            var += [self.insert_flow_velocity]
+            var_fmts += [".3g"]
+            units += ["cm s-1"]
+
+        # Residence Times
         self.FT_residence_time = self.FT_length / self.FT_flow_velocity
         var_names += ["Flow Tube Residence Time"]
         var += [self.FT_residence_time]
         var_fmts += [".3g"]
         units += ["s"]
+
+        if self.insert_length > 0:
+            self.insert_residence_time = self.insert_length / self.insert_flow_velocity
+            var_names += ["Insert Residence Time"]
+            var += [self.insert_residence_time]
+            var_fmts += [".3g"]
+            units += ["s"]
 
         ### Display Values ###
         if disp:
