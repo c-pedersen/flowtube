@@ -868,7 +868,7 @@ class CoatedWallReactor:
                 units,
             )
 
-    def calculate_gamma(
+    def calculate_gamma_effective(
         self,
         concentrations: ArrayLike,
         exposure: ArrayLike,

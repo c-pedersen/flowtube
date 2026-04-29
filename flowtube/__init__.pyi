@@ -181,12 +181,17 @@ class BoatReactor:
     k: float
     uptake: float
 
-    def calculate_gamma(
+    def calculate_gamma_effective(
         self,
         concentrations: NDArray[np.float64],
         exposure: NDArray[np.float64],
         exposure_units: str,
     ) -> tuple[float, float, float, float, float]: ...
+
+    def diffusion_corrected_uptake_coefficient(
+        self,
+        effective_gamma: float,
+    ) -> float: ...
 
 __version__: str
 __author__: str
