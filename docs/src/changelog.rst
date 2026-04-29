@@ -5,6 +5,7 @@ Changelog
 -------------------
 - Fixed critical error in vapor pressure to mixing ratio conversion function that caused incorrect results.
 - Fixed critical issue with documentation build
+- Minor improvments
 
 1.3.0
 -------------------

@@ -364,8 +364,11 @@ class CoatedWallReactor:
             self.insert_flow_velocity = flow_calc.sccm_to_velocity(
                 self, self.total_FR, self.insert_ID
             )
-        var_names += ["Flow Tube Velocity"]
-        var += [self.FT_flow_velocity]
+            var_names += ["Insert Velocity"]
+            var += [self.insert_flow_velocity]
+        else:
+            var_names += ["Flow Tube Velocity"]
+            var += [self.FT_flow_velocity]
         var_fmts += [".3g"]
         units += ["cm s-1"]
 
