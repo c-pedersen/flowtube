@@ -103,13 +103,15 @@ def vapor_pressure_to_MR(
     else:
         system_pressure_Pa = system_pressure
 
+    if vapor_pressure_Pa < 0 or not np.isfinite(vapor_pressure_Pa):
+        raise ValueError("Vapor pressure must be non-negative and finite.")
+    if system_pressure_Pa <= 0 or not np.isfinite(system_pressure_Pa):
+        raise ValueError("System pressure must be positive and finite.")
     if vapor_pressure_Pa > system_pressure_Pa:
         raise ValueError("Vapor pressure cannot exceed system pressure.")
-    if vapor_pressure_Pa < 0 or system_pressure_Pa <= 0:
-        raise ValueError("Vapor pressure and system pressure must be positive.")
     if vapor_pressure_Pa > system_pressure_Pa * 0.01:
-        warn("Vapor pressure is greater than 1% of system pressure. " \
-        "This may lead to non-ideal behavior and inaccurate mixing ratio calculation.")
+        warn("Vapor pressure is greater than 1% of system pressure. "
+             "This may lead to non-ideal behavior and inaccurate mixing ratio calculation.")
 
     # Calculate mixing ratio as the ratio of vapor pressure to system pressure
     return vapor_pressure_Pa / system_pressure_Pa
