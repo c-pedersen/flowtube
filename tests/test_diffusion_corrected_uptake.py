@@ -37,7 +37,7 @@ def test_diffusion_corrected_uptake_with_insert(build_reactor):
     """
     obj, _, _ = build_reactor(
         CoatedWallReactor,
-        constructor_overrides={"insert_ID": 1.0, "insert_length": 50.0},
+        constructor_overrides={"insert_ID": 1.0, "insert_OD": 1.5, "insert_length": 50.0},
     )
 
     # Reactor must expose both sets of correction attributes

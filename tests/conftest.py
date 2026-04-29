@@ -24,9 +24,9 @@ def make_constructor_kwargs():
             reactant_conc_type="ppm",
             reactant_conc=30,
         )
-        # Class-specific ctor args
+        # Class-specific reactor args
         if Reactor is CoatedWallReactor:
-            base.update(dict(insert_ID=0.0, insert_length=0.0))
+            base.update(dict(insert_ID=np.nan, insert_OD=np.nan, insert_length=0.0))
         elif Reactor is BoatReactor:
             base.update(
                 dict(
