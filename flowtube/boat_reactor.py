@@ -757,7 +757,7 @@ class BoatReactor:
                 units,
             )
 
-    def calculate_gamma(
+    def calculate_gamma_effective(
         self,
         concentrations: ArrayLike,
         exposure: ArrayLike,
@@ -785,7 +785,7 @@ class BoatReactor:
         # Check for geometric correction and apply
         # (see geometric_correction in reactant_uptake)
         if not hasattr(self, "geometric_correction"):
-            raise RuntimeError("Must call reactant_uptake() before calculate_gamma()")
+            raise RuntimeError("Must call reactant_uptake() before calculate_gamma_effective()")
         else:
             diameter = self.FT_ID * self.geometric_correction
 

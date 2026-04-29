@@ -16,7 +16,7 @@ def test_fitting_before_reactant_uptake(build_reactor):
     # init error: negative flow in initialize
     obj, _, _ = build_reactor(BoatReactor)
     with pytest.raises(RuntimeError, match=r"Must call reactant_uptake*"):
-        obj.calculate_gamma(
+        obj.calculate_gamma_effective(
             concentrations=np.array([0.01, 0.02, 0.03]),
             exposure=np.array([0.1, 0.2, 0.3]),
             exposure_units="s",
