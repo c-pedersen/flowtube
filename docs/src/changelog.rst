@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.3.2
+-------------------
+- Added exposure time return for kinetics fitting functions in `boat_reactor` and `coated_wall_reactor` modules.
+
 1.3.1
 -------------------
 - Fixed critical error in vapor pressure to mixing ratio conversion function that caused incorrect results.
