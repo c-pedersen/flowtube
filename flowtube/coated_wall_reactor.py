@@ -729,8 +729,9 @@ class CoatedWallReactor:
             gamma_wall (float): Wall uptake coefficient (default: 5e-6
                 for halocarbon wax coating - Ivanov et al., J. Mass
                 Spectrom., 2021).
-            exposure_time (float, default: 10): Time in minutes over
-                which the surface is exposed to the reactant.
+            exposure_time (float): Time in minutes over which the 
+                surface is exposed to the reactant. Default is 
+                10 minutes.
             disp (bool): Display calculated values.
 
         Returns:
