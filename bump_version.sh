@@ -79,6 +79,7 @@ make html > /tmp/sphinx_build.log 2>&1
 if grep -qi "error" /tmp/sphinx_build.log; then
     echo "Error: Documentation build failed"
     cat /tmp/sphinx_build.log
+    cd ../..
     exit 1
 fi
 rm -r _build
