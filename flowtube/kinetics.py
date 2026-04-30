@@ -69,7 +69,7 @@ def correction_factor_from_gamma(
     gamma_effective: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
-    Calculate correction factor (gamma_eff/gamma)for uptake coefficient 
+    Calculate correction factor (gamma_eff/gamma)for uptake coefficient
     - eq. 15 from Knopf et al., 2015.
 
     Args:
@@ -89,7 +89,7 @@ def correction_factor_from_effective_gamma(
     effective_gamma: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
-    Calculate correction factor (gamma_eff/gamma) for uptake coefficient 
+    Calculate correction factor (gamma_eff/gamma) for uptake coefficient
     - eq. 20 from Knopf et al., 2015.
 
     Args:
@@ -190,7 +190,7 @@ def fit_first_order_kinetics(
     concentrations: ArrayLike,
     exposure: ArrayLike,
     exposure_units: str,
-) -> tuple[float, float, float, float, float]:
+) -> tuple[ArrayLike, float, float, float, float, float]:
     """
     Fits the observed loss to a first order kinetic model to extract the
     uptake coefficient.
@@ -207,11 +207,12 @@ def fit_first_order_kinetics(
             "seconds", "cm", "centimeter", "centimeters").
 
     Returns:
-        float: Slope of the linear regression.
-        float: Intercept of the linear regression.
-        float: R-value of the linear regression.
-        float: P-value of the linear regression.
-        float: Standard error of the linear regression.
+        exposure_time (ArrayLike): Array of exposure times (s).
+        slope (float): Slope of the linear regression.
+        intercept (float): Intercept of the linear regression.
+        r_value (float): R-value of the linear regression.
+        p_value (float): P-value of the linear regression.
+        std_err (float): Standard error of the linear regression.
     """
 
     ### Check for valid inputs ###
@@ -262,4 +263,12 @@ def fit_first_order_kinetics(
     # Fit data with linear regression
     log_concentrations = np.log(concentrations)
 
-    return linregress(exposure_time, log_concentrations)
+    result = linregress(exposure_time, log_concentrations)
+    return (
+        exposure_time,
+        result.slope,  # pyright: ignore[reportAttributeAccessIssue]
+        result.intercept,  # pyright: ignore[reportAttributeAccessIssue]
+        result.rvalue,  # pyright: ignore[reportAttributeAccessIssue]
+        result.pvalue,  # pyright: ignore[reportAttributeAccessIssue]
+        result.stderr,  # pyright: ignore[reportAttributeAccessIssue]
+    )

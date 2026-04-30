@@ -749,7 +749,7 @@ class CoatedWallReactor:
 
             if hypothetical_gamma.ndim != 1:
                 raise ValueError("Gamma input must be 1-dimensional.")
-            
+
         # Check exposure time
         if exposure_time <= 0:
             raise ValueError("Exposure time must be a positive number.")
@@ -894,7 +894,7 @@ class CoatedWallReactor:
         concentrations: ArrayLike,
         exposure: ArrayLike,
         exposure_units: str,
-    ) -> tuple[float, float, float, float, float, float]:
+    ) -> tuple[ArrayLike, float, float, float, float, float, float]:
         """
         Fits the observed loss to the coated wall to a first order kinetic
         model to extract the effective uptake coefficient.
@@ -906,12 +906,13 @@ class CoatedWallReactor:
             exposure_units (str): Units of exposure (s or cm).
 
         Returns:
-            float: k, first order loss rate (s-1).
-            float: intercept, y-intercept of the fit.
-            float: r_value, correlation coefficient of the fit.
-            float: gamma_effective, effective uptake coefficient.
-            float: gamma_effective_lower, lower bound of 95% confidence interval for gamma_effective.
-            float: gamma_effective_upper, upper bound of 95% confidence interval for gamma_effective.
+            exposure_times (ArrayLike): Exposure times corresponding to input exposures.
+            k (float): First order loss rate (s-1).
+            intercept (float): y-intercept of the fit.
+            r_value (float): Correlation coefficient of the fit.
+            gamma_effective (float): Effective uptake coefficient.
+            gamma_effective_lower (float): Lower bound of 95% confidence interval for gamma_effective.
+            gamma_effective_upper (float): Upper bound of 95% confidence interval for gamma_effective.
         """
         # Check which inner diameter to use
         if self.insert_length > 0:
@@ -920,11 +921,13 @@ class CoatedWallReactor:
             diameter = self.FT_ID
 
         # Fit data to first order kinetics
-        slope, intercept, r_value, _, std_err = kinetics.fit_first_order_kinetics(
-            obj=self,
-            concentrations=concentrations,
-            exposure=exposure,
-            exposure_units=exposure_units,
+        exposure_times, slope, intercept, r_value, _, std_err = (
+            kinetics.fit_first_order_kinetics(
+                obj=self,
+                concentrations=concentrations,
+                exposure=exposure,
+                exposure_units=exposure_units,
+            )
         )
         k = -slope
 
@@ -951,7 +954,15 @@ class CoatedWallReactor:
                 "This is typically due to limited data or low correlation."
             )
 
-        return k, intercept, r_value, gamma_effective, gamma_effective_lower, gamma_effective_upper
+        return (
+            exposure_times,
+            k,
+            intercept,
+            r_value,
+            gamma_effective,
+            gamma_effective_lower,
+            gamma_effective_upper,
+        )
 
     def diffusion_corrected_uptake_coefficient(
         self,

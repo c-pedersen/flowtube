@@ -762,7 +762,7 @@ class BoatReactor:
         concentrations: ArrayLike,
         exposure: ArrayLike,
         exposure_units: str,
-    ) -> tuple[float, float, float, float, float, float]:
+    ) -> tuple[ArrayLike, float, float, float, float, float, float]:
         """
         Fits the observed loss to the boat to a first order kinetic
         model to extract the uptake coefficient.
@@ -774,12 +774,13 @@ class BoatReactor:
             exposure_units (str): Units of exposure (s or cm).
 
         Returns:
-            float: k, first order loss rate (s-1).
-            float: intercept, y-intercept of the fit.
-            float: r_value, correlation coefficient of the fit.
-            float: gamma_effective, effective uptake coefficient.
-            float: gamma_effective_lower, lower bound of 95% confidence interval for gamma_effective.
-            float: gamma_effective_upper, upper bound of 95% confidence interval for gamma_effective.
+            exposure_times (ArrayLike): Exposure times corresponding to input exposures.
+            k (float): First order loss rate (s-1).
+            intercept (float): Y-intercept of the fit.
+            r_value (float): Correlation coefficient of the fit.
+            gamma_effective (float): Effective uptake coefficient.
+            gamma_effective_lower (float): Lower bound of 95% confidence interval for gamma_effective.
+            gamma_effective_upper (float): Upper bound of 95% confidence interval for gamma_effective.
         """
 
         # Check for geometric correction and apply
@@ -790,7 +791,7 @@ class BoatReactor:
             diameter = self.FT_ID * self.geometric_correction
 
         # Fit data to first order kinetics
-        slope, intercept, r_value, _p_value, std_err = (
+        exposure_times, slope, intercept, r_value, _p_value, std_err = (
             kinetics.fit_first_order_kinetics(
                 obj=self,
                 concentrations=concentrations,
@@ -823,4 +824,4 @@ class BoatReactor:
                 "This is typically due to limited data or low correlation."
             )
 
-        return k, intercept, r_value, gamma_effective, gamma_effective_lower, gamma_effective_upper
+        return exposure_times, k, intercept, r_value, gamma_effective, gamma_effective_lower, gamma_effective_upper
