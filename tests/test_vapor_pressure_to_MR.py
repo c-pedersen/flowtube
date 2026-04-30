@@ -92,6 +92,17 @@ class TestVaporPressureToMR:
                 system_pressure=-100.0,
                 P_units_system="Pa",
             )
+            
+    # --- Validation: vapor_pressure < 0 ---
+    def test_negative_vapor_pressure_raises(self):
+        with pytest.raises(ValueError, match=r"[Vv]apor pressure must be positive"):
+            vapor_pressure_to_MR(
+                vapor_pressure=-1.0,
+                P_units="Pa",
+                system_pressure=1000.0,
+                P_units_system="Pa",
+            )
+
 
     # --- Warning: vapor_pressure > 1 % of system_pressure ---
 
