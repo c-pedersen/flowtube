@@ -123,7 +123,7 @@ def test_mixing_ratio_bounds(Reactor, make_constructor_kwargs, build_reactor):
 def test_fitting(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor, call_initialize=False)
     with pytest.raises(RuntimeError, match=r"Must call*"):
-        obj.calculate_gamma(
+        obj.calculate_gamma_effective(
             concentrations=np.array([0.01, 0.02, 0.03]),
             exposure=np.array([0.1, 0.2, 0.3]),
             exposure_units="s",
@@ -153,7 +153,7 @@ def test_fitting_invalid_exposure_units(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
     obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
     with pytest.raises(ValueError, match=r"Unsupported exposure units"):
-        obj.calculate_gamma(
+        obj.calculate_gamma_effective(
             concentrations=np.array([0.01, 0.02, 0.03]),
             exposure=np.array([0.1, 0.2, 0.3]),
             exposure_units="invalid_unit",
@@ -165,7 +165,7 @@ def test_fitting_negative_concentrations(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
     obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
     with pytest.raises(ValueError, match=r"Concentrations must be non-negative"):
-        obj.calculate_gamma(
+        obj.calculate_gamma_effective(
             concentrations=np.array([-0.01, 0.02, 0.03]),
             exposure=np.array([0.1, 0.2, 0.3]),
             exposure_units="s",
@@ -177,14 +177,14 @@ def test_fitting_non_arraylike_inputs(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
     obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
     with pytest.raises(TypeError, match=r"Exposure input must be array-like"):
-        obj.calculate_gamma(
+        obj.calculate_gamma_effective(
             concentrations=[0.01, 0.02, 0.03],
             exposure=["test"],
             exposure_units="s",
         )
 
     with pytest.raises(ValueError, match=r"inputs must have the same length"):
-        obj.calculate_gamma(
+        obj.calculate_gamma_effective(
             concentrations=np.array([0.01, 0.03]),
             exposure=[0.1, 0.2, 0.3],
             exposure_units="s",
