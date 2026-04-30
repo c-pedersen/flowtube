@@ -105,6 +105,8 @@ def vapor_pressure_to_MR(
 
     if system_pressure_Pa <= 0:
         raise ValueError("System pressure must be positive.")
+    if vapor_pressure_Pa < 0:
+        raise ValueError("Vapor pressure must be positive.")
     if vapor_pressure_Pa > system_pressure_Pa:
         raise ValueError("Vapor pressure cannot exceed system pressure.")
     if vapor_pressure_Pa > system_pressure_Pa * 0.01:
