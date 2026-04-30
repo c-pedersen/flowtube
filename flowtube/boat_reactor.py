@@ -777,9 +777,9 @@ class BoatReactor:
             float: k, first order loss rate (s-1).
             float: intercept, y-intercept of the fit.
             float: r_value, correlation coefficient of the fit.
-            float: gamma, uptake coefficient.
-            float: gamma_lower, lower bound of 95% confidence interval for gamma.
-            float: gamma_upper, upper bound of 95% confidence interval for gamma.
+            float: gamma_effective, effective uptake coefficient.
+            float: gamma_effective_lower, lower bound of 95% confidence interval for gamma_effective.
+            float: gamma_effective_upper, upper bound of 95% confidence interval for gamma_effective.
         """
 
         # Check for geometric correction and apply
@@ -801,26 +801,26 @@ class BoatReactor:
         k = -slope
 
         # Calculate gamma and confidence intervals
-        gamma = kinetics.gamma_from_k(
+        gamma_effective = kinetics.gamma_from_k(
             self,
             k=k,
             diameter=diameter,
         )
-        gamma_upper = kinetics.gamma_from_k(
+        gamma_effective_upper = kinetics.gamma_from_k(
             self,
             k=k + std_err * 1.96,
             diameter=diameter,
         )
-        gamma_lower = kinetics.gamma_from_k(
+        gamma_effective_lower = kinetics.gamma_from_k(
             self,
             k=k - std_err * 1.96,
             diameter=diameter,
         )
 
-        if gamma_lower < 0 or gamma_upper > 1:
+        if gamma_effective_lower < 0 or gamma_effective_upper > 1:
             warnings.warn(
-                "Calculated confidence interval for gamma is unphysical. "
+                "Calculated confidence interval for gamma_effective is unphysical. "
                 "This is typically due to limited data or low correlation."
             )
 
-        return k, intercept, r_value, gamma, gamma_lower, gamma_upper
+        return k, intercept, r_value, gamma_effective, gamma_effective_lower, gamma_effective_upper

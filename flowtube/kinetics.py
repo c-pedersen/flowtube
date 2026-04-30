@@ -66,7 +66,7 @@ def diffusion_limited_uptake_coefficient(
 def correction_factor_from_gamma(
     N_eff_Shw: float,
     Kn: float,
-    gamma: NDArray[np.float64] | float,
+    gamma_effective: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
     Calculate correction factor (gamma_eff/gamma)for uptake coefficient 
@@ -75,14 +75,12 @@ def correction_factor_from_gamma(
     Args:
         N_eff_Shw (float): Effective Sherwood number (unitless).
         Kn (float): Knudsen number (unitless).
-        hypothetical_gamma (float): Hypothetical uptake coefficient
-            (unitless).
-
+        gamma_effective (float): Effective uptake coefficient (unitless).
     Returns:
         float: Correction factor (unitless).
     """
 
-    return 1 / (1 + gamma * 3 / (2 * N_eff_Shw * Kn))
+    return 1 / (1 + gamma_effective * 3 / (2 * N_eff_Shw * Kn))
 
 
 def correction_factor_from_effective_gamma(
@@ -110,7 +108,7 @@ def correction_factor_from_effective_gamma(
 def observed_loss_rate(
     obj: full_attrs,
     diameter: float,
-    gamma_eff: NDArray[np.float64] | float,
+    gamma_effective: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
     Calculate observed loss rate (s-1) - eq. 19 from Knopf et al., 2015.
@@ -121,13 +119,13 @@ def observed_loss_rate(
             carrier_dynamic_viscosity in kg m-1 s-1,
             carrier_density in kg m-3).
         diameter (float): Diameter of the cylinder (cm).
-        gamma_eff (float): Effective uptake coefficient (unitless).
+        gamma_effective (float): Effective uptake coefficient (unitless).
 
     Returns:
         float: Observed loss rate (s-1).
     """
 
-    return gamma_eff * obj.reactant_molec_velocity / diameter
+    return gamma_effective * obj.reactant_molec_velocity / diameter
 
 
 def cylinder_loss(
