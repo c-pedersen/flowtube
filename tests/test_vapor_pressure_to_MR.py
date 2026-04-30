@@ -151,63 +151,23 @@ class TestVaporPressureToMR:
 class TestVaporPressureReactorIntegration:
     """Verify vapor_pressure_to_MR behavior when used via reactor initialize()."""
 
-    def _make_ctor_kwargs(self, Reactor, **overrides):
-        import numpy as np
-
-        base = dict(
-            FT_ID=2.6,
-            FT_length=100,
-            injector_ID=0.60,
-            injector_OD=1.20,
-            reactant_gas="HCl",
-            carrier_gas="N2",
-            reactant_conc_type="Pa",
-            reactant_conc=10.0,
-        )
-        if Reactor is CoatedWallReactor:
-            base.update(dict(insert_ID=float("nan"), insert_OD=float("nan"), insert_length=0.0))
-        elif Reactor is BoatReactor:
-            base.update(
-                dict(
-                    boat_liquid_width=2.0,
-                    boat_length=53.8,
-                    boat_cross_section=3.0,
-                )
-            )
-        base.update(overrides)
-        return base
-
-    def _make_init_kwargs(self, **overrides):
-        import numpy as np
-
-        base = dict(
-            reactant_FR=1.0,
-            reactant_carrier_FR=50.0,
-            carrier_FR=5000.0,
-            P=2000.0,
-            P_units="Pa",
-            T=25.0,
-            reactant_diffusion_rate=np.nan,
-            radial_delta_T=1.0,
-            axial_delta_T=1.0,
-            disp=False,
-        )
-        base.update(overrides)
-        return base
-
-    def test_vapor_pressure_conc_type_succeeds(self, Reactor):
+    def test_vapor_pressure_conc_type_succeeds(
+        self, Reactor, make_constructor_kwargs, make_init_kwargs
+    ):
         """Reactor initializes without error when reactant_conc_type='Pa' and vapor < system."""
-        ctor = self._make_ctor_kwargs(Reactor)
+        ctor = make_constructor_kwargs(Reactor, reactant_conc_type="Pa", reactant_conc=10.0)
         obj = Reactor(**ctor)
-        init = self._make_init_kwargs()
+        init = make_init_kwargs(Reactor, P=2000.0, P_units="Pa")
         obj.initialize(**init)  # should not raise
         assert obj.reactant_MR == pytest.approx(10.0 / 2000.0)
 
-    def test_vapor_pressure_exceeds_system_raises_via_reactor(self, Reactor):
+    def test_vapor_pressure_exceeds_system_raises_via_reactor(
+        self, Reactor, make_constructor_kwargs, make_init_kwargs
+    ):
         """Reactor.initialize raises when vapor pressure > system pressure."""
-        ctor = self._make_ctor_kwargs(Reactor, reactant_conc=5000.0)
+        ctor = make_constructor_kwargs(Reactor, reactant_conc_type="Pa", reactant_conc=5000.0)
         obj = Reactor(**ctor)
-        init = self._make_init_kwargs(P=2000.0, P_units="Pa")
+        init = make_init_kwargs(Reactor, P=2000.0, P_units="Pa")
         with pytest.raises(ValueError, match=r"cannot exceed"):
             obj.initialize(**init)
 
@@ -215,15 +175,16 @@ class TestVaporPressureReactorIntegration:
         "vp_units",
         ["Pa", "Torr", "bar", "mbar"],
     )
-    def test_all_supported_vapor_pressure_units(self, Reactor, vp_units):
+    def test_all_supported_vapor_pressure_units(
+        self, Reactor, vp_units, make_constructor_kwargs, make_init_kwargs
+    ):
         """Reactor.initialize works for every supported vapor-pressure unit."""
         from flowtube.tools import P_in_Pa
 
         warnings.filterwarnings("ignore")
-        # Use a small vapor pressure relative to ~1 atm system pressure
-        ctor = self._make_ctor_kwargs(Reactor, reactant_conc=0.001, reactant_conc_type=vp_units)
+        ctor = make_constructor_kwargs(Reactor, reactant_conc=0.001, reactant_conc_type=vp_units)
         obj = Reactor(**ctor)
-        init = self._make_init_kwargs(P=101325.0, P_units="Pa")
+        init = make_init_kwargs(Reactor, P=101325.0, P_units="Pa")
         obj.initialize(**init)  # should not raise
         expected_mr = P_in_Pa(0.001, vp_units) / 101325.0
         assert obj.reactant_MR == pytest.approx(expected_mr)
