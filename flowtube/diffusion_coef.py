@@ -2,9 +2,16 @@
 Handles the calculation of the diffusion coefficient of a binary gas
 mixture.
 
-Citations
-    Reid, R.C., Prausnitz, J.M., Poling, B.E., 1987. The Properties of Gases
-    and Liquids, 4th ed. McGraw-Hill, New York.
+Citations:
+Reid, R.C., Prausnitz, J.M., Poling, B.E., 1987. The Properties of Gases
+and Liquids, 4th ed. McGraw-Hill, New York.
+
+Langenberg, S., Carstens, T., Hupperich, D., Schweighoefer, S.,
+Schurath, U., 2020. Technical note: Determination of binary gas-phase
+diffusion coefficients of unstable and adsorbing atmospheric trace gases
+at low temperature - arrested flow and twin tube method. Atmos. Chem.
+Phys. 20, 3669-3682. https://doi.org/10.5194/acp-20-3669-2020
+
 """
 
 import numpy as np
@@ -37,6 +44,11 @@ sigmas: dict[str, float] = {
     "NO": 3.492,
     "N2": 3.798,
     "O2": 3.467,
+    "ClONO2": 4.470,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "ClNO3": 4.470,  # See above
+    "N2O5": 4.570,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "O3": 3.875,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "NO2": 3.765,  # Langenberg et al., Atmos. Chem. Phys., 2020
 }
 
 # Characteristic Lennard-Jones Energies (K)
@@ -54,6 +66,11 @@ e_ks: dict[str, float] = {
     "NO": 116.7,
     "N2": 71.4,
     "O2": 106.7,
+    "ClONO2": 364.7,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "ClNO3": 364.7,  # See above
+    "N2O5": 450.0,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "O3": 208.4,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "NO2": 210.0,  # Langenberg et al., Atmos. Chem. Phys., 2020
 }
 
 
