@@ -488,6 +488,15 @@ class CoatedWallReactor:
         var_fmts += [".1f"]
         units += ["cm"]
 
+        if self.insert_length > 0:
+            insert_length_to_laminar = flow_calc.length_to_laminar(
+                self.insert_ID, Re_insert # pyright: ignore[reportPossiblyUnboundVariable]
+            )
+            var_names += ["Insert Entrance length"]
+            var += [insert_length_to_laminar]
+            var_fmts += [".1f"]
+            units += ["cm"]
+
         # Pressure Gradient (%) - see flow_calc.py for details
         FT_conductance = flow_calc.conductance(self, self.FT_ID, self.FT_length)
         if self.insert_length > 0:
