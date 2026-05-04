@@ -542,25 +542,30 @@ class BoatReactor:
         units: list[str] = []
 
         # Reactant Diffusion Rate (cm2 s-1)
-        if self.reactant_gas not in diffusion_coef.sigmas.keys():
-            if isinstance(reactant_diffusion_rate, (float, np.floating)):
-                if np.isnan(reactant_diffusion_rate):
-                    raise ValueError(
-                        f"Must input reactant diffusion rate for {self.reactant_gas}"
-                    )
-            elif isinstance(reactant_diffusion_rate, (int, np.integer)):
-                reactant_diffusion_rate = float(reactant_diffusion_rate)
-            else:
-                raise TypeError("Reactant diffusion rate must be a number")
-
+        try:
+            reactant_diffusion_rate = float(reactant_diffusion_rate)
+        except Exception:
+            raise TypeError("Reactant diffusion rate must be a number")
+        if not np.isnan(reactant_diffusion_rate):
+            if reactant_diffusion_rate < 0:
+                raise ValueError("Reactant diffusion rate must be non-negative")
             self.reactant_diffusion_rate = reactant_diffusion_rate
             var_names += ["Manually Inputted Reactant Diffusion Rate"]
         else:
-            self.reactant_diffusion_rate = diffusion_coef.binary_diffusion_coefficient(
-                self
-            )
-            var_names += ["Reactant Diffusion Rate"]
-
+            if (
+                self.reactant_gas not in diffusion_coef.sigmas.keys()
+                and self.reactant_gas not in diffusion_coef.e_ks.keys()
+            ):
+                raise ValueError(
+                    f"Must input reactant diffusion rate for {self.reactant_gas}"
+                )
+            else:
+                self.reactant_diffusion_rate = (
+                    diffusion_coef.binary_diffusion_coefficient(self)
+                )
+                var_names += [
+                    "Calculated Reactant Diffusion Rate \n(Lennard-Jones model)"
+                ]
         var += [self.reactant_diffusion_rate]
         var_fmts += [".3g"]
         units += ["cm2 s-1"]

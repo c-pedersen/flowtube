@@ -100,6 +100,17 @@ def test_manual_reactant_diffusion_coef(
         init_overrides=init_kwargs,
     )
 
+    # Gas with coefficients in database but manual diffusion coefficient
+    kwargs = make_constructor_kwargs(Reactor, reactant_gas="O2")
+    init_kwargs = make_init_kwargs(Reactor, reactant_diffusion_rate=1.111)
+    obj, _, _ = build_reactor(
+        Reactor,
+        constructor_overrides=kwargs,
+        init_overrides=init_kwargs,
+    )
+
+    assert obj.reactant_diffusion_rate == 1.111  # cm2 s-1
+
 
 @pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
 def test_temperature_below_physical_limit(Reactor, build_reactor, make_init_kwargs):

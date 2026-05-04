@@ -1,6 +1,6 @@
 """
 Handles the calculation of the diffusion coefficient of a binary gas
-mixture.
+mixture using the Lennard-Jones model.
 
 Citations:
 Reid, R.C., Prausnitz, J.M., Poling, B.E., 1987. The Properties of Gases
