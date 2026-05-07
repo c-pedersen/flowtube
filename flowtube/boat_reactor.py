@@ -181,7 +181,6 @@ class BoatReactor:
         T: float,
         reactant_diffusion_rate: float = np.nan,
         radial_delta_T: float = 1,
-        axial_delta_T: float = 1,
         disp: bool = True,
     ) -> None:
         """
@@ -200,8 +199,6 @@ class BoatReactor:
             reactant_diffusion_rate (float, optional): Reactant
                 diffusion rate (cm2 s-1).
             radial_delta_T (float): Radial temperature gradient (K)
-                (default = 1 K).
-            axial_delta_T (float): Axial temperature gradient (K)
                 (default = 1 K).
             disp (bool): Display calculated calculated values.
 
@@ -231,7 +228,7 @@ class BoatReactor:
         # Check if the temperature & temperature gradients are valid numbers
         if T < -273.15:
             raise ValueError("Temperature must be above absolute zero (-273.15 C)")
-        if radial_delta_T < 0 or axial_delta_T < 0:
+        if radial_delta_T < 0:
             raise ValueError("Temperature gradients must be positive")
 
         # Calculate reactant mixing ratio from input concentration
@@ -269,7 +266,6 @@ class BoatReactor:
         )
         self.carrier_flow(
             radial_delta_T=radial_delta_T,
-            axial_delta_T=axial_delta_T,
             disp=disp,
         )
         self.reactant_diffusion(
@@ -410,14 +406,12 @@ class BoatReactor:
     def carrier_flow(
         self,
         radial_delta_T: float = 1,
-        axial_delta_T: float = 1,
         disp: bool = True,
     ):
         """Performs and displays carrier gas transport calculations.
 
         Args:
             delta_T_radial (float): Radial temperature gradient (K).
-            delta_T_axial (float): Axial temperature gradient (K).
             disp (bool): Display calculated values.
 
         Returns:
@@ -489,25 +483,14 @@ class BoatReactor:
         radial_buoyancy = flow_calc.buoyancy_parameters(
             self, radial_delta_T, self.FT_ID, self.Re
         )
-        axial_buoyancy = flow_calc.buoyancy_parameters(
-            self, axial_delta_T, self.FT_length, self.Re
-        )
         var_names += [f"Radial Buoyancy Parameter (ΔT={radial_delta_T:.1f} C)"]
         var += [radial_buoyancy]
-        var_fmts += [".2f"]
-        units += ["unitless"]
-        var_names += [f"Axial Buoyancy Parameter (ΔT={axial_delta_T:.1f} C)"]
-        var += [axial_buoyancy]
         var_fmts += [".2f"]
         units += ["unitless"]
         if radial_buoyancy > 1:
             warnings.warn(
                 "Radial buoyancy parameter > 1. "
                 "Flow may be affected by buoyancy effects"
-            )
-        if axial_buoyancy > 1:
-            warnings.warn(
-                "Axial buoyancy parameter > 1. Flow may be affected by buoyancy effects"
             )
 
         ### Display Values ###

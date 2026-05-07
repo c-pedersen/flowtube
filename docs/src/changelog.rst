@@ -6,6 +6,7 @@ Changelog
 - Added exposure time return for kinetics fitting functions in `boat_reactor` and `coated_wall_reactor` modules.
 - Added Lennard-Jones parameters for ClONO2, N2O5, O3, and NO2 to `diffusion_coef` module in order to support diffusion coefficient calculations for these species.
 - Allowed for the use of a custom diffusion coefficient even if the species is in the database of the `diffusion_coef` module.
+- Removed axial temperature gradient parameter and associated calculations.
 
 1.3.1
 -------------------

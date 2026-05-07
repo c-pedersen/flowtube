@@ -53,7 +53,6 @@ def make_init_kwargs():
             T=25.0,
             reactant_diffusion_rate=np.nan,
             radial_delta_T=1.0,
-            axial_delta_T=1.0,
             disp=False,
         )
         base.update(overrides)

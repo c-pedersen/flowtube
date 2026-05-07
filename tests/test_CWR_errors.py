@@ -36,7 +36,6 @@ def test_Knopf_et_al_2015_parameters_do_not_raise(
         P_units="hPa",
         T=295 - 273.15,
         reactant_diffusion_rate=0.1267,
-        axial_delta_T=0,
         radial_delta_T=0,
         disp=False,
     )
@@ -85,7 +84,6 @@ def test_Knopf_et_al_2015_parameters_do_not_raise(
         P_units="hPa",
         T=293 - 273.15,
         reactant_diffusion_rate=188.22,
-        axial_delta_T=0,
         radial_delta_T=0,
         disp=False,
     )

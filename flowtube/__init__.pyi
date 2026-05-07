@@ -50,7 +50,6 @@ class CoatedWallReactor:
         T: float,
         reactant_diffusion_rate: float = ...,
         radial_delta_T: float = ...,
-        axial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
     def flows(
@@ -69,7 +68,6 @@ class CoatedWallReactor:
     def carrier_flow(
         self,
         radial_delta_T: float = ...,
-        axial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
 
@@ -141,7 +139,6 @@ class BoatReactor:
         T: float,
         reactant_diffusion_rate: float = ...,
         radial_delta_T: float = ...,
-        axial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
     def flows(
@@ -160,7 +157,6 @@ class BoatReactor:
     def carrier_flow(
         self,
         radial_delta_T: float = ...,
-        axial_delta_T: float = ...,
         disp: bool = True,
     ) -> None: ...
 
