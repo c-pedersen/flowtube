@@ -295,6 +295,40 @@ class CoatedWallReactor:
         var_fmts: list[str] = []
         units: list[str] = []
 
+        ### Calculate Cross Sectional Areas ###
+        # Preinjector net cross section is the area between the FT wall
+        # and the injector OD, minus the cross sectional area of the
+        # insert if present
+        preinjector_net_cross_section = tools.cross_sectional_area(
+            self.FT_ID
+        ) - tools.cross_sectional_area(self.injector_OD)
+        # If the insert is present, subtract the cross sectional area of the insert
+        if self.insert_length > 0:
+            cross_section_outside_insert = tools.cross_sectional_area(
+                self.FT_ID
+            ) - tools.cross_sectional_area(self.insert_OD)
+            cross_section_inside_insert = tools.cross_sectional_area(self.insert_ID)
+
+            preinjector_net_cross_section -= tools.cross_sectional_area(
+                self.insert_OD
+            ) - tools.cross_sectional_area(self.insert_ID)
+
+            if preinjector_net_cross_section <= 0:
+                raise ValueError(
+                    "Invalid insert geometry: insert dimensions must leave a positive net flow cross-section."
+                )
+
+        # Postinjector net cross section is the area inside the FT,
+        # minus the area of the insert if present
+        if self.insert_length > 0:
+            postinjector_net_cross_section = (
+                cross_section_outside_insert + cross_section_inside_insert  # pyright: ignore
+            )
+            if postinjector_net_cross_section <= 0:
+                raise ValueError(
+                    "Invalid insert geometry: insert dimensions must leave a positive net flow cross-section."
+                )
+
         ### Flow Rates ###
         # Flow Rate Setpoints
         var_names += ["Reactant Flow Rate"]
@@ -321,20 +355,7 @@ class CoatedWallReactor:
 
         ### Minimum Carrier Flow Velocity & Rate ###
         # to prevent effect mentioned in Li et al., ACP, 2020
-        # Calculate net cross section for flow before then end of the injector
-        preinjector_net_cross_section = tools.cross_sectional_area(
-            self.FT_ID
-        ) - tools.cross_sectional_area(self.injector_OD)
-        # If the insert is present, subtract the cross sectional area of the insert
         if self.insert_length > 0:
-            preinjector_net_cross_section -= tools.cross_sectional_area(
-                self.insert_OD
-            ) - tools.cross_sectional_area(self.insert_ID)
-
-            if preinjector_net_cross_section <= 0:
-                raise ValueError(
-                    "Invalid insert geometry: insert dimensions must leave a positive net flow cross-section."
-                )
             var_names += ["Minimum Carrier Flow Rate through Insert"]
         else:
             var_names += ["Minimum Carrier Flow Rate through Flow Tube"]
@@ -362,22 +383,39 @@ class CoatedWallReactor:
         var_fmts += [".1f"]
         units += ["sccm"]
 
-        ### Reactant Concentrations (ppb) ###
+        ### Reactant Concentrations ###
+        # Concentration inside of the injector (ppb)
         self.injector_conc = reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
-        self.FT_conc = reactant_FR / self.total_FR * self.reactant_MR * 1e9
-        self.FT_conc_molec = flow_calc.MR_to_molec(self, self.FT_conc)
         var_names += [f"Injector {self.reactant_gas} Concentration"]
         var += [self.injector_conc]
         var_fmts += [".3g"]
         units += ["ppb"]
-        var_names += [f"Flow Tube {self.reactant_gas} Concentration"]
-        var += [self.FT_conc]
-        var_fmts += [".3g"]
-        units += ["ppb"]
-        var_names += [f"Flow Tube {self.reactant_gas} Concentration"]
-        var += [self.FT_conc_molec]
-        var_fmts += [".2e"]
-        units += ["molec. cm-3"]
+
+        # Concentration after the injector (ppb) - Insert
+        # assumes the injector is inside the insert, and that the
+        # reactant flow is only mixes inside the insert
+        if self.insert_length > 0:
+            self.insert_FR = (
+                reactant_FR
+                + carrier_FR
+                * cross_section_inside_insert  # pyright: ignore[reportPossiblyUnboundVariable]
+                / (cross_section_inside_insert + cross_section_outside_insert)  # pyright: ignore
+            )
+
+            self.insert_conc = reactant_FR / self.insert_FR * self.reactant_MR * 1e9
+            self.insert_conc_molec = flow_calc.MR_to_molec(self, self.insert_conc)
+            var_names += 2 * [f"Insert {self.reactant_gas} Concentration"]
+            var += [self.insert_conc, self.insert_conc_molec]
+            var_fmts += [".3g", ".2e"]
+            units += ["ppb", "molec. cm-3"]
+
+        # Concentration after the injector (ppb) - FT
+        self.FT_conc = reactant_FR / self.total_FR * self.reactant_MR * 1e9
+        self.FT_conc_molec = flow_calc.MR_to_molec(self, self.FT_conc)
+        var_names += 2 * [f"Flow Tube {self.reactant_gas} Concentration"]
+        var += [self.FT_conc, self.FT_conc_molec]
+        var_fmts += [".3g", ".2e"]
+        units += ["ppb", "molec. cm-3"]
 
         ### Flow Tube Flow Velocity ###
         self.FT_flow_velocity = flow_calc.sccm_to_velocity(
@@ -391,19 +429,9 @@ class CoatedWallReactor:
         ### Insert flow velocity ###
         # - accounts for flow around outside of insert and through inside of insert
         if self.insert_length > 0:
-            postinjector_net_cross_section = (
-                tools.cross_sectional_area(self.FT_ID)
-                - tools.cross_sectional_area(self.insert_OD)
-                + tools.cross_sectional_area(self.insert_ID)
-            )
-            if postinjector_net_cross_section <= 0:
-                raise ValueError(
-                    "Invalid insert geometry: insert dimensions must leave a positive net flow cross-section."
-                )
-
             self.insert_flow_velocity = (
                 flow_calc.sccm_to_ccm(self, self.total_FR)
-                / postinjector_net_cross_section
+                / postinjector_net_cross_section  # pyright: ignore[reportPossiblyUnboundVariable]
                 / 60
             )
             var_names += ["Insert Velocity"]
@@ -878,9 +906,14 @@ class CoatedWallReactor:
 
         ### Fraction of unreacted surface sites after exposure to reactant gas ###
         # - see Bertram et al., J. Phys. Chem. A, 2001
-        collision_frequency = (
-            self.FT_conc_molec * self.reactant_molec_velocity / 4
-        )  # molecules cm-2 s-1
+        if self.insert_length > 0:
+            collision_frequency = (
+                self.insert_conc_molec * self.reactant_molec_velocity / 4
+            )  # molecules cm-2 s-1
+        else:
+            collision_frequency = (
+                self.FT_conc_molec * self.reactant_molec_velocity / 4
+            )  # molecules cm-2 s-1
         N_tot = 1e15  # number of reaction sites per cm2, assumed
         F = np.exp(
             -hypothetical_gamma * collision_frequency * exposure_time * 60 / N_tot

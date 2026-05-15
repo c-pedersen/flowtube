@@ -8,6 +8,7 @@ Changelog
 - Allowed for the use of a custom diffusion coefficient even if the species is in the database of the `diffusion_coef` module.
 - Removed axial temperature gradient parameter and associated calculations.
 - Updated minimum carrier flow rate calculation to account for the presence of an insert
+- Added calculation of concentration inside the insert and used this concentration to calculate the fraction of unreacted surface sites after a given exposure time in the `coated_wall_reactor` module.
 
 1.3.1
 -------------------
