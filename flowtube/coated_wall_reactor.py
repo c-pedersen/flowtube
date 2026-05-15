@@ -149,7 +149,7 @@ class CoatedWallReactor:
                 "Supported types: 'ppm', 'ppb', 'ng/min', 'Pa', 'hPa', 'Torr', 'bar', 'mbar'"
             )
 
-        # Initialize variables
+        ### Initialize variables ###
         self.FT_ID = FT_ID
         self.FT_length = FT_length
         self.injector_ID = injector_ID
@@ -284,16 +284,18 @@ class CoatedWallReactor:
         Returns:
             None
         """
+        ### Check for valid inputs ###
         # Check if the flow rates are positive
         if reactant_FR < 0 or reactant_carrier_FR < 0 or carrier_FR < 0:
             raise ValueError("Flow rates must be positive")
 
-        # Lists for displaying values
+        ### Initialize Lists for displaying values ###
         var_names: list[str] = []
         var: list[float] = []
         var_fmts: list[str] = []
         units: list[str] = []
 
+        ### Flow Rates ###
         # Flow Rate Setpoints
         var_names += ["Reactant Flow Rate"]
         var += [reactant_FR]
@@ -312,24 +314,35 @@ class CoatedWallReactor:
         var_fmts += [".1f"]
         units += ["sccm"]
 
-        # Total Reactant Flow Velocity
+        ### Total Reactant Flow Velocity ###
         total_reactant_flow_velocity = flow_calc.sccm_to_velocity(
             self, total_reactant_FR, self.injector_ID
         )
 
-        # Minimum Carrier Flow Velocity & Rate
+        ### Minimum Carrier Flow Velocity & Rate ###
         # to prevent effect mentioned in Li et al., ACP, 2020
+        # Calculate net cross section for flow before then end of the injector
+        preinjector_net_cross_section = tools.cross_sectional_area(
+            self.FT_ID
+        ) - tools.cross_sectional_area(self.injector_OD)
+        # If the insert is present, subtract the cross sectional area of the insert
+        if self.insert_length > 0:
+            preinjector_net_cross_section -= tools.cross_sectional_area(
+                self.insert_OD
+            ) - tools.cross_sectional_area(self.insert_ID)
+
+            if preinjector_net_cross_section <= 0:
+                raise ValueError(
+                    "Invalid insert geometry: insert dimensions must leave a positive net flow cross-section."
+                )
+            var_names += ["Minimum Carrier Flow Rate through Insert"]
+        else:
+            var_names += ["Minimum Carrier Flow Rate through Flow Tube"]
+
         min_carrier_flow_velocity = total_reactant_flow_velocity * 1.33
         min_carrier_FR = flow_calc.ccm_to_sccm(
-            self,
-            min_carrier_flow_velocity
-            * (
-                tools.cross_sectional_area(self.FT_ID)
-                - tools.cross_sectional_area(self.injector_OD)
-            )
-            * 60,
+            self, min_carrier_flow_velocity * preinjector_net_cross_section * 60
         )
-        var_names += ["Minimum Carrier Flow Rate"]
         var += [min_carrier_FR]
         var_fmts += [".1f"]
         units += ["sccm"]
@@ -339,7 +352,7 @@ class CoatedWallReactor:
                 "This may affect the flow profile in the flow tube."
             )
 
-        # More Flow Rates
+        ### More Flow Rates ###
         var_names += ["Carrier Flow Rate"]
         var += [carrier_FR]
         var_fmts += [".1f"]
@@ -349,7 +362,7 @@ class CoatedWallReactor:
         var_fmts += [".1f"]
         units += ["sccm"]
 
-        # Reactant Concentrations (ppb)
+        ### Reactant Concentrations (ppb) ###
         self.injector_conc = reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
         self.FT_conc = reactant_FR / self.total_FR * self.reactant_MR * 1e9
         self.FT_conc_molec = flow_calc.MR_to_molec(self, self.FT_conc)
@@ -366,7 +379,7 @@ class CoatedWallReactor:
         var_fmts += [".2e"]
         units += ["molec. cm-3"]
 
-        # Flow Tube Flow Velocity
+        ### Flow Tube Flow Velocity ###
         self.FT_flow_velocity = flow_calc.sccm_to_velocity(
             self, self.total_FR, self.FT_ID
         )
@@ -375,28 +388,30 @@ class CoatedWallReactor:
         var_fmts += [".3g"]
         units += ["cm s-1"]
 
-        # Insert flow velocity
+        ### Insert flow velocity ###
         # - accounts for flow around outside of insert and through inside of insert
         if self.insert_length > 0:
-            net_cross_section = (
+            postinjector_net_cross_section = (
                 tools.cross_sectional_area(self.FT_ID)
                 - tools.cross_sectional_area(self.insert_OD)
                 + tools.cross_sectional_area(self.insert_ID)
             )
-            if net_cross_section <= 0:
+            if postinjector_net_cross_section <= 0:
                 raise ValueError(
                     "Invalid insert geometry: insert dimensions must leave a positive net flow cross-section."
                 )
 
             self.insert_flow_velocity = (
-                flow_calc.sccm_to_ccm(self, self.total_FR) / net_cross_section / 60
+                flow_calc.sccm_to_ccm(self, self.total_FR)
+                / postinjector_net_cross_section
+                / 60
             )
             var_names += ["Insert Velocity"]
             var += [self.insert_flow_velocity]
             var_fmts += [".3g"]
             units += ["cm s-1"]
 
-        # Residence Times
+        ### Residence Times ###
         self.FT_residence_time = self.FT_length / self.FT_flow_velocity
         var_names += ["Flow Tube Residence Time"]
         var += [self.FT_residence_time]
@@ -435,13 +450,13 @@ class CoatedWallReactor:
             None
         """
 
-        # Lists for displaying values
+        ### Initialize Lists for displaying values ###
         var_names: list[str] = []
         var: list[float] = []
         var_fmts: list[str] = []
         units: list[str] = []
 
-        # Carrier Gas Dynamic Viscosity (kg m-1 s-1)
+        ### Carrier Gas Dynamic Viscosity (kg m-1 s-1) ###
         self.carrier_dynamic_viscosity = viscosity_density.dynamic_viscosity(
             self, self.carrier_gas
         )
@@ -450,14 +465,14 @@ class CoatedWallReactor:
         var_fmts += [".2e"]
         units += ["kg m-1 s-1"]
 
-        # Carrier Gas Density (kg m-3)
+        ### Carrier Gas Density (kg m-3) ###
         self.carrier_density = viscosity_density.real_density(self, self.carrier_gas)
         var_names += ["Carrier Gas Density"]
         var += [self.carrier_density]
         var_fmts += [".3g"]
         units += ["kg m-3"]
 
-        # Reynolds Number - laminar flow if Re < 1800
+        ### Reynolds Number - laminar flow if Re < 1800 ###
         self.Re_FT = flow_calc.reynolds_number(self, self.total_FR, self.FT_ID)
         var_names += ["Flow Tube Reynolds Number"]
         var += [self.Re_FT]
@@ -475,7 +490,7 @@ class CoatedWallReactor:
             if Re_insert > 1800:
                 warnings.warn("Re > 1800. Flow in insert may not be laminar")
 
-        # Entrance length (cm) - see flow_calc.py for details
+        ### Entrance length (cm) - see flow_calc.py for details ###
         length_to_laminar = flow_calc.length_to_laminar(self.FT_ID, self.Re_FT)
         var_names += ["Flow Tube Entrance length"]
         var += [length_to_laminar]
@@ -492,7 +507,7 @@ class CoatedWallReactor:
             var_fmts += [".1f"]
             units += ["cm"]
 
-        # Pressure Gradient (%) - see flow_calc.py for details
+        ### Pressure Gradient (%) - see flow_calc.py for details ###
         FT_conductance = flow_calc.conductance(self, self.FT_ID, self.FT_length)
         if self.insert_length > 0:
             insert_conductance = flow_calc.conductance(
@@ -524,7 +539,7 @@ class CoatedWallReactor:
             var_fmts += [".2f"]
             units += ["%"]
 
-        # Buoyancy Parameters - see flow_calc.py for details
+        ### Buoyancy Parameters - see flow_calc.py for details ###
         radial_buoyancy = flow_calc.buoyancy_parameters(
             self, radial_delta_T, self.FT_ID, self.Re_FT
         )
@@ -563,13 +578,13 @@ class CoatedWallReactor:
             None
         """
 
-        # Lists for displaying values
+        ### Initialize lists for displaying values ###
         var_names: list[str] = []
         var: list[float] = []
         var_fmts: list[str] = []
         units: list[str] = []
 
-        # Reactant Diffusion Rate (cm2 s-1)
+        ### Reactant Diffusion Rate (cm2 s-1) ###
         try:
             reactant_diffusion_rate = float(reactant_diffusion_rate)
         except Exception:
@@ -598,18 +613,18 @@ class CoatedWallReactor:
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
 
-        # Thermal Molecular Velocity (cm s-1)
+        ### Thermal Molecular Velocity (cm s-1) ###
         # formula matched to values from Knopf et al., Anal. Chem., 2015
         self.reactant_molec_velocity = flow_calc.molec_velocity(
             self, float(mm.Formula(self.reactant_gas).mass)
         )  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
 
-        # Reactant Mean Free Path (cm) - Fuchs and Sutugin, 1971
+        ### Reactant Mean Free Path (cm) - Fuchs and Sutugin, 1971 ###
         self.reactant_mean_free_path = (
             3 * self.reactant_diffusion_rate / self.reactant_molec_velocity
         )
 
-        # Advection Rate (cm2 s-1) - eq. 1 from Knopf et al., Anal. Chem., 2015
+        ### Advection Rate (cm2 s-1) - eq. 1 from Knopf et al., Anal. Chem., 2015 ###
         if self.insert_length > 0:
             advection_rate = self.insert_flow_velocity * self.insert_ID
             var_names += ["Insert Advection Rate"]
@@ -620,7 +635,7 @@ class CoatedWallReactor:
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
 
-        # Peclet Number - if > 10 then axial diffusion is negligible
+        ### Peclet Number - if > 10 then axial diffusion is negligible ###
         # - eq. 1 from Knopf et al., Anal. Chem., 2015
         self.Pe_FT = advection_rate / self.reactant_diffusion_rate
         var_names += ["Peclet Number"]
@@ -630,7 +645,7 @@ class CoatedWallReactor:
         if self.Pe_FT < 10:
             warnings.warn("Pe < 10. Axial diffusion is non-negligible")
 
-        # Mixing Time (s) - see flow_calc.py for details
+        ### Mixing Time (s) - see flow_calc.py for details ###
         if self.insert_length > 0:
             mixing_time = flow_calc.mixing_time(self, self.insert_ID)
             var_names += ["Insert Mixing Time"]
@@ -641,7 +656,7 @@ class CoatedWallReactor:
         var_fmts += [".2g"]
         units += ["s"]
 
-        # Mixing Length (cm)
+        ### Mixing Length (cm) ###
         if self.insert_length > 0:
             mixing_length = self.insert_flow_velocity * mixing_time
             var_names += ["Insert Mixing Length"]
@@ -652,7 +667,7 @@ class CoatedWallReactor:
         var_fmts += [".2g"]
         units += ["cm"]
 
-        # Effective Sherwood Number (unitless)
+        ### Effective Sherwood Number (unitless) ###
         # - eq. 11 from Knopf et al., Anal. Chem., 2015
         self.N_eff_Shw_FT = flow_calc.N_eff_Shw(self, self.FT_length, self.total_FR)
         if self.insert_length > 0:
@@ -660,13 +675,13 @@ class CoatedWallReactor:
                 self, self.insert_length, self.total_FR
             )
 
-        # Knudsen Number for reactant-wall/insert interaction
+        ### Knudsen Number for reactant-wall/insert interaction ###
         # - eq. 8 from Knopf et al., Anal. Chem., 2015
         self.Kn_FT = flow_calc.Kn(self.reactant_mean_free_path, self.FT_ID)
         if self.insert_length > 0:
             self.Kn_insert = flow_calc.Kn(self.reactant_mean_free_path, self.insert_ID)
 
-        # Diffusion Limited Rate Constant (s-1) and Uptake Coefficient
+        ### Diffusion Limited Rate Constant (s-1) and Uptake Coefficient ###
         # - see kinetics.py for details
         if self.insert_length > 0:
             k_diff = kinetics.diffusion_limited_rate_constant(
@@ -691,7 +706,7 @@ class CoatedWallReactor:
         var_fmts += [".2g"]
         units += ["unitless"]
 
-        # Diffusion Limited Uptake Coefficient
+        ### Diffusion Limited Uptake Coefficient ###
         # – diffusion correction limit from Tang et al., Atmos. Chem. Phys., 2014.
         gamma_diff = gamma_eff_diff / 0.1
         var_names += ["Approx. Diffusion Limited Uptake Coefficient"]
@@ -761,13 +776,13 @@ class CoatedWallReactor:
         if gamma_wall < 0 or gamma_wall > 1:
             raise ValueError("Wall uptake coefficient must be between 0 and 1")
 
-        # Lists for displaying values
+        ### Initialize lists for displaying values ###
         var_names: list[str] = []
         var: list[NDArray[np.float64] | float] = []
         var_fmts: list[str] = []
         units: list[str] = []
 
-        # Surface area of coated area
+        ### Surface area of coated area ###
         if self.insert_length > 0:
             surface_area = 2 * np.pi * self.insert_ID * self.insert_length / 4
             var_names += ["Insert surface area"]
@@ -778,7 +793,7 @@ class CoatedWallReactor:
         var_fmts += [".1f"]
         units += ["cm2"]
 
-        # Diffusion Correction Factor - gamma_eff / gamma
+        ### Diffusion Correction Factor - gamma_eff / gamma ###
         # - eq. 15 from Knopf et al., Anal. Chem., 2015
         if self.insert_length > 0:
             self.C_g = kinetics.correction_factor_from_gamma(
@@ -794,7 +809,7 @@ class CoatedWallReactor:
         var_fmts += [".3g"]
         units += ["unitless"]
 
-        # Diffusion Correction
+        ### Diffusion Correction ###
         diff_corr = 1 - self.C_g
         if self.insert_length > 0:
             var_names += ["Insert Diffusion Correction"]
@@ -804,7 +819,7 @@ class CoatedWallReactor:
         var_fmts += [".1f"]
         units += ["%"]
 
-        # Effective Uptake Coefficient
+        ### Effective Uptake Coefficient ###
         # - eq. 15 from Knopf et al., Anal. Chem., 2015
         gamma_eff = hypothetical_gamma * self.C_g
         var_names += ["Effective Uptake Coefficient"]
@@ -812,7 +827,7 @@ class CoatedWallReactor:
         var_fmts += [".2e"]
         units += ["unitless"]
 
-        # Observed Loss Rate (s-1) - see kinetics.py for details
+        ### Observed Loss Rate (s-1) - see kinetics.py for details ###
         if self.insert_length > 0:
             k_obs = kinetics.observed_loss_rate(self, self.insert_ID, gamma_eff)
         else:
@@ -822,7 +837,7 @@ class CoatedWallReactor:
         var_fmts += [".3g"]
         units += ["s-1"]
 
-        # Uptake to coated region - see kinetics.py for details
+        ### Uptake to coated region - see kinetics.py for details ###
         if self.insert_length > 0:
             self.uptake = kinetics.cylinder_loss(
                 self,
@@ -847,7 +862,7 @@ class CoatedWallReactor:
         var_fmts += [".1f"]
         units += ["%"]
 
-        # Reactant Wall Loss (entire FT minus insert)
+        ### Reactant Wall Loss (entire FT minus insert) ###
         reactant_wall_loss = kinetics.cylinder_loss(
             self,
             self.FT_ID,
@@ -861,7 +876,7 @@ class CoatedWallReactor:
         var_fmts += [".2g"]
         units += ["%"]
 
-        # Fraction of unreacted surface sites after exposure to reactant gas
+        ### Fraction of unreacted surface sites after exposure to reactant gas ###
         # - see Bertram et al., J. Phys. Chem. A, 2001
         collision_frequency = (
             self.FT_conc_molec * self.reactant_molec_velocity / 4
@@ -913,13 +928,13 @@ class CoatedWallReactor:
             gamma_effective_lower (float): Lower bound of 95% confidence interval for gamma_effective.
             gamma_effective_upper (float): Upper bound of 95% confidence interval for gamma_effective.
         """
-        # Check which inner diameter to use
+        ### Check which inner diameter to use ###
         if self.insert_length > 0:
             diameter = self.insert_ID
         else:
             diameter = self.FT_ID
 
-        # Fit data to first order kinetics
+        ### Fit data to first order kinetics ###
         exposure_times, slope, intercept, r_value, _, std_err = (
             kinetics.fit_first_order_kinetics(
                 obj=self,
@@ -930,7 +945,7 @@ class CoatedWallReactor:
         )
         k = -slope
 
-        # Calculate gamma and confidence intervals
+        ### Calculate gamma and confidence intervals ###
         gamma_effective = kinetics.gamma_from_k(
             self,
             k=k,
@@ -976,11 +991,11 @@ class CoatedWallReactor:
         Returns:
             float: Diffusion-corrected uptake coefficient.
         """
-        # Validate effective_gamma input
+        ### Validate effective_gamma input ###
         if effective_gamma < 0 or effective_gamma > 1:
             raise ValueError("Effective gamma must be between 0 and 1")
 
-        # Use insert if present, otherwise use flow tube values
+        ### Use insert if present, otherwise use flow tube values ###
         if self.insert_length > 0:
             N_eff_Shw = self.N_eff_Shw_insert
             Kn = self.Kn_insert
@@ -988,6 +1003,7 @@ class CoatedWallReactor:
             N_eff_Shw = self.N_eff_Shw_FT
             Kn = self.Kn_FT
 
+        ### Calculate diffusion correction factor ###
         Cg = kinetics.correction_factor_from_effective_gamma(
             N_eff_Shw=N_eff_Shw, Kn=Kn, effective_gamma=effective_gamma
         )

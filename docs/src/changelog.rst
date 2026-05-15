@@ -7,6 +7,7 @@ Changelog
 - Added Lennard-Jones parameters for ClONO2, N2O5, O3, and NO2 to `diffusion_coef` module in order to support diffusion coefficient calculations for these species.
 - Allowed for the use of a custom diffusion coefficient even if the species is in the database of the `diffusion_coef` module.
 - Removed axial temperature gradient parameter and associated calculations.
+- Updated minimum carrier flow rate calculation to account for the presence of an insert
 
 1.3.1
 -------------------
