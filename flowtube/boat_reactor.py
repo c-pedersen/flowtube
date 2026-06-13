@@ -255,13 +255,16 @@ class BoatReactor:
                 "Mixing ratio must be between 0 and 1"
             )
 
-        self.P = tools.P_in_Pa(P, P_units)
-        self.T = tools.T_in_K(T)
+        self.reactant_FR = reactant_FR
+        self.reactant_carrier_FR = reactant_carrier_FR
+        self.carrier_FR = carrier_FR
+        self.P_Pa = tools.P_in_Pa(P, P_units)
+        self.T_K = tools.T_in_K(T)
 
         self.flows(
-            reactant_FR,
-            reactant_carrier_FR,
-            carrier_FR,
+            reactant_FR = self.reactant_FR,
+            reactant_carrier_FR = self.reactant_carrier_FR,
+            carrier_FR = self.carrier_FR,
             disp=disp,
         )
         self.carrier_flow(

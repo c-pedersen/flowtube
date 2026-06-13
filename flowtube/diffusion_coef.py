@@ -22,8 +22,8 @@ from . import tools
 
 
 class required_attrs(Protocol):
-    P: float  # Pressure in Pa
-    T: float  # Temperature in K
+    P_Pa: float  # Pressure in Pa
+    T_K: float  # Temperature in K
     reactant_gas: str  # Molecular formula of reactant gas
     carrier_gas: str  # Molecular formula of carrier gas
 
@@ -130,10 +130,10 @@ def binary_diffusion_coefficient(obj: required_attrs) -> float:
     mean_e_k = (e_ks[obj.reactant_gas] * e_ks[obj.carrier_gas]) ** 0.5
 
     # Diffusion Collision Integral (unitless)
-    Omega_D = non_polar_Lennard_Jones_potential(mean_e_k, obj.T)
+    Omega_D = non_polar_Lennard_Jones_potential(mean_e_k, obj.T_K)
 
     return float(
         0.00266
-        * obj.T**1.5
-        / ((obj.P / tools.STANDARD_PRESSURE_Pa) * m**0.5 * mean_sigma**2 * Omega_D)
+        * obj.T_K**1.5
+        / ((obj.P_Pa / tools.STANDARD_PRESSURE_Pa) * m**0.5 * mean_sigma**2 * Omega_D)
     )

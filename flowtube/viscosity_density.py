@@ -25,8 +25,8 @@ from . import tools
 
 
 class basic_attrs(Protocol):
-    P: float  # Pressure in Pa
-    T: float  # Temperature in K
+    P_Pa: float  # Pressure in Pa
+    T_K: float  # Temperature in K
 
 
 ## van der Waal's Constants - Chemistry LibreTexts
@@ -69,13 +69,13 @@ def real_density(
     m = float(mm.Formula(gas).mass)
 
     # Calculate pressure from Pa to bar
-    P_bar = obj.P / tools.P_CF["bar"]
+    P_bar = obj.P_Pa / tools.P_CF["bar"]
 
     # Coefficients for van der Waal's equation of state solved for the
     # inverse density (cubic function)
     coefficients = [
         P_bar,
-        -P_bar * b[gas] - tools.UNIVERSAL_GAS_CONSTANT / 100 * obj.T,
+        -P_bar * b[gas] - tools.UNIVERSAL_GAS_CONSTANT / 100 * obj.T_K,
         a[gas],
         -a[gas] * b[gas],
     ]
@@ -89,7 +89,7 @@ def real_density(
     # Check if the density is negative, which is unphysical
     if density < 0:
         raise ValueError(
-            f"Calculated density for {gas} at T={obj.T} K and P={obj.P} Pa "
+            f"Calculated density for {gas} at T={obj.T_K} K and P={obj.P_Pa} Pa "
             f"is negative: {density} kg m-3"
         )
 
@@ -127,7 +127,7 @@ def dynamic_viscosity(
         )
 
     # Reduced temperature
-    T_r = obj.T / T_c[gas]
+    T_r = obj.T_K / T_c[gas]
 
     # Reduced, Inverse Viscosity ((µP)-1) - eq. 9-4.14 from Reid et al., 1987
     xi = 0.176 * (T_c[gas] / (m**3 * P_c[gas] ** 4)) ** (1 / 6)

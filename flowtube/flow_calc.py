@@ -37,8 +37,8 @@ from . import tools
 class basic_attrs(
     Protocol,
 ):
-    P: float  # Pressure in Pa
-    T: float  # Temperature in K
+    P_Pa: float  # Pressure in Pa
+    T_K: float  # Temperature in K
 
 
 class carrier_attrs(
@@ -78,7 +78,7 @@ def sccm_to_ccm(
     """
 
     return (
-        (tools.STANDARD_PRESSURE_Pa / obj.P) * obj.T / tools.STANDARD_TEMPERATURE_K * FR
+        (tools.STANDARD_PRESSURE_Pa / obj.P_Pa) * obj.T_K / tools.STANDARD_TEMPERATURE_K * FR
     )
 
 
@@ -98,7 +98,7 @@ def ccm_to_sccm(
     """
 
     return (
-        (obj.P / tools.STANDARD_PRESSURE_Pa) * tools.STANDARD_TEMPERATURE_K / obj.T * FR
+        (obj.P_Pa / tools.STANDARD_PRESSURE_Pa) * tools.STANDARD_TEMPERATURE_K / obj.T_K * FR
     )
 
 
@@ -139,8 +139,8 @@ def MR_to_molec(
     """
 
     return (
-        obj.P
-        / (tools.UNIVERSAL_GAS_CONSTANT * obj.T)
+        obj.P_Pa
+        / (tools.UNIVERSAL_GAS_CONSTANT * obj.T_K)
         * tools.AVOGADROS_NUMBER
         / 100**3
         * conc
@@ -166,7 +166,7 @@ def molec_velocity(
     """
 
     return 100 * np.sqrt(
-        8 / np.pi * tools.UNIVERSAL_GAS_CONSTANT * obj.T / molar_mass * 1000
+        8 / np.pi * tools.UNIVERSAL_GAS_CONSTANT * obj.T_K / molar_mass * 1000
     )
 
 
@@ -256,7 +256,7 @@ def conductance(
         32600
         * diameter**4
         / (obj.carrier_dynamic_viscosity * 1e7 * length)
-        * obj.P
+        * obj.P_Pa
         / tools.P_CF["Torr"]
     )
 
@@ -308,7 +308,7 @@ def buoyancy_parameters(
     # Grashof Number - eq. 9.12 from Incropera, et al., 2007
     grashof_number = (
         9.81
-        / obj.T
+        / obj.T_K
         * delta_T
         * distance**3
         / (obj.carrier_dynamic_viscosity / 100 / (obj.carrier_density / 100**3)) ** 2

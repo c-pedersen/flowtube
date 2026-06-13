@@ -52,6 +52,16 @@ class CoatedWallReactor:
         radial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
+
+    reactant_FR: float
+    reactant_carrier_FR: float
+    carrier_FR: float
+    P: float
+    P_units: str
+    P_Pa: float
+    T: float
+    T_K: float
+
     def flows(
         self,
         reactant_FR: float,
@@ -141,6 +151,16 @@ class BoatReactor:
         radial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
+
+    reactant_FR: float
+    reactant_carrier_FR: float
+    carrier_FR: float
+    P: float
+    P_units: str
+    P_Pa: float
+    T: float
+    T_K: float
+
     def flows(
         self,
         reactant_FR: float,

@@ -39,6 +39,11 @@ import warnings
 
 from . import tools, diffusion_coef, viscosity_density, flow_calc, kinetics
 
+_CTOR_ATTRS = frozenset({
+    "FT_ID", "FT_length", "injector_ID", "injector_OD", "reactant_gas", "carrier_gas", "reactant_conc_type", 
+    "reactant_conc", "insert_ID", "insert_OD", "insert_length",
+})
+
 
 class CoatedWallReactor:
     def __init__(
@@ -72,7 +77,7 @@ class CoatedWallReactor:
                 injector.
             reactant_gas (str): Molecular formula of reactant gas
                 (supported Ar, He, Air, Br2, Cl2, HBr, HCl, HI, H2O, I2,
-                NO, N2, and O2).
+                NO, N2, O2, ClONO2/ClNO3, N2O5, O3, and NO2).
             carrier_gas (str): Molecular formula of carrier gas
                 (supported: Ar, He, N2, O2).
             reactant_conc_type (str): Type of reactant concentration
@@ -246,13 +251,20 @@ class CoatedWallReactor:
                 "Mixing ratio must be between 0 and 1"
             )
 
-        self.P = tools.P_in_Pa(P, P_units)
-        self.T = tools.T_in_K(T)
+        self.P = P
+        self.P_units = P_units
+        self.T = T
+        self.reactant_FR = reactant_FR
+        self.reactant_carrier_FR = reactant_carrier_FR
+        self.carrier_FR = carrier_FR
+
+        self.P_Pa = tools.P_in_Pa(self.P, self.P_units)
+        self.T_K = tools.T_in_K(self.T)
 
         self.flows(
-            reactant_FR,
-            reactant_carrier_FR,
-            carrier_FR,
+            reactant_FR=self.reactant_FR,
+            reactant_carrier_FR=self.reactant_carrier_FR,
+            carrier_FR=self.carrier_FR,
             disp=disp,
         )
         self.carrier_flow(
