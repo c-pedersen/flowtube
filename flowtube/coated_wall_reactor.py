@@ -39,13 +39,94 @@ import warnings
 
 from . import tools, diffusion_coef, viscosity_density, flow_calc, kinetics
 
-_CTOR_ATTRS = frozenset({
-    "FT_ID", "FT_length", "injector_ID", "injector_OD", "reactant_gas", "carrier_gas", "reactant_conc_type", 
-    "reactant_conc", "insert_ID", "insert_OD", "insert_length",
-})
+_CTOR_ATTRS = frozenset(
+    {
+        "FT_ID",
+        "FT_length",
+        "injector_ID",
+        "injector_OD",
+        "reactant_gas",
+        "carrier_gas",
+        "reactant_conc_type",
+        "reactant_conc",
+        "insert_ID",
+        "insert_OD",
+        "insert_length",
+        "reactant_FR",
+        "reactant_carrier_FR",
+        "carrier_FR",
+        "P",
+        "P_units",
+        "T",
+        "reactant_diffusion_rate",
+        "radial_delta_T",
+    }
+)
 
 
 class CoatedWallReactor:
+    def _validate_init(self) -> None:
+        # Check if the gases are supported
+        if self.reactant_gas not in diffusion_coef.sigmas.keys():
+            # Validate molecular formulas using molarmass
+            try:
+                mm.Formula(self.reactant_gas).mass  # raises on invalid formula
+            except Exception:
+                raise ValueError(
+                    f"Invalid reactant gas molecular formula: {self.reactant_gas}. "
+                    f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}, or "
+                    f"other if manually inputting diffusion coefficient"
+                )
+        if self.carrier_gas not in viscosity_density.a.keys():
+            raise ValueError(
+                f"Unsupported carrier gas. "
+                f"Supported gases: {', '.join(viscosity_density.a.keys())}"
+            )
+
+        # Check physicality of insert dimensions
+        if self.insert_ID < 0 or self.insert_length < 0 or self.insert_OD < 0:
+            raise ValueError("Insert ID, OD, and length must be positive")
+        elif self.insert_ID > self.FT_ID or self.insert_OD > self.FT_ID:
+            raise ValueError("Insert cannot be larger than flow tube ID")
+        elif self.insert_length > self.FT_length:
+            raise ValueError("Insert length cannot be larger than flow tube length")
+        elif np.isnan(self.insert_ID) != np.isnan(self.insert_OD) or np.isnan(
+            self.insert_ID
+        ) != (self.insert_length == 0):
+            raise ValueError(
+                "Insert dimensions must all be specified or all be unspecified"
+            )
+
+        # Check physicality of injector dimensions
+        if self.injector_ID < 0 or self.injector_OD < 0:
+            raise ValueError("Injector ID and OD must be positive")
+        elif self.injector_ID > self.FT_ID:
+            raise ValueError("Injector ID cannot be larger than flow tube ID")
+        elif self.injector_OD > self.FT_ID:
+            raise ValueError("Injector OD cannot be larger than flow tube ID")
+        elif self.injector_ID > self.injector_OD:
+            raise ValueError("Injector ID cannot be larger than injector OD")
+        elif self.injector_ID == 0 or self.injector_OD == 0:
+            raise ValueError("Injector dimensions must be non-zero")
+
+        # Check reactant concentration inputs
+        if self.reactant_conc < 0:
+            raise ValueError("Reactant concentration must be non-negative")
+        if self.reactant_conc_type not in [
+            "ppm",
+            "ppb",
+            "ng/min",
+            "Pa",
+            "hPa",
+            "Torr",
+            "bar",
+            "mbar",
+        ]:
+            raise ValueError(
+                "Unsupported reactant concentration type. "
+                "Supported types: 'ppm', 'ppb', 'ng/min', 'Pa', 'hPa', 'Torr', 'bar', 'mbar'"
+            )
+
     def __init__(
         self,
         FT_ID: float,
@@ -91,68 +172,8 @@ class CoatedWallReactor:
         Returns:
             None
         """
-
-        ### Check for valid inputs ###
-        # Check if the gases are supported
-        if reactant_gas not in diffusion_coef.sigmas.keys():
-            # Validate molecular formulas using molarmass
-            try:
-                mm.Formula(reactant_gas).mass  # raises on invalid formula
-            except Exception:
-                raise ValueError(
-                    f"Invalid reactant gas molecular formula: {reactant_gas}. "
-                    f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}, or "
-                    f"other if manually inputting diffusion coefficient"
-                )
-        if carrier_gas not in viscosity_density.a.keys():
-            raise ValueError(
-                f"Unsupported carrier gas. "
-                f"Supported gases: {', '.join(viscosity_density.a.keys())}"
-            )
-
-        # Check physicality of insert dimensions
-        if insert_ID < 0 or insert_length < 0 or insert_OD < 0:
-            raise ValueError("Insert ID, OD, and length must be positive")
-        elif insert_ID > FT_ID or insert_OD > FT_ID:
-            raise ValueError("Insert cannot be larger than flow tube ID")
-        elif insert_length > FT_length:
-            raise ValueError("Insert length cannot be larger than flow tube length")
-        elif np.isnan(insert_ID) != np.isnan(insert_OD) or np.isnan(insert_ID) != (
-            insert_length == 0
-        ):
-            raise ValueError(
-                "Insert dimensions must all be specified or all be unspecified"
-            )
-
-        # Check physicality of injector dimensions
-        if injector_ID < 0 or injector_OD < 0:
-            raise ValueError("Injector ID and OD must be positive")
-        elif injector_ID > FT_ID:
-            raise ValueError("Injector ID cannot be larger than flow tube ID")
-        elif injector_OD > FT_ID:
-            raise ValueError("Injector OD cannot be larger than flow tube ID")
-        elif injector_ID > injector_OD:
-            raise ValueError("Injector ID cannot be larger than injector OD")
-        elif injector_ID == 0 or injector_OD == 0:
-            raise ValueError("Injector dimensions must be non-zero")
-
-        # Check reactant concentration inputs
-        if reactant_conc < 0:
-            raise ValueError("Reactant concentration must be non-negative")
-        if reactant_conc_type not in [
-            "ppm",
-            "ppb",
-            "ng/min",
-            "Pa",
-            "hPa",
-            "Torr",
-            "bar",
-            "mbar",
-        ]:
-            raise ValueError(
-                "Unsupported reactant concentration type. "
-                "Supported types: 'ppm', 'ppb', 'ng/min', 'Pa', 'hPa', 'Torr', 'bar', 'mbar'"
-            )
+        # Flag to prevent calling __setattr__ before initialization is complete
+        object.__setattr__(self, "_initializing", True)
 
         ### Initialize variables ###
         self.FT_ID = FT_ID
@@ -166,6 +187,33 @@ class CoatedWallReactor:
         self.insert_ID = insert_ID
         self.insert_OD = insert_OD
         self.insert_length = insert_length
+
+        # Validate inputs
+        self._validate_init()
+
+        # Turn flag off to allow __setattr__ to be used normally
+        object.__setattr__(self, "_initializing", False)
+
+    def __setattr__(self, name, value):
+        object.__setattr__(self, name, value)
+        if name in _CTOR_ATTRS and not self.__dict__.get("_initializing", True):
+            self._validate_init()  # validate before re-init
+
+            missing = [a for a in _CTOR_ATTRS if not hasattr(self, a)]
+            if missing:
+                raise RuntimeError(
+                    f"initialize() has not been called yet. Missing: {missing}"
+                )
+
+            self.initialize(
+                reactant_FR=self.reactant_FR,
+                reactant_carrier_FR=self.reactant_carrier_FR,
+                carrier_FR=self.carrier_FR,
+                P=self.P,
+                P_units=self.P_units,
+                T=self.T,
+                disp=False,
+            )
 
     def initialize(
         self,
@@ -207,10 +255,10 @@ class CoatedWallReactor:
             raise ValueError("Flow rates must be positive")
 
         # Check for non-zero flow
-        if (reactant_FR <= 0) + (reactant_carrier_FR < 0) + (carrier_FR < 0):
+        if reactant_FR <= 0:
             raise ValueError("Reactant flow rate must be positive and non-zero")
-        if reactant_carrier_FR < 0 and carrier_FR < 0:
-            raise ValueError(" Flow rates must be positive or zero")
+        if reactant_carrier_FR < 0 or carrier_FR < 0:
+            raise ValueError("Flow rates must be positive or zero")
 
         # Check if the pressure units are supported
         if P_units not in tools.P_CF.keys():
@@ -251,55 +299,41 @@ class CoatedWallReactor:
                 "Mixing ratio must be between 0 and 1"
             )
 
+        # Flag to prevent calling __setattr__ before initialization is complete
+        object.__setattr__(self, "_initializing", True)
+
         self.P = P
         self.P_units = P_units
         self.T = T
         self.reactant_FR = reactant_FR
         self.reactant_carrier_FR = reactant_carrier_FR
         self.carrier_FR = carrier_FR
-
+        self.radial_delta_T = radial_delta_T
+        self.reactant_diffusion_rate = reactant_diffusion_rate
         self.P_Pa = tools.P_in_Pa(self.P, self.P_units)
         self.T_K = tools.T_in_K(self.T)
 
-        self.flows(
-            reactant_FR=self.reactant_FR,
-            reactant_carrier_FR=self.reactant_carrier_FR,
-            carrier_FR=self.carrier_FR,
-            disp=disp,
-        )
-        self.carrier_flow(
-            radial_delta_T=radial_delta_T,
-            disp=disp,
-        )
-        self.reactant_diffusion(
-            reactant_diffusion_rate=reactant_diffusion_rate,
-            disp=disp,
-        )
+        # Perform calculations for flows, carrier gas transport, and reactant diffusion
+        self.flows(disp=disp)
+        self.carrier_flow(disp=disp)
+        self.reactant_diffusion(disp=disp)
+
+        # Turn flag off to allow __setattr__ to be used normally
+        object.__setattr__(self, "_initializing", False)
 
     def flows(
         self,
-        reactant_FR: float,
-        reactant_carrier_FR: float,
-        carrier_FR: float,
         disp: bool = True,
     ) -> None:
         """Calculates Flow Tube flows.
 
         Args:
-            reactant_FR (float): Reactant flow rate (sccm).
-            reactant_carrier_FR (float): Carrier flow rate (sccm) used
-                to dilute the reactant.
-            carrier_FR (float): Carrier flow rate (sccm) typically
-                injected near the start of the flow tube.
             disp (bool): Display calculated calculated values.
 
         Returns:
             None
         """
         ### Check for valid inputs ###
-        # Check if the flow rates are positive
-        if reactant_FR < 0 or reactant_carrier_FR < 0 or carrier_FR < 0:
-            raise ValueError("Flow rates must be positive")
 
         ### Initialize Lists for displaying values ###
         var_names: list[str] = []
@@ -344,17 +378,17 @@ class CoatedWallReactor:
         ### Flow Rates ###
         # Flow Rate Setpoints
         var_names += ["Reactant Flow Rate"]
-        var += [reactant_FR]
+        var += [self.reactant_FR]
         var_fmts += [".2f"]
         units += ["sccm"]
         var_names += ["Reactant Carrier Flow Rate"]
-        var += [reactant_carrier_FR]
+        var += [self.reactant_carrier_FR]
         var_fmts += [".1f"]
         units += ["sccm"]
 
         # Total Flow Rates
-        total_reactant_FR = reactant_FR + reactant_carrier_FR
-        self.total_FR = reactant_FR + reactant_carrier_FR + carrier_FR
+        total_reactant_FR = self.reactant_FR + self.reactant_carrier_FR
+        self.total_FR = self.reactant_FR + self.reactant_carrier_FR + self.carrier_FR
         var_names += ["Total Reactant Flow Rate"]
         var += [total_reactant_FR]
         var_fmts += [".1f"]
@@ -379,7 +413,7 @@ class CoatedWallReactor:
         var += [min_carrier_FR]
         var_fmts += [".1f"]
         units += ["sccm"]
-        if carrier_FR < min_carrier_FR:
+        if self.carrier_FR < min_carrier_FR:
             warnings.warn(
                 "Carrier flow rate is below the minimum. "
                 "This may affect the flow profile in the flow tube."
@@ -387,7 +421,7 @@ class CoatedWallReactor:
 
         ### More Flow Rates ###
         var_names += ["Carrier Flow Rate"]
-        var += [carrier_FR]
+        var += [self.carrier_FR]
         var_fmts += [".1f"]
         units += ["sccm"]
         var_names += ["Total Flow Rate"]
@@ -397,7 +431,9 @@ class CoatedWallReactor:
 
         ### Reactant Concentrations ###
         # Concentration inside of the injector (ppb)
-        self.injector_conc = reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
+        self.injector_conc = (
+            self.reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
+        )
         var_names += [f"Injector {self.reactant_gas} Concentration"]
         var += [self.injector_conc]
         var_fmts += [".3g"]
@@ -408,13 +444,15 @@ class CoatedWallReactor:
         # reactant flow is only mixes inside the insert
         if self.insert_length > 0:
             self.insert_FR = (
-                reactant_FR
-                + carrier_FR
+                self.reactant_FR
+                + self.carrier_FR
                 * cross_section_inside_insert  # pyright: ignore[reportPossiblyUnboundVariable]
                 / (cross_section_inside_insert + cross_section_outside_insert)  # pyright: ignore
             )
 
-            self.insert_conc = reactant_FR / self.insert_FR * self.reactant_MR * 1e9
+            self.insert_conc = (
+                self.reactant_FR / self.insert_FR * self.reactant_MR * 1e9
+            )
             self.insert_conc_molec = flow_calc.MR_to_molec(self, self.insert_conc)
             var_names += 2 * [f"Insert {self.reactant_gas} Concentration"]
             var += [self.insert_conc, self.insert_conc_molec]
@@ -422,7 +460,7 @@ class CoatedWallReactor:
             units += ["ppb", "molec. cm-3"]
 
         # Concentration after the injector (ppb) - FT
-        self.FT_conc = reactant_FR / self.total_FR * self.reactant_MR * 1e9
+        self.FT_conc = self.reactant_FR / self.total_FR * self.reactant_MR * 1e9
         self.FT_conc_molec = flow_calc.MR_to_molec(self, self.FT_conc)
         var_names += 2 * [f"Flow Tube {self.reactant_gas} Concentration"]
         var += [self.FT_conc, self.FT_conc_molec]
@@ -477,7 +515,6 @@ class CoatedWallReactor:
 
     def carrier_flow(
         self,
-        radial_delta_T: float = 1,
         disp: bool = True,
     ):
         """Performs and displays carrier gas transport calculations.
@@ -581,9 +618,9 @@ class CoatedWallReactor:
 
         ### Buoyancy Parameters - see flow_calc.py for details ###
         radial_buoyancy = flow_calc.buoyancy_parameters(
-            self, radial_delta_T, self.FT_ID, self.Re_FT
+            self, self.radial_delta_T, self.FT_ID, self.Re_FT
         )
-        var_names += [f"Radial Buoyancy Parameter (ΔT={radial_delta_T:.1f} C)"]
+        var_names += [f"Radial Buoyancy Parameter (ΔT={self.radial_delta_T:.1f} C)"]
         var += [radial_buoyancy]
         var_fmts += [".2f"]
         units += ["unitless"]
@@ -605,13 +642,11 @@ class CoatedWallReactor:
 
     def reactant_diffusion(
         self,
-        reactant_diffusion_rate: float = np.nan,
         disp: bool = True,
     ) -> None:
         """Performs and displays reactant diffusion calculations.
 
         Args:
-            reactant_diffusion_rate (float): Reactant diffusion rate (cm2 s-1).
             disp (bool): Display calculated calculated values.
 
         Returns:
@@ -626,13 +661,13 @@ class CoatedWallReactor:
 
         ### Reactant Diffusion Rate (cm2 s-1) ###
         try:
-            reactant_diffusion_rate = float(reactant_diffusion_rate)
+            float(self.reactant_diffusion_rate)
         except Exception:
             raise TypeError("Reactant diffusion rate must be a number")
-        if not np.isnan(reactant_diffusion_rate):
-            if reactant_diffusion_rate < 0:
+
+        if not np.isnan(self.reactant_diffusion_rate):
+            if self.reactant_diffusion_rate < 0:
                 raise ValueError("Reactant diffusion rate must be non-negative")
-            self.reactant_diffusion_rate = reactant_diffusion_rate
             var_names += ["Manually Inputted Reactant Diffusion Rate"]
         else:
             if (

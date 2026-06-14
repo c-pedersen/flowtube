@@ -3,7 +3,7 @@ Handles the calculation of the viscosity and density of a variety of
 pure gases.
 
 Citations
-    “A8: Van Der Waal’s Constants for Real Gases.” Chemistry LibreTexts,
+    “A8: Van Der Waal's Constants for Real Gases.” Chemistry LibreTexts,
     November 14, 2024. Accessed August 6, 2025.
     https://chem.libretexts.org/Ancillary_Materials/Reference/Reference_Tables/Atomic_and_Molecular_Properties/A8%3A_van_der_Waal’s_Constants_for_Real_Gases.
 

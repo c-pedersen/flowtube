@@ -78,7 +78,10 @@ def sccm_to_ccm(
     """
 
     return (
-        (tools.STANDARD_PRESSURE_Pa / obj.P_Pa) * obj.T_K / tools.STANDARD_TEMPERATURE_K * FR
+        (tools.STANDARD_PRESSURE_Pa / obj.P_Pa)
+        * obj.T_K
+        / tools.STANDARD_TEMPERATURE_K
+        * FR
     )
 
 
@@ -98,7 +101,10 @@ def ccm_to_sccm(
     """
 
     return (
-        (obj.P_Pa / tools.STANDARD_PRESSURE_Pa) * tools.STANDARD_TEMPERATURE_K / obj.T_K * FR
+        (obj.P_Pa / tools.STANDARD_PRESSURE_Pa)
+        * tools.STANDARD_TEMPERATURE_K
+        / obj.T_K
+        * FR
     )
 
 
