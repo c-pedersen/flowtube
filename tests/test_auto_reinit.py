@@ -44,7 +44,7 @@ CWR_COMPUTED_ATTRS = [
     "FT_flow_velocity",
     "FT_residence_time",
     "Re_FT",
-    "Pe_FT",
+    "Pe",
     "carrier_dynamic_viscosity",
     "carrier_density",
     "reactant_diffusion_rate",
@@ -316,6 +316,16 @@ def test_invalid_reactant_gas_raises(
     )
     with pytest.raises(ValueError, match=r"Invalid reactant gas molecular formula"):
         mutated.reactant_gas = "NotAGas!!"
+
+@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+def test_manual_reactant_diffusion_coef(Reactor, build_reactor, make_init_kwargs):
+    obj, _, _ = build_reactor(Reactor, call_initialize=False)
+    init = make_init_kwargs(Reactor, reactant_diffusion_rate = 1.111)
+    obj.initialize(**init)
+    obj.FT_ID = obj.FT_ID*1.1  # should trigger auto-reinit
+
+    assert obj.manually_inputted_diffusion_rate is True
+    assert obj.reactant_diffusion_rate == 1.111  # cm2 s-1
 
 
 def test_boat_invalid_dimensions_raises(make_constructor_kwargs, make_init_kwargs):

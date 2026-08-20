@@ -113,6 +113,26 @@ def test_manual_reactant_diffusion_coef(
 
 
 @pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+def test_manual_reactant_diffusion_coef_during_initialization(Reactor, build_reactor, make_init_kwargs):
+    obj, _, _ = build_reactor(Reactor, call_initialize=False)
+    init = make_init_kwargs(Reactor, reactant_diffusion_rate = 1.111)
+    obj.initialize(**init)
+
+    assert obj.manually_inputted_diffusion_rate is True
+    assert obj.reactant_diffusion_rate == 1.111  # cm2 s-1
+
+@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+def test_manual_reactant_diffusion_coef_after_initialization(Reactor, build_reactor):
+    obj, _, _ = build_reactor(Reactor)
+
+    obj.manually_inputted_diffusion_rate = True
+    obj.reactant_diffusion_rate = 1.111
+
+    assert obj.manually_inputted_diffusion_rate is True
+    assert obj.reactant_diffusion_rate == 1.111  # cm2 s-1
+
+
+@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
 def test_temperature_below_physical_limit(Reactor, build_reactor, make_init_kwargs):
     obj, _, _ = build_reactor(Reactor, call_initialize=False)
     bad_init = make_init_kwargs(Reactor, T=-273.16)
@@ -200,3 +220,5 @@ def test_fitting_non_arraylike_inputs(Reactor, build_reactor):
             exposure=[0.1, 0.2, 0.3],
             exposure_units="s",
         )
+
+

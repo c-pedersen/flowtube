@@ -321,10 +321,25 @@ class BoatReactor:
         self.reactant_carrier_FR = reactant_carrier_FR
         self.carrier_FR = carrier_FR
         self.radial_delta_T = radial_delta_T
-        self.reactant_diffusion_rate = reactant_diffusion_rate
 
         self.P_Pa = tools.P_in_Pa(self.P, self.P_units)
         self.T_K = tools.T_in_K(self.T)
+
+        # Verify that the reactant diffusion rate is a number
+        try:
+            float(reactant_diffusion_rate)
+        except ValueError:
+            raise TypeError("Reactant diffusion rate must be a number")
+
+        # Check if the user has manually inputted a diffusion rate
+        try:
+            self.manually_inputted_diffusion_rate  # noqa: B018
+        except AttributeError:
+            if not np.isnan(reactant_diffusion_rate):
+                self.manually_inputted_diffusion_rate = True
+            else:
+                self.manually_inputted_diffusion_rate = False
+            self.reactant_diffusion_rate = reactant_diffusion_rate
 
         # Calculate boat perimeter if not provided, assuming a half-cylinder profile
         if not self._user_boat_perimeter:
@@ -578,13 +593,9 @@ class BoatReactor:
         var_fmts: list[str] = []
         units: list[str] = []
 
-        # Reactant Diffusion Rate (cm2 s-1)
-        try:
-            float(self.reactant_diffusion_rate)
-        except Exception:
-            raise TypeError("Reactant diffusion rate must be a number")
-
-        if not np.isnan(self.reactant_diffusion_rate):
+        ### Reactant Diffusion Rate (cm2 s-1) ###
+        # Calculate the diffusion rate if it was not manually inputted
+        if self.manually_inputted_diffusion_rate:
             if self.reactant_diffusion_rate < 0:
                 raise ValueError("Reactant diffusion rate must be non-negative")
             var_names += ["Manually Inputted Reactant Diffusion Rate"]
@@ -600,9 +611,7 @@ class BoatReactor:
                 self.reactant_diffusion_rate = (
                     diffusion_coef.binary_diffusion_coefficient(self)
                 )
-                var_names += [
-                    "Calculated Reactant Diffusion Rate \n(Lennard-Jones model)"
-                ]
+            var_names += ["Calculated Reactant Diffusion Rate \n(Lennard-Jones model)"]
         var += [self.reactant_diffusion_rate]
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
@@ -653,10 +662,14 @@ class BoatReactor:
         var_fmts += [".2g"]
         units += ["cm"]
 
+        ### Axial Distance ###
+        # - eq. 2 from Knopf et al., Anal. Chem., 2015
+        self.z_star = flow_calc.z_star(self, z=self.FT_length, FR=self.total_FR)
+
         # Effective Sherwood Number (unitless)
         # Note: the boat geometry is not considered and thus this value
         # should be used as a limiting case
-        self.N_eff_Shw_FT = flow_calc.N_eff_Shw(self, self.FT_length, self.total_FR)
+        self.N_eff_Shw_FT = flow_calc.N_eff_Shw(z_star=self.z_star)
 
         # Knudsen Number for reactant-wall/insert interaction
         # Note: the boat geometry is not considered and thus this value
