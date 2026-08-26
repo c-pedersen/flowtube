@@ -303,7 +303,7 @@ def buoyancy_parameters(
             carrier_density in kg m-3).
         delta_T (float): Temperature difference (K).
         distance (float): Distance over which the temperature difference
-            is measured (cm) (typically axial or radial).
+            is measured (cm).
         Re (float): Reynolds number of the flow tube.
 
     Returns:
@@ -313,11 +313,11 @@ def buoyancy_parameters(
 
     # Grashof Number - eq. 9.12 from Incropera, et al., 2007
     grashof_number = (
-        9.81
-        / obj.T_K
-        * delta_T
-        * distance**3
-        / (obj.carrier_dynamic_viscosity / 100 / (obj.carrier_density / 100**3)) ** 2
+        9.81  # m s-2
+        / obj.T_K  # K
+        * delta_T  # K
+        * (distance / 100)**3 # m3
+        / (obj.carrier_dynamic_viscosity / obj.carrier_density) ** 2 # (kg m-1 s-1 / kg m-3 = m2 s-1)^2
     )
 
     return grashof_number / Re**2
