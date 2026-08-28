@@ -36,7 +36,6 @@ def test_Knopf_et_al_2015_parameters_do_not_raise(
         P_units="hPa",
         T=295 - 273.15,
         reactant_diffusion_rate=0.1267,
-        axial_delta_T=0,
         radial_delta_T=0,
         disp=False,
     )
@@ -59,7 +58,7 @@ def test_Knopf_et_al_2015_parameters_do_not_raise(
 
     assert np.isclose(obj.FT_residence_time, 1.657, rtol=0.01)
     assert np.isclose(obj.Re_FT, 17.4, rtol=0.2)
-    assert np.isclose(obj.Pe_FT, 190.5, rtol=0.01)
+    assert np.isclose(obj.Pe, 190.5, rtol=0.01)
     assert np.isclose(obj.reactant_mean_free_path, 1.1e-5, rtol=0.05)
     assert np.isclose(obj.Kn_FT, 2.8e-5, rtol=0.1)
     assert np.isclose(obj.reactant_molec_velocity, 3.6e4, rtol=0.1)
@@ -85,7 +84,6 @@ def test_Knopf_et_al_2015_parameters_do_not_raise(
         P_units="hPa",
         T=293 - 273.15,
         reactant_diffusion_rate=188.22,
-        axial_delta_T=0,
         radial_delta_T=0,
         disp=False,
     )
@@ -108,7 +106,49 @@ def test_Knopf_et_al_2015_parameters_do_not_raise(
 
     assert np.isclose(obj.FT_residence_time, 0.00126, rtol=0.01)
     assert np.isclose(obj.Re_FT, 22.5, rtol=0.1)
-    assert np.isclose(obj.Pe_FT, 28.71, rtol=0.1)
+    assert np.isclose(obj.Pe, 28.71, rtol=0.1)
     assert np.isclose(obj.reactant_mean_free_path, 9.35e-3, rtol=0.05)
     assert np.isclose(obj.Kn_FT, 0.01, rtol=0.1)
     assert np.isclose(obj.reactant_molec_velocity, 6.04e4, rtol=0.1)
+
+
+def test_FT_insert_flow_velocity(
+    make_constructor_kwargs, make_init_kwargs, build_reactor
+):
+    """
+    Test that the flow velocity through the insert is greater than the flow
+    velocity through the flow tube.
+    """
+    kwargs = make_constructor_kwargs(
+        CoatedWallReactor,
+        FT_ID=2,
+        FT_length=36,
+        injector_ID=0.2,
+        injector_OD=0.5,
+        reactant_gas="HCl",
+        carrier_gas="He",
+        reactant_conc_type="ppm",
+        reactant_conc=1e6,
+        insert_ID=1,
+        insert_OD=1,
+    )
+    init_kwargs = make_init_kwargs(
+        CoatedWallReactor,
+        reactant_FR=0.01,
+        reactant_carrier_FR=0,
+        carrier_FR=1000,
+        P=5.3,
+        P_units="hPa",
+        T=20,
+    )
+    obj, _, _ = build_reactor(
+        CoatedWallReactor,
+        init_overrides=init_kwargs,
+        constructor_overrides=kwargs,
+    )
+
+    assert np.isclose(obj.insert_flow_velocity, obj.FT_flow_velocity, rtol=1e-3)
+
+    obj.insert_OD = 1.5
+
+    assert obj.insert_flow_velocity > obj.FT_flow_velocity

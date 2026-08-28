@@ -30,15 +30,17 @@ Fundamentals of heat and mass transfer, 6. ed. ed. Wiley, Hoboken, NJ.
 """
 
 from typing import Protocol
+
 import numpy as np
+
 from . import tools
 
 
 class basic_attrs(
     Protocol,
 ):
-    P: float  # Pressure in Pa
-    T: float  # Temperature in K
+    P_Pa: float  # Pressure in Pa
+    T_K: float  # Temperature in K
 
 
 class carrier_attrs(
@@ -78,7 +80,10 @@ def sccm_to_ccm(
     """
 
     return (
-        (tools.STANDARD_PRESSURE_Pa / obj.P) * obj.T / tools.STANDARD_TEMPERATURE_K * FR
+        (tools.STANDARD_PRESSURE_Pa / obj.P_Pa)
+        * obj.T_K
+        / tools.STANDARD_TEMPERATURE_K
+        * FR
     )
 
 
@@ -98,7 +103,10 @@ def ccm_to_sccm(
     """
 
     return (
-        (obj.P / tools.STANDARD_PRESSURE_Pa) * tools.STANDARD_TEMPERATURE_K / obj.T * FR
+        (obj.P_Pa / tools.STANDARD_PRESSURE_Pa)
+        * tools.STANDARD_TEMPERATURE_K
+        / obj.T_K
+        * FR
     )
 
 
@@ -139,8 +147,8 @@ def MR_to_molec(
     """
 
     return (
-        obj.P
-        / (tools.UNIVERSAL_GAS_CONSTANT * obj.T)
+        obj.P_Pa
+        / (tools.UNIVERSAL_GAS_CONSTANT * obj.T_K)
         * tools.AVOGADROS_NUMBER
         / 100**3
         * conc
@@ -166,7 +174,7 @@ def molec_velocity(
     """
 
     return 100 * np.sqrt(
-        8 / np.pi * tools.UNIVERSAL_GAS_CONSTANT * obj.T / molar_mass * 1000
+        8 / np.pi * tools.UNIVERSAL_GAS_CONSTANT * obj.T_K / molar_mass * 1000
     )
 
 
@@ -256,7 +264,7 @@ def conductance(
         32600
         * diameter**4
         / (obj.carrier_dynamic_viscosity * 1e7 * length)
-        * obj.P
+        * obj.P_Pa
         / tools.P_CF["Torr"]
     )
 
@@ -297,7 +305,7 @@ def buoyancy_parameters(
             carrier_density in kg m-3).
         delta_T (float): Temperature difference (K).
         distance (float): Distance over which the temperature difference
-            is measured (cm) (typically axial or radial).
+            is measured (cm).
         Re (float): Reynolds number of the flow tube.
 
     Returns:
@@ -307,11 +315,12 @@ def buoyancy_parameters(
 
     # Grashof Number - eq. 9.12 from Incropera, et al., 2007
     grashof_number = (
-        9.81
-        / obj.T
-        * delta_T
-        * distance**3
-        / (obj.carrier_dynamic_viscosity / 100 / (obj.carrier_density / 100**3)) ** 2
+        9.81  # m s-2
+        / obj.T_K  # K
+        * delta_T  # K
+        * (distance / 100) ** 3  # m3
+        / (obj.carrier_dynamic_viscosity / obj.carrier_density)
+        ** 2  # (kg m-1 s-1 / kg m-3 = m2 s-1)^2
     )
 
     return grashof_number / Re**2
@@ -366,33 +375,46 @@ def mixing_time(
 
 ### KPS Method Calculations ###
 def N_eff_Shw(
-    obj: full_attrs,
-    length: float,
-    FR: float,
+    z_star: float,
 ) -> float:
     """
     Calculate the effective Sherwood number - eq. 11 from Knopf et al.,
     2015.
 
     Args:
-        obj (full_attrs): Object with full attributes (P in Pa, T in K,
-            reactant_diffusion_rate in cm2 s-1,
-            carrier_dynamic_viscosity in kg m-1 s-1,
-            carrier_density in kg m-3).
-        length (float): Length of the flow tube (cm).
-        FR (float): Total flow rate in cm3 min-1.
+        z_star (float): Dimensionless axial distance.
 
     Returns:
         float: Effective Sherwood number.
     """
 
+    return 3.6568 + 0.0978 / (z_star + 0.0154)
+
+
+def z_star(
+    obj: full_attrs,
+    z: float,
+    FR: float,
+) -> float:
+    """
+    Calculate the z_star - eq. 2 from Knopf et al., 2015.
+
+    Args:
+        obj (full_attrs): Object with full attributes (P in Pa, T in K,
+            reactant_diffusion_rate in cm2 s-1,
+            carrier_dynamic_viscosity in kg m-1 s-1,
+            carrier_density in kg m-3).
+        z (float): Characteristic axial length (cm).
+        FR (float): Total flow rate in sccm.
+
+    Returns:
+        float: Dimensionless axial distance, z_star.
+    """
     # Axial Distance (unitless)
     # - eq. 2 from Knopf et al., Anal. Chem., 2015
-    z_star = (
-        length * np.pi / 2 * obj.reactant_diffusion_rate / (sccm_to_ccm(obj, FR) / 60)
-    )
+    z_star = z * np.pi / 2 * obj.reactant_diffusion_rate / (sccm_to_ccm(obj, FR) / 60)
 
-    return 3.6568 + 0.0978 / (z_star + 0.0154)
+    return z_star
 
 
 def Kn(

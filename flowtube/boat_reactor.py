@@ -17,25 +17,123 @@ Citations:
     International Reviews in Aerosol Physics and Chemistry. Pergamon,
     p. 1. https://doi.org/10.1016/B978-0-08-016674-2.50006-6
 
-    Ivanov, A.V., Molina, M.J., Park, J., 2021. Experimental study on
-    HCl uptake by MgCl2 and sea salt under humid conditions. J Mass
-    Spectrom 56, e4601. https://doi.org/10.1002/jms.4601
-
     Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and
     evaluation of gas phase diffusion coefficients of reactive trace
     gases in the atmosphere: volume 1. Inorganic compounds. Atmos. Chem.
     Phys. 14, 9233–9247. https://doi.org/10.5194/acp-14-9233-2014
 """
 
-import numpy as np
-import molmass as mm
-from numpy.typing import NDArray, ArrayLike
+from __future__ import annotations
+
 import warnings
 
-from . import tools, diffusion_coef, viscosity_density, flow_calc, kinetics
+import molmass as mm
+import numpy as np
+from numpy.typing import ArrayLike, NDArray
+
+from . import diffusion_coef, flow_calc, kinetics, tools, viscosity_density
+
+_CTOR_ATTRS = frozenset(
+    {
+        "FT_ID",
+        "FT_length",
+        "injector_ID",
+        "injector_OD",
+        "reactant_gas",
+        "carrier_gas",
+        "reactant_conc_type",
+        "reactant_conc",
+        "boat_liquid_width",
+        "boat_length",
+        "boat_cross_section",
+        "boat_perimeter",
+        "reactant_FR",
+        "reactant_carrier_FR",
+        "carrier_FR",
+        "P",
+        "P_units",
+        "T",
+        "reactant_diffusion_rate",
+        "radial_delta_T",
+        "axial_distance",
+    }
+)
 
 
 class BoatReactor:
+    def _validate_init(self):
+
+        ### Check for valid inputs ###
+        # Check if the gases are supported
+        if self.reactant_gas not in diffusion_coef.sigmas:
+            # Validate molecular formulas using molarmass
+            try:
+                mm.Formula(  # noqa: B018
+                    self.reactant_gas
+                ).mass  # raises on invalid formula
+            except Exception as e:
+                raise ValueError(
+                    f"Invalid reactant gas molecular formula: {self.reactant_gas}. "
+                    f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}, or "
+                    f"other if manually inputting diffusion coefficient"
+                ) from e
+        if self.carrier_gas not in viscosity_density.a:
+            raise ValueError(
+                f"Unsupported carrier gas. "
+                f"Supported gases: {', '.join(viscosity_density.a.keys())}"
+            )
+
+        # Check physicality of boat dimensions
+        if (
+            self.boat_length < 0
+            or self.boat_liquid_width < 0
+            or self.boat_cross_section < 0
+        ):
+            raise ValueError("Boat dimensions must be positive")
+        elif (
+            self.boat_liquid_width > self.FT_ID
+            or self.boat_cross_section > np.pi * (self.FT_ID / 2) ** 2
+        ):
+            raise ValueError(
+                "Boat liquid width cannot be larger than the flow tube ID, and "
+                "boat cross-sectional area cannot be larger than the flow tube "
+                "cross-sectional area"
+            )
+        elif self.boat_length > self.FT_length:
+            raise ValueError("Boat length cannot be larger than flow tube length")
+        if self.boat_perimeter is not None and self.boat_perimeter < 0:
+            raise ValueError("Boat perimeter must be positive")
+
+        # Check physicality of injector dimensions
+        if self.injector_ID < 0 or self.injector_OD < 0:
+            raise ValueError("Injector ID and OD must be positive")
+        elif self.injector_ID > self.FT_ID:
+            raise ValueError("Injector ID cannot be larger than flow tube ID")
+        elif self.injector_OD > self.FT_ID:
+            raise ValueError("Injector OD cannot be larger than flow tube ID")
+        elif self.injector_ID > self.injector_OD:
+            raise ValueError("Injector ID cannot be larger than injector OD")
+        elif self.injector_ID == 0 or self.injector_OD == 0:
+            raise ValueError("Injector dimensions must be non-zero")
+
+        # Check reactant concentration inputs
+        if self.reactant_conc < 0:
+            raise ValueError("Reactant concentration must be non-negative")
+        if self.reactant_conc_type not in [
+            "ppm",
+            "ppb",
+            "ng/min",
+            "Pa",
+            "hPa",
+            "Torr",
+            "bar",
+            "mbar",
+        ]:
+            raise ValueError(
+                "Unsupported reactant concentration type. "
+                "Supported types: 'ppm', 'ppb', 'ng/min', 'Pa', 'hPa', 'Torr', 'bar', 'mbar'"
+            )
+
     def __init__(
         self,
         FT_ID: float,
@@ -88,68 +186,8 @@ class BoatReactor:
         Returns:
             None
         """
-
-        ### Check for valid inputs ###
-        # Check if the gases are supported
-        if reactant_gas not in diffusion_coef.sigmas.keys():
-            # Validate molecular formulas using molarmass
-            try:
-                mm.Formula(reactant_gas).mass  # raises on invalid formula
-            except Exception:
-                raise ValueError(
-                    f"Invalid reactant gas molecular formula: {reactant_gas}. "
-                    f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}, or "
-                    f"other if manually inputting diffusion coefficient"
-                )
-        if carrier_gas not in viscosity_density.a.keys():
-            raise ValueError(
-                f"Unsupported carrier gas. "
-                f"Supported gases: {', '.join(viscosity_density.a.keys())}"
-            )
-
-        # Check physicality of boat dimensions
-        if boat_length < 0 or boat_liquid_width < 0 or boat_cross_section < 0:
-            raise ValueError("Boat dimensions must be positive")
-        elif boat_liquid_width > FT_ID or boat_cross_section > np.pi * (FT_ID / 2) ** 2:
-            raise ValueError(
-                "Boat liquid width cannot be larger than the flow tube ID, and "
-                "boat cross-sectional area cannot be larger than the flow tube "
-                "cross-sectional area"
-            )
-        elif boat_length > FT_length:
-            raise ValueError("Boat length cannot be larger than flow tube length")
-        if boat_perimeter is not None and boat_perimeter < 0:
-            raise ValueError("Boat perimeter must be positive")
-
-        # Check physicality of injector dimensions
-        if injector_ID < 0 or injector_OD < 0:
-            raise ValueError("Injector ID and OD must be positive")
-        elif injector_ID > FT_ID:
-            raise ValueError("Injector ID cannot be larger than flow tube ID")
-        elif injector_OD > FT_ID:
-            raise ValueError("Injector OD cannot be larger than flow tube ID")
-        elif injector_ID > injector_OD:
-            raise ValueError("Injector ID cannot be larger than injector OD")
-        elif injector_ID == 0 or injector_OD == 0:
-            raise ValueError("Injector dimensions must be non-zero")
-
-        # Check reactant concentration inputs
-        if reactant_conc < 0:
-            raise ValueError("Reactant concentration must be non-negative")
-        if reactant_conc_type not in [
-            "ppm",
-            "ppb",
-            "ng/min",
-            "Pa",
-            "hPa",
-            "Torr",
-            "bar",
-            "mbar",
-        ]:
-            raise ValueError(
-                "Unsupported reactant concentration type. "
-                "Supported types: 'ppm', 'ppb', 'ng/min', 'Pa', 'hPa', 'Torr', 'bar', 'mbar'"
-            )
+        # Flag to prevent calling __setattr__ before initialization is complete
+        object.__setattr__(self, "_initializing", True)
 
         # Initialize variables
         self.FT_ID = FT_ID
@@ -163,13 +201,36 @@ class BoatReactor:
         self.boat_liquid_width = boat_liquid_width
         self.boat_cross_section = boat_cross_section
         self.boat_length = boat_length
-        if boat_perimeter is None:
-            boat_effective_radius = np.sqrt(2 * boat_cross_section / np.pi)
-            self.boat_perimeter = tools.partial_cylinder_area(
-                boat_effective_radius, boat_effective_radius * 2
-            )[0]
-        else:
-            self.boat_perimeter = boat_perimeter
+        self._user_boat_perimeter = boat_perimeter
+        self.boat_perimeter = boat_perimeter
+
+        # Validate inputs
+        self._validate_init()
+
+        # Turn flag off to allow __setattr__ to be used normally
+        object.__setattr__(self, "_initializing", False)
+
+    def __setattr__(self, name, value):
+        object.__setattr__(self, name, value)
+        if name in _CTOR_ATTRS and not self.__dict__.get("_initializing", True):
+            self._validate_init()  # validate before re-init
+
+            missing = [a for a in _CTOR_ATTRS if not hasattr(self, a)]
+            if missing:
+                raise RuntimeError(
+                    f"initialize() has not been called yet. Missing: {missing}"
+                )
+
+            self.initialize(
+                reactant_FR=self.reactant_FR,
+                reactant_carrier_FR=self.reactant_carrier_FR,
+                carrier_FR=self.carrier_FR,
+                P=self.P,
+                P_units=self.P_units,
+                T=self.T,
+                axial_distance=self.axial_distance,
+                disp=False,
+            )
 
     def initialize(
         self,
@@ -179,9 +240,9 @@ class BoatReactor:
         P: float,
         P_units: str,
         T: float,
+        axial_distance: float,
         reactant_diffusion_rate: float = np.nan,
         radial_delta_T: float = 1,
-        axial_delta_T: float = 1,
         disp: bool = True,
     ) -> None:
         """
@@ -197,11 +258,11 @@ class BoatReactor:
             P (float): Pressure.
             P_units (str): Pressure units.
             T (float): Temperature (C).
+            axial_distance (float): Axial distance of exposed reactant
+                surface (cm). Also referred to as z.
             reactant_diffusion_rate (float, optional): Reactant
                 diffusion rate (cm2 s-1).
             radial_delta_T (float): Radial temperature gradient (K)
-                (default = 1 K).
-            axial_delta_T (float): Axial temperature gradient (K)
                 (default = 1 K).
             disp (bool): Display calculated calculated values.
 
@@ -213,14 +274,12 @@ class BoatReactor:
         if reactant_FR < 0 or reactant_carrier_FR < 0 or carrier_FR < 0:
             raise ValueError("Flow rates must be positive")
 
-        # Check for non-zero flow
-        if (reactant_FR <= 0) + (reactant_carrier_FR < 0) + (carrier_FR < 0):
+        # Check for non-zero reactant flow
+        if reactant_FR <= 0:
             raise ValueError("Reactant flow rate must be positive and non-zero")
-        if reactant_carrier_FR < 0 and carrier_FR < 0:
-            raise ValueError(" Flow rates must be positive or zero")
 
         # Check if the pressure units are supported
-        if P_units not in tools.P_CF.keys():
+        if P_units not in tools.P_CF:
             raise ValueError(
                 f"Unsupported pressure units. "
                 f"Supported units: {', '.join(tools.P_CF.keys())}"
@@ -231,7 +290,7 @@ class BoatReactor:
         # Check if the temperature & temperature gradients are valid numbers
         if T < -273.15:
             raise ValueError("Temperature must be above absolute zero (-273.15 C)")
-        if radial_delta_T < 0 or axial_delta_T < 0:
+        if radial_delta_T < 0:
             raise ValueError("Temperature gradients must be positive")
 
         # Calculate reactant mixing ratio from input concentration
@@ -258,49 +317,75 @@ class BoatReactor:
                 "Mixing ratio must be between 0 and 1"
             )
 
-        self.P = tools.P_in_Pa(P, P_units)
-        self.T = tools.T_in_K(T)
+        ### Check for valid inputs ###
+        try:
+            float(axial_distance)
+        except TypeError:
+            raise TypeError("Axial distance must be castable to a float")
 
-        self.flows(
-            reactant_FR,
-            reactant_carrier_FR,
-            carrier_FR,
-            disp=disp,
-        )
-        self.carrier_flow(
-            radial_delta_T=radial_delta_T,
-            axial_delta_T=axial_delta_T,
-            disp=disp,
-        )
-        self.reactant_diffusion(
-            reactant_diffusion_rate=reactant_diffusion_rate,
-            disp=disp,
-        )
+        # Flag to prevent calling __setattr__ before initialization is complete
+        object.__setattr__(self, "_initializing", True)
+
+        self.P = P
+        self.P_units = P_units
+        self.T = T
+        self.reactant_FR = reactant_FR
+        self.reactant_carrier_FR = reactant_carrier_FR
+        self.carrier_FR = carrier_FR
+        self.axial_distance = axial_distance
+        self.radial_delta_T = radial_delta_T
+
+        self.P_Pa = tools.P_in_Pa(self.P, self.P_units)
+        self.T_K = tools.T_in_K(self.T)
+
+        # Verify that the reactant diffusion rate is a number
+        try:
+            float(reactant_diffusion_rate)
+        except ValueError:
+            raise TypeError("Reactant diffusion rate must be a number")
+
+        # Check if the user has manually inputted a diffusion rate
+        try:
+            self.manually_inputted_diffusion_rate  # noqa: B018
+        except AttributeError:
+            if not np.isnan(reactant_diffusion_rate):
+                self.manually_inputted_diffusion_rate = True
+            else:
+                self.manually_inputted_diffusion_rate = False
+            self.reactant_diffusion_rate = reactant_diffusion_rate
+        else:
+            if self.manually_inputted_diffusion_rate & ~np.isnan(
+                reactant_diffusion_rate
+            ):
+                self.reactant_diffusion_rate = reactant_diffusion_rate
+
+        # Calculate boat perimeter if not provided, assuming a half-cylinder profile
+        if self._user_boat_perimeter is None:
+            boat_effective_radius = np.sqrt(2 * self.boat_cross_section / np.pi)
+            self.boat_perimeter = tools.partial_cylinder_area(
+                boat_effective_radius, boat_effective_radius * 2
+            )[0]
+
+        # Perform calculations for flows, carrier gas transport, and reactant diffusion
+        self.flows(disp=disp)
+        self.carrier_flow(disp=disp)
+        self.reactant_diffusion(disp=disp)
+
+        # Turn flag off to allow __setattr__ to be used normally
+        object.__setattr__(self, "_initializing", False)
 
     def flows(
         self,
-        reactant_FR: float,
-        reactant_carrier_FR: float,
-        carrier_FR: float,
         disp: bool = True,
     ) -> None:
         """Calculates Flow Tube flows.
 
         Args:
-            reactant_FR (float): Reactant flow rate (sccm).
-            reactant_carrier_FR (float): Carrier flow rate (sccm) used
-                to dilute the reactant.
-            carrier_FR (float): Carrier flow rate (sccm) typically
-                injected near the start of the flow tube.
             disp (bool): Display calculated calculated values.
 
         Returns:
             None
         """
-        # Check if the flow rates are positive
-        if reactant_FR < 0 or reactant_carrier_FR < 0 or carrier_FR < 0:
-            raise ValueError("Flow rates must be positive")
-
         # Lists for displaying values
         var_names: list[str] = []
         var: list[float] = []
@@ -309,17 +394,17 @@ class BoatReactor:
 
         # Flow Rate Setpoints
         var_names += ["Reactant Flow Rate"]
-        var += [reactant_FR]
+        var += [self.reactant_FR]
         var_fmts += [".2f"]
         units += ["sccm"]
         var_names += ["Reactant Carrier Flow Rate"]
-        var += [reactant_carrier_FR]
+        var += [self.reactant_carrier_FR]
         var_fmts += [".1f"]
         units += ["sccm"]
 
         # Total Flow Rates
-        total_reactant_FR = reactant_FR + reactant_carrier_FR
-        self.total_FR = reactant_FR + reactant_carrier_FR + carrier_FR
+        total_reactant_FR = self.reactant_FR + self.reactant_carrier_FR
+        self.total_FR = self.reactant_FR + self.reactant_carrier_FR + self.carrier_FR
         var_names += ["Total Reactant Flow Rate"]
         var += [total_reactant_FR]
         var_fmts += [".1f"]
@@ -348,7 +433,7 @@ class BoatReactor:
         var += [min_carrier_FR]
         var_fmts += [".1f"]
         units += ["sccm"]
-        if carrier_FR < min_carrier_FR:
+        if self.carrier_FR < min_carrier_FR:
             warnings.warn(
                 "Carrier flow rate is below the minimum. "
                 "This may affect the flow profile in the flow tube."
@@ -356,7 +441,7 @@ class BoatReactor:
 
         # More Flow Rates
         var_names += ["Carrier Flow Rate"]
-        var += [carrier_FR]
+        var += [self.carrier_FR]
         var_fmts += [".1f"]
         units += ["sccm"]
         var_names += ["Total Flow Rate"]
@@ -365,8 +450,10 @@ class BoatReactor:
         units += ["sccm"]
 
         # Reactant Concentrations (ppb)
-        self.injector_conc = reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
-        self.FT_conc = reactant_FR / self.total_FR * self.reactant_MR * 1e9
+        self.injector_conc = (
+            self.reactant_FR / total_reactant_FR * self.reactant_MR * 1e9
+        )
+        self.FT_conc = self.reactant_FR / self.total_FR * self.reactant_MR * 1e9
         self.FT_conc_molec = flow_calc.MR_to_molec(self, self.FT_conc)
         var_names += [f"Injector {self.reactant_gas} Concentration"]
         var += [self.injector_conc]
@@ -409,15 +496,11 @@ class BoatReactor:
 
     def carrier_flow(
         self,
-        radial_delta_T: float = 1,
-        axial_delta_T: float = 1,
         disp: bool = True,
     ):
         """Performs and displays carrier gas transport calculations.
 
         Args:
-            delta_T_radial (float): Radial temperature gradient (K).
-            delta_T_axial (float): Axial temperature gradient (K).
             disp (bool): Display calculated values.
 
         Returns:
@@ -451,7 +534,7 @@ class BoatReactor:
         self.Re = flow_calc.reynolds_number_irregular(
             self,
             cross_sectional_area=self.net_cross_section,
-            wetted_perimeter=self.boat_perimeter,
+            wetted_perimeter=self.boat_perimeter,  # pyright: ignore[reportArgumentType]
             FR=self.total_FR,
         )
         var_names += ["Reynolds Number Over Boat (upper limit)"]
@@ -487,27 +570,16 @@ class BoatReactor:
 
         # Buoyancy Parameters - see flow_calc.py for details
         radial_buoyancy = flow_calc.buoyancy_parameters(
-            self, radial_delta_T, self.FT_ID, self.Re
+            self, self.radial_delta_T, self.FT_ID, self.Re
         )
-        axial_buoyancy = flow_calc.buoyancy_parameters(
-            self, axial_delta_T, self.FT_length, self.Re
-        )
-        var_names += [f"Radial Buoyancy Parameter (ΔT={radial_delta_T:.1f} C)"]
+        var_names += [f"Radial Buoyancy Parameter (ΔT={self.radial_delta_T:.1f} C)"]
         var += [radial_buoyancy]
-        var_fmts += [".2f"]
-        units += ["unitless"]
-        var_names += [f"Axial Buoyancy Parameter (ΔT={axial_delta_T:.1f} C)"]
-        var += [axial_buoyancy]
         var_fmts += [".2f"]
         units += ["unitless"]
         if radial_buoyancy > 1:
             warnings.warn(
                 "Radial buoyancy parameter > 1. "
                 "Flow may be affected by buoyancy effects"
-            )
-        if axial_buoyancy > 1:
-            warnings.warn(
-                "Axial buoyancy parameter > 1. Flow may be affected by buoyancy effects"
             )
 
         ### Display Values ###
@@ -522,13 +594,11 @@ class BoatReactor:
 
     def reactant_diffusion(
         self,
-        reactant_diffusion_rate: float = np.nan,
         disp: bool = True,
     ) -> None:
         """Performs and displays reactant diffusion calculations.
 
         Args:
-            reactant_diffusion_rate (float): Reactant diffusion rate (cm2 s-1).
             disp (bool): Display calculated calculated values.
 
         Returns:
@@ -541,26 +611,25 @@ class BoatReactor:
         var_fmts: list[str] = []
         units: list[str] = []
 
-        # Reactant Diffusion Rate (cm2 s-1)
-        if self.reactant_gas not in diffusion_coef.sigmas.keys():
-            if isinstance(reactant_diffusion_rate, (float, np.floating)):
-                if np.isnan(reactant_diffusion_rate):
-                    raise ValueError(
-                        f"Must input reactant diffusion rate for {self.reactant_gas}"
-                    )
-            elif isinstance(reactant_diffusion_rate, (int, np.integer)):
-                reactant_diffusion_rate = float(reactant_diffusion_rate)
-            else:
-                raise TypeError("Reactant diffusion rate must be a number")
-
-            self.reactant_diffusion_rate = reactant_diffusion_rate
+        ### Reactant Diffusion Rate (cm2 s-1) ###
+        # Calculate the diffusion rate if it was not manually inputted
+        if self.manually_inputted_diffusion_rate:
+            if self.reactant_diffusion_rate < 0:
+                raise ValueError("Reactant diffusion rate must be non-negative")
             var_names += ["Manually Inputted Reactant Diffusion Rate"]
         else:
-            self.reactant_diffusion_rate = diffusion_coef.binary_diffusion_coefficient(
-                self
-            )
-            var_names += ["Reactant Diffusion Rate"]
-
+            if (
+                self.reactant_gas not in diffusion_coef.sigmas
+                and self.reactant_gas not in diffusion_coef.e_ks
+            ):
+                raise ValueError(
+                    f"Must input reactant diffusion rate for {self.reactant_gas}"
+                )
+            else:
+                self.reactant_diffusion_rate = (
+                    diffusion_coef.binary_diffusion_coefficient(self)
+                )
+            var_names += ["Calculated Reactant Diffusion Rate \n(Lennard-Jones model)"]
         var += [self.reactant_diffusion_rate]
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
@@ -611,10 +680,14 @@ class BoatReactor:
         var_fmts += [".2g"]
         units += ["cm"]
 
+        ### Axial Distance ###
+        # - eq. 2 from Knopf et al., Anal. Chem., 2015
+        self.z_star = flow_calc.z_star(self, z=self.axial_distance, FR=self.total_FR)
+
         # Effective Sherwood Number (unitless)
         # Note: the boat geometry is not considered and thus this value
         # should be used as a limiting case
-        self.N_eff_Shw_FT = flow_calc.N_eff_Shw(self, self.FT_length, self.total_FR)
+        self.N_eff_Shw_FT = flow_calc.N_eff_Shw(z_star=self.z_star)
 
         # Knudsen Number for reactant-wall/insert interaction
         # Note: the boat geometry is not considered and thus this value
@@ -633,8 +706,9 @@ class BoatReactor:
 
     def reactant_uptake(
         self,
-        hypothetical_gamma: ArrayLike | float | int,
-        gamma_wall: float = 5e-6,
+        hypothetical_gamma: ArrayLike | float,
+        gamma_wall: float = np.nan,
+        exposure_length: float = 1,
         disp: bool = True,
     ) -> None:
         """
@@ -642,11 +716,12 @@ class BoatReactor:
         walls.
 
         Args:
-            hypothetical_gamma (ArrayLike or float or int): Hypothetical
+            hypothetical_gamma (ArrayLike or float): Hypothetical
                 uptake coefficient to calculate diffusion correction
                 factor.
-            gamma_wall (float): Wall uptake coefficient (default: 5e-6
-                for halocarbon wax coating - Ivanov et al., 2021).
+            gamma_wall (float): Wall uptake coefficient (optional).
+            exposure_length (float): Length of the exposed surface in
+                cm. Default is 1 cm.
             disp (bool): Display calculated values.
 
         Returns:
@@ -659,19 +734,29 @@ class BoatReactor:
                 hypothetical_gamma = np.asarray(hypothetical_gamma, dtype=np.float64)
             except Exception as e:
                 raise TypeError(
-                    "Gamma input must be int, float, or Array-like of int "
-                    f"or float; got {type(hypothetical_gamma)}"
+                    "Gamma input must be float or Array-like of float; "
+                    f"got {type(hypothetical_gamma)}"
                 ) from e
 
             if hypothetical_gamma.ndim != 1:
                 raise ValueError("Gamma input must be 1-dimensional.")
+
+        # Verify that the exposure length is a positive number and that
+        # it is less than the axial distance of the flow tube or insert
+        if exposure_length <= 0:
+            raise ValueError("Exposure length must be a positive number.")
+        if exposure_length > self.axial_distance:
+            raise ValueError(
+                "Exposure length must be less than the axial distance. Set "
+                "object.axial_distance = ... with a larger axial_distance."
+            )
 
         # Check if hypothetical_gamma is between 0 and 1
         if np.min(hypothetical_gamma) < 0 or np.max(hypothetical_gamma) > 1:  # pyright: ignore[reportUnknownMemberType]
             raise ValueError("Hypothetical gamma must be between 0 and 1")
 
         # Check if gamma_wall is between 0 and 1
-        if gamma_wall < 0 or gamma_wall > 1:
+        if not np.isnan(gamma_wall) and (gamma_wall < 0 or gamma_wall > 1):
             raise ValueError("Wall uptake coefficient must be between 0 and 1")
 
         # Lists for displaying values
@@ -691,15 +776,14 @@ class BoatReactor:
         diff_corr = 1 - kinetics.correction_factor_from_gamma(
             self.N_eff_Shw_FT, self.Kn_FT, hypothetical_gamma
         )
-        if not isinstance(diff_corr, np.ndarray):
-            if diff_corr > 0.05:
-                warnings.warn(
-                    "Diffusion correction is > 5%. "
-                    "Negligible diffusion may no longer be a valid assumption"
-                )
+        if not isinstance(diff_corr, np.ndarray) and diff_corr > 0.05:
+            warnings.warn(
+                "Diffusion correction is > 5%. "
+                "Negligible diffusion may no longer be a valid assumption"
+            )
         var_names += [
-            "Flow Tube Wall Diffusion Correction "
-            "\n(must be small to neglect for boat reactor)"
+            "Flow Tube Wall Diffusion Correction ",
+            "\n(must be small to neglect for boat reactor)",
         ]
         var += [diff_corr * 100]
         var_fmts += [".1f"]
@@ -726,26 +810,27 @@ class BoatReactor:
         units += ["s-1"]
 
         # Uptake to boat (fraction) - first order kinetics
-        self.uptake = 1 - np.exp(-self.k * self.residence_time / 4)
-        var_names += ["Loss to Boat - 1/4 Length"]
+        self.uptake = 1 - np.exp(-self.k * exposure_length / self.flow_velocity)
+        var_names += [f"Loss to Boat - {exposure_length:.1f} cm"]
         var += [self.uptake * 100]
         var_fmts += [".1f"]
         units += ["%"]
 
         # Reactant Wall Loss (fraction)
         # - calculated as if there is no boat, take as an upper limit
-        reactant_wall_loss = kinetics.cylinder_loss(
-            self,
-            self.FT_ID,
-            self.N_eff_Shw_FT,
-            self.Kn_FT,
-            gamma_wall,
-            self.residence_time,
-        )
-        var_names += ["Estimated Wall Loss (upper limit)"]
-        var += [reactant_wall_loss * 100]
-        var_fmts += [".2g"]
-        units += ["%"]
+        if not np.isnan(gamma_wall):
+            reactant_wall_loss = kinetics.cylinder_loss(
+                self,
+                self.FT_ID,
+                self.N_eff_Shw_FT,
+                self.Kn_FT,
+                gamma_wall,
+                self.residence_time,
+            )
+            var_names += ["Estimated Wall Loss (upper limit)"]
+            var += [reactant_wall_loss * 100]
+            var_fmts += [".2g"]
+            units += ["%"]
 
         ### Display Values ###
         if disp and not isinstance(hypothetical_gamma, np.ndarray):
@@ -762,7 +847,7 @@ class BoatReactor:
         concentrations: ArrayLike,
         exposure: ArrayLike,
         exposure_units: str,
-    ) -> tuple[float, float, float, float, float, float]:
+    ) -> tuple[ArrayLike, float, float, float, float, float, float]:
         """
         Fits the observed loss to the boat to a first order kinetic
         model to extract the uptake coefficient.
@@ -774,23 +859,26 @@ class BoatReactor:
             exposure_units (str): Units of exposure (s or cm).
 
         Returns:
-            float: k, first order loss rate (s-1).
-            float: intercept, y-intercept of the fit.
-            float: r_value, correlation coefficient of the fit.
-            float: gamma, uptake coefficient.
-            float: gamma_lower, lower bound of 95% confidence interval for gamma.
-            float: gamma_upper, upper bound of 95% confidence interval for gamma.
+            exposure_times (ArrayLike): Exposure times corresponding to input exposures.
+            k (float): First order loss rate (s-1).
+            intercept (float): Y-intercept of the fit.
+            r_value (float): Correlation coefficient of the fit.
+            gamma_effective (float): Effective uptake coefficient.
+            gamma_effective_lower (float): Lower bound of 95% confidence interval for gamma_effective.
+            gamma_effective_upper (float): Upper bound of 95% confidence interval for gamma_effective.
         """
 
         # Check for geometric correction and apply
         # (see geometric_correction in reactant_uptake)
         if not hasattr(self, "geometric_correction"):
-            raise RuntimeError("Must call reactant_uptake() before calculate_gamma_effective()")
+            raise RuntimeError(
+                "Must call reactant_uptake() before calculate_gamma_effective()"
+            )
         else:
             diameter = self.FT_ID * self.geometric_correction
 
         # Fit data to first order kinetics
-        slope, intercept, r_value, _p_value, std_err = (
+        exposure_times, slope, intercept, r_value, _p_value, std_err = (
             kinetics.fit_first_order_kinetics(
                 obj=self,
                 concentrations=concentrations,
@@ -801,26 +889,34 @@ class BoatReactor:
         k = -slope
 
         # Calculate gamma and confidence intervals
-        gamma = kinetics.gamma_from_k(
+        gamma_effective = kinetics.gamma_from_k(
             self,
             k=k,
             diameter=diameter,
         )
-        gamma_upper = kinetics.gamma_from_k(
+        gamma_effective_upper = kinetics.gamma_from_k(
             self,
             k=k + std_err * 1.96,
             diameter=diameter,
         )
-        gamma_lower = kinetics.gamma_from_k(
+        gamma_effective_lower = kinetics.gamma_from_k(
             self,
             k=k - std_err * 1.96,
             diameter=diameter,
         )
 
-        if gamma_lower < 0 or gamma_upper > 1:
+        if gamma_effective_lower < 0 or gamma_effective_upper > 1:
             warnings.warn(
-                "Calculated confidence interval for gamma is unphysical. "
+                "Calculated confidence interval for gamma_effective is unphysical. "
                 "This is typically due to limited data or low correlation."
             )
 
-        return k, intercept, r_value, gamma, gamma_lower, gamma_upper
+        return (
+            exposure_times,
+            k,
+            intercept,
+            r_value,
+            gamma_effective,
+            gamma_effective_lower,
+            gamma_effective_upper,
+        )

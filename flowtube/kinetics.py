@@ -8,10 +8,13 @@ Citations:
     3746–3754. https://doi.org/10.1021/ac5042395
 """
 
-from .flow_calc import full_attrs, carrier_attrs
+from __future__ import annotations
+
 import numpy as np
-from numpy.typing import NDArray, ArrayLike
+from numpy.typing import ArrayLike, NDArray
 from scipy.stats import linregress
+
+from .flow_calc import carrier_attrs, full_attrs
 
 
 ### KPS Method Calculations ###
@@ -66,23 +69,21 @@ def diffusion_limited_uptake_coefficient(
 def correction_factor_from_gamma(
     N_eff_Shw: float,
     Kn: float,
-    gamma: NDArray[np.float64] | float,
+    gamma_effective: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
-    Calculate correction factor (gamma_eff/gamma)for uptake coefficient 
+    Calculate correction factor (gamma_eff/gamma)for uptake coefficient
     - eq. 15 from Knopf et al., 2015.
 
     Args:
         N_eff_Shw (float): Effective Sherwood number (unitless).
         Kn (float): Knudsen number (unitless).
-        hypothetical_gamma (float): Hypothetical uptake coefficient
-            (unitless).
-
+        gamma_effective (float): Effective uptake coefficient (unitless).
     Returns:
         float: Correction factor (unitless).
     """
 
-    return 1 / (1 + gamma * 3 / (2 * N_eff_Shw * Kn))
+    return 1 / (1 + gamma_effective * 3 / (2 * N_eff_Shw * Kn))
 
 
 def correction_factor_from_effective_gamma(
@@ -91,7 +92,7 @@ def correction_factor_from_effective_gamma(
     effective_gamma: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
-    Calculate correction factor (gamma_eff/gamma) for uptake coefficient 
+    Calculate correction factor (gamma_eff/gamma) for uptake coefficient
     - eq. 20 from Knopf et al., 2015.
 
     Args:
@@ -110,7 +111,7 @@ def correction_factor_from_effective_gamma(
 def observed_loss_rate(
     obj: full_attrs,
     diameter: float,
-    gamma_eff: NDArray[np.float64] | float,
+    gamma_effective: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """
     Calculate observed loss rate (s-1) - eq. 19 from Knopf et al., 2015.
@@ -121,13 +122,13 @@ def observed_loss_rate(
             carrier_dynamic_viscosity in kg m-1 s-1,
             carrier_density in kg m-3).
         diameter (float): Diameter of the cylinder (cm).
-        gamma_eff (float): Effective uptake coefficient (unitless).
+        gamma_effective (float): Effective uptake coefficient (unitless).
 
     Returns:
         float: Observed loss rate (s-1).
     """
 
-    return gamma_eff * obj.reactant_molec_velocity / diameter
+    return gamma_effective * obj.reactant_molec_velocity / diameter
 
 
 def cylinder_loss(
@@ -192,7 +193,7 @@ def fit_first_order_kinetics(
     concentrations: ArrayLike,
     exposure: ArrayLike,
     exposure_units: str,
-) -> tuple[float, float, float, float, float]:
+) -> tuple[ArrayLike, float, float, float, float, float]:
     """
     Fits the observed loss to a first order kinetic model to extract the
     uptake coefficient.
@@ -209,11 +210,12 @@ def fit_first_order_kinetics(
             "seconds", "cm", "centimeter", "centimeters").
 
     Returns:
-        float: Slope of the linear regression.
-        float: Intercept of the linear regression.
-        float: R-value of the linear regression.
-        float: P-value of the linear regression.
-        float: Standard error of the linear regression.
+        exposure_time (ArrayLike): Array of exposure times (s).
+        slope (float): Slope of the linear regression.
+        intercept (float): Intercept of the linear regression.
+        r_value (float): R-value of the linear regression.
+        p_value (float): P-value of the linear regression.
+        std_err (float): Standard error of the linear regression.
     """
 
     ### Check for valid inputs ###
@@ -264,4 +266,12 @@ def fit_first_order_kinetics(
     # Fit data with linear regression
     log_concentrations = np.log(concentrations)
 
-    return linregress(exposure_time, log_concentrations)
+    result = linregress(exposure_time, log_concentrations)
+    return (
+        exposure_time,
+        result.slope,  # pyright: ignore[reportAttributeAccessIssue]
+        result.intercept,  # pyright: ignore[reportAttributeAccessIssue]
+        result.rvalue,  # pyright: ignore[reportAttributeAccessIssue]
+        result.pvalue,  # pyright: ignore[reportAttributeAccessIssue]
+        result.stderr,  # pyright: ignore[reportAttributeAccessIssue]
+    )

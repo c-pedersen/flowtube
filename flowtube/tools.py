@@ -13,12 +13,12 @@ Constants:
 """
 
 from warnings import warn
+
+import molmass as mm
 import numpy as np
 import pandas as pd
-import molmass as mm
-from tabulate import tabulate
 from requests.structures import CaseInsensitiveDict
-
+from tabulate import tabulate
 
 ### Constants ###
 # Physical constants
@@ -110,8 +110,10 @@ def vapor_pressure_to_MR(
     if vapor_pressure_Pa > system_pressure_Pa:
         raise ValueError("Vapor pressure cannot exceed system pressure.")
     if vapor_pressure_Pa > system_pressure_Pa * 0.01:
-        warn("Vapor pressure is greater than 1% of system pressure. "
-             "This may lead to non-ideal behavior and inaccurate mixing ratio calculation.")
+        warn(
+            "Vapor pressure is greater than 1% of system pressure. "
+            "This may lead to non-ideal behavior and inaccurate mixing ratio calculation."
+        )
 
     # Calculate mixing ratio as the ratio of vapor pressure to system pressure
     return vapor_pressure_Pa / system_pressure_Pa

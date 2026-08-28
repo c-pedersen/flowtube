@@ -1,7 +1,7 @@
 # Configuration file for the Sphinx documentation builder.
 import os
-import sys
 import re
+import sys
 
 # Make the project root importable
 sys.path.insert(0, os.path.abspath("../.."))

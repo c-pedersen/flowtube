@@ -1,22 +1,30 @@
 """
 Handles the calculation of the diffusion coefficient of a binary gas
-mixture.
+mixture using the Lennard-Jones model.
 
-Citations
-    Reid, R.C., Prausnitz, J.M., Poling, B.E., 1987. The Properties of Gases
-    and Liquids, 4th ed. McGraw-Hill, New York.
+Citations:
+Reid, R.C., Prausnitz, J.M., Poling, B.E., 1987. The Properties of Gases
+and Liquids, 4th ed. McGraw-Hill, New York.
+
+Langenberg, S., Carstens, T., Hupperich, D., Schweighoefer, S.,
+Schurath, U., 2020. Technical note: Determination of binary gas-phase
+diffusion coefficients of unstable and adsorbing atmospheric trace gases
+at low temperature - arrested flow and twin tube method. Atmos. Chem.
+Phys. 20, 3669-3682. https://doi.org/10.5194/acp-20-3669-2020
+
 """
 
-import numpy as np
-import molmass as mm
 from typing import Protocol
+
+import molmass as mm
+import numpy as np
 
 from . import tools
 
 
 class required_attrs(Protocol):
-    P: float  # Pressure in Pa
-    T: float  # Temperature in K
+    P_Pa: float  # Pressure in Pa
+    T_K: float  # Temperature in K
     reactant_gas: str  # Molecular formula of reactant gas
     carrier_gas: str  # Molecular formula of carrier gas
 
@@ -37,6 +45,11 @@ sigmas: dict[str, float] = {
     "NO": 3.492,
     "N2": 3.798,
     "O2": 3.467,
+    "ClONO2": 4.470,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "ClNO3": 4.470,  # See above
+    "N2O5": 4.570,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "O3": 3.875,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "NO2": 3.765,  # Langenberg et al., Atmos. Chem. Phys., 2020
 }
 
 # Characteristic Lennard-Jones Energies (K)
@@ -54,6 +67,11 @@ e_ks: dict[str, float] = {
     "NO": 116.7,
     "N2": 71.4,
     "O2": 106.7,
+    "ClONO2": 364.7,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "ClNO3": 364.7,  # See above
+    "N2O5": 450.0,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "O3": 208.4,  # Langenberg et al., Atmos. Chem. Phys., 2020
+    "NO2": 210.0,  # Langenberg et al., Atmos. Chem. Phys., 2020
 }
 
 
@@ -94,8 +112,8 @@ def binary_diffusion_coefficient(obj: required_attrs) -> float:
     Returns:
         float: Diffusion coefficient for binary gas mixture (cm2 s-1)
     """
-    if (obj.reactant_gas not in sigmas.keys()) or (
-        obj.carrier_gas not in sigmas.keys()
+    if (obj.reactant_gas not in sigmas) or (
+        obj.carrier_gas not in sigmas
     ):
         raise ValueError(
             f"Unsupported gas. Supported gases: {', '.join(sigmas.keys())}"
@@ -113,10 +131,10 @@ def binary_diffusion_coefficient(obj: required_attrs) -> float:
     mean_e_k = (e_ks[obj.reactant_gas] * e_ks[obj.carrier_gas]) ** 0.5
 
     # Diffusion Collision Integral (unitless)
-    Omega_D = non_polar_Lennard_Jones_potential(mean_e_k, obj.T)
+    Omega_D = non_polar_Lennard_Jones_potential(mean_e_k, obj.T_K)
 
     return float(
         0.00266
-        * obj.T**1.5
-        / ((obj.P / tools.STANDARD_PRESSURE_Pa) * m**0.5 * mean_sigma**2 * Omega_D)
+        * obj.T_K**1.5
+        / ((obj.P_Pa / tools.STANDARD_PRESSURE_Pa) * m**0.5 * mean_sigma**2 * Omega_D)
     )
