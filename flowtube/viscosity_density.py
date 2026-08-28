@@ -15,11 +15,12 @@ Citations
     Gases and Liquids, 4th ed. McGraw-Hill, New York.
 """
 
-import numpy as np
-import molmass as mm
 import math
 from typing import Protocol
 from warnings import warn
+
+import molmass as mm
+import numpy as np
 
 from . import tools
 
@@ -62,7 +63,7 @@ def real_density(
     """
 
     # Check if the gas is supported
-    if gas not in a.keys():
+    if gas not in a:
         raise ValueError(f"Unsupported gas. Supported gases: {', '.join(a.keys())}")
 
     # Molar mass (g mol-1)
@@ -113,7 +114,7 @@ def dynamic_viscosity(
         float: Gas viscosity (kg m-1 s-1).
     """
     # Check if the gas is supported
-    if gas not in a.keys():
+    if gas not in a:
         raise ValueError(f"Unsupported gas. Supported gases: {', '.join(a.keys())}")
 
     # Molar mass (g mol-1)

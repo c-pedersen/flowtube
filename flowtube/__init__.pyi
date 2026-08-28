@@ -2,11 +2,12 @@
 
 import numpy as np
 from numpy.typing import NDArray
-from . import tools as tools
-from . import viscosity_density as viscosity_density
+
 from . import diffusion_coef as diffusion_coef
 from . import flow_calc as flow_calc
 from . import kinetics as kinetics
+from . import tools as tools
+from . import viscosity_density as viscosity_density
 
 class CoatedWallReactor:
     """
@@ -212,4 +213,12 @@ class BoatReactor:
 __version__: str
 __author__: str
 __email__: str
-__all__: list[str]
+__all__ = [
+    "BoatReactor",
+    "CoatedWallReactor",
+    "diffusion_coef",
+    "flow_calc",
+    "kinetics",
+    "tools",
+    "viscosity_density",
+]

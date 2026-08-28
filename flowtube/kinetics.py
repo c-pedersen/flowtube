@@ -8,10 +8,13 @@ Citations:
     3746–3754. https://doi.org/10.1021/ac5042395
 """
 
-from .flow_calc import full_attrs, carrier_attrs
+from __future__ import annotations
+
 import numpy as np
-from numpy.typing import NDArray, ArrayLike
+from numpy.typing import ArrayLike, NDArray
 from scipy.stats import linregress
+
+from .flow_calc import carrier_attrs, full_attrs
 
 
 ### KPS Method Calculations ###

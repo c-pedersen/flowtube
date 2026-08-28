@@ -13,12 +13,12 @@ Constants:
 """
 
 from warnings import warn
+
+import molmass as mm
 import numpy as np
 import pandas as pd
-import molmass as mm
-from tabulate import tabulate
 from requests.structures import CaseInsensitiveDict
-
+from tabulate import tabulate
 
 ### Constants ###
 # Physical constants

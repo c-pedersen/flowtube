@@ -30,7 +30,9 @@ Fundamentals of heat and mass transfer, 6. ed. ed. Wiley, Hoboken, NJ.
 """
 
 from typing import Protocol
+
 import numpy as np
+
 from . import tools
 
 
@@ -316,8 +318,9 @@ def buoyancy_parameters(
         9.81  # m s-2
         / obj.T_K  # K
         * delta_T  # K
-        * (distance / 100)**3 # m3
-        / (obj.carrier_dynamic_viscosity / obj.carrier_density) ** 2 # (kg m-1 s-1 / kg m-3 = m2 s-1)^2
+        * (distance / 100) ** 3  # m3
+        / (obj.carrier_dynamic_viscosity / obj.carrier_density)
+        ** 2  # (kg m-1 s-1 / kg m-3 = m2 s-1)^2
     )
 
     return grashof_number / Re**2

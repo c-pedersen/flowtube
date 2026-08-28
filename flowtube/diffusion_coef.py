@@ -14,9 +14,10 @@ Phys. 20, 3669-3682. https://doi.org/10.5194/acp-20-3669-2020
 
 """
 
-import numpy as np
-import molmass as mm
 from typing import Protocol
+
+import molmass as mm
+import numpy as np
 
 from . import tools
 
@@ -111,8 +112,8 @@ def binary_diffusion_coefficient(obj: required_attrs) -> float:
     Returns:
         float: Diffusion coefficient for binary gas mixture (cm2 s-1)
     """
-    if (obj.reactant_gas not in sigmas.keys()) or (
-        obj.carrier_gas not in sigmas.keys()
+    if (obj.reactant_gas not in sigmas) or (
+        obj.carrier_gas not in sigmas
     ):
         raise ValueError(
             f"Unsupported gas. Supported gases: {', '.join(sigmas.keys())}"

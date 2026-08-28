@@ -24,12 +24,14 @@ Citations:
 """
 
 from __future__ import annotations
-import numpy as np
-import molmass as mm
-from numpy.typing import NDArray, ArrayLike
+
 import warnings
 
-from . import tools, diffusion_coef, viscosity_density, flow_calc, kinetics
+import molmass as mm
+import numpy as np
+from numpy.typing import ArrayLike, NDArray
+
+from . import diffusion_coef, flow_calc, kinetics, tools, viscosity_density
 
 _CTOR_ATTRS = frozenset(
     {
