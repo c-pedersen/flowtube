@@ -87,14 +87,16 @@ class CoatedWallReactor:
             )
 
         # Check physicality of insert dimensions
-        if self.insert_ID < 0 or self.insert_OD < 0:
-            raise ValueError("Insert ID and OD must be positive")
-        elif self.insert_ID > self.FT_ID or self.insert_OD > self.FT_ID:
-            raise ValueError("Insert cannot be larger than flow tube ID")
-        elif np.isnan(self.insert_ID) != np.isnan(self.insert_OD):
+        if np.isnan(self.insert_ID) != np.isnan(self.insert_OD):
             raise ValueError(
                 "Insert dimensions must all be specified or all be unspecified"
             )
+        elif self.insert_ID <= 0 or self.insert_OD <= 0:
+            raise ValueError("Insert ID and OD must be non-zero and positive")
+        elif self.insert_ID > self.FT_ID or self.insert_OD > self.FT_ID:
+            raise ValueError("Insert cannot be larger than flow tube ID")
+        elif not np.isnan(self.insert_ID) and self.insert_ID > self.insert_OD:
+            raise ValueError("Insert ID cannot be larger than insert OD")
 
         # Check physicality of injector dimensions
         if self.injector_ID < 0 or self.injector_OD < 0:
@@ -335,13 +337,15 @@ class CoatedWallReactor:
                 self.manually_inputted_diffusion_rate = False
             self.reactant_diffusion_rate = reactant_diffusion_rate
         else:
-            if self.manually_inputted_diffusion_rate & ~np.isnan(reactant_diffusion_rate):
+            if self.manually_inputted_diffusion_rate & ~np.isnan(
+                reactant_diffusion_rate
+            ):
                 self.reactant_diffusion_rate = reactant_diffusion_rate
 
         # Perform calculations for flows, carrier gas transport, and reactant diffusion
         self.flows(disp=disp)
         self.carrier_flow(disp=disp)
-        self.reactant_diffusion(axial_distance, disp=disp)
+        self.reactant_diffusion(disp=disp)
 
         # Turn flag off to allow __setattr__ to be used normally
         object.__setattr__(self, "_initializing", False)
@@ -676,14 +680,11 @@ class CoatedWallReactor:
 
     def reactant_diffusion(
         self,
-        axial_distance: float,
         disp: bool = True,
     ) -> None:
         """Performs and displays reactant diffusion calculations.
 
         Args:
-            axial_distance (float): Axial distance of exposed reactant
-                surface (cm). Also referred to as z.
             disp (bool): Display calculated calculated values.
 
         Returns:
@@ -839,7 +840,6 @@ class CoatedWallReactor:
     def reactant_uptake(
         self,
         hypothetical_gamma: ArrayLike | float,
-        wall_exposure_length: float = 1,
         exposure_length: float = 1,
         exposure_time: float = 10,
         disp: bool = True,
@@ -852,8 +852,6 @@ class CoatedWallReactor:
             hypothetical_gamma (ArrayLike or float): Hypothetical
                 uptake coefficient to calculate diffusion correction
                 factor.
-            wall_exposure_length (float): Length of the exposed wall in
-                cm to calculate wall loss over. Default is 1 cm.
             exposure_length (float): Length of the exposed surface in
                 cm. Default is 1 cm.
             exposure_time (float): Time in minutes over which the
@@ -951,7 +949,7 @@ class CoatedWallReactor:
 
         ### Uptake to coated region - see kinetics.py for details ###
         if not np.isnan(self.insert_OD):
-            self.uptake = kinetics.cylinder_loss(
+            uptake = kinetics.cylinder_loss(
                 self,
                 self.insert_ID,
                 self.N_eff_Shw_insert,
@@ -961,7 +959,7 @@ class CoatedWallReactor:
             )
             var_names += [f"Insert Loss per {exposure_length:.1f} cm Exposure"]
         else:
-            self.uptake = kinetics.cylinder_loss(
+            uptake = kinetics.cylinder_loss(
                 self,
                 self.FT_ID,
                 self.N_eff_Shw_FT,
@@ -970,7 +968,7 @@ class CoatedWallReactor:
                 exposure_length / self.FT_flow_velocity,
             )
             var_names += [f"Flow Tube Loss per {exposure_length:.1f} cm Exposure"]
-        var += [self.uptake * 100]
+        var += [uptake * 100]
         var_fmts += [".1f"]
         units += ["%"]
 

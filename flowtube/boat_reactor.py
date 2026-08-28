@@ -353,9 +353,14 @@ class BoatReactor:
             else:
                 self.manually_inputted_diffusion_rate = False
             self.reactant_diffusion_rate = reactant_diffusion_rate
+        else:
+            if self.manually_inputted_diffusion_rate & ~np.isnan(
+                reactant_diffusion_rate
+            ):
+                self.reactant_diffusion_rate = reactant_diffusion_rate
 
         # Calculate boat perimeter if not provided, assuming a half-cylinder profile
-        if not self._user_boat_perimeter:
+        if self._user_boat_perimeter is None:
             boat_effective_radius = np.sqrt(2 * self.boat_cross_section / np.pi)
             self.boat_perimeter = tools.partial_cylinder_area(
                 boat_effective_radius, boat_effective_radius * 2
@@ -703,7 +708,6 @@ class BoatReactor:
         self,
         hypothetical_gamma: ArrayLike | float,
         gamma_wall: float = np.nan,
-        wall_exposure_length: float = 1,
         exposure_length: float = 1,
         disp: bool = True,
     ) -> None:
@@ -716,8 +720,6 @@ class BoatReactor:
                 uptake coefficient to calculate diffusion correction
                 factor.
             gamma_wall (float): Wall uptake coefficient (optional).
-            wall_exposure_length (float): Length of the exposed wall in
-                cm to calculate wall loss over. Default is 1 cm.
             exposure_length (float): Length of the exposed surface in
                 cm. Default is 1 cm.
             disp (bool): Display calculated values.
@@ -808,8 +810,8 @@ class BoatReactor:
         units += ["s-1"]
 
         # Uptake to boat (fraction) - first order kinetics
-        self.uptake = 1 - np.exp(-self.k * self.residence_time / 4)
-        var_names += ["Loss to Boat - 1/4 Length"]
+        self.uptake = 1 - np.exp(-self.k * exposure_length / self.flow_velocity)
+        var_names += [f"Loss to Boat - {exposure_length:.1f} cm"]
         var += [self.uptake * 100]
         var_fmts += [".1f"]
         units += ["%"]

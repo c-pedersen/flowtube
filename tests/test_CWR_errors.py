@@ -112,9 +112,11 @@ def test_Knopf_et_al_2015_parameters_do_not_raise(
     assert np.isclose(obj.reactant_molec_velocity, 6.04e4, rtol=0.1)
 
 
-def test_FT_insert_flow_velocity(make_constructor_kwargs, make_init_kwargs, build_reactor):
+def test_FT_insert_flow_velocity(
+    make_constructor_kwargs, make_init_kwargs, build_reactor
+):
     """
-    Test that the flow velocity through the insert is less than the flow
+    Test that the flow velocity through the insert is greater than the flow
     velocity through the flow tube.
     """
     kwargs = make_constructor_kwargs(
@@ -146,3 +148,7 @@ def test_FT_insert_flow_velocity(make_constructor_kwargs, make_init_kwargs, buil
     )
 
     assert np.isclose(obj.insert_flow_velocity, obj.FT_flow_velocity, rtol=1e-3)
+
+    obj.insert_OD = 1.5
+
+    assert obj.insert_flow_velocity > obj.FT_flow_velocity

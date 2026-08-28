@@ -25,7 +25,6 @@ class CoatedWallReactor:
     reactant_conc: float
     insert_ID: float
     insert_OD: float
-    insert_length: float
 
     def __init__(
         self,
@@ -39,7 +38,6 @@ class CoatedWallReactor:
         reactant_conc: float,
         insert_ID: float = ...,
         insert_OD: float = ...,
-        insert_length: float = ...,
     ) -> None: ...
     def initialize(
         self,
@@ -49,6 +47,7 @@ class CoatedWallReactor:
         P: float,
         P_units: str,
         T: float,
+        axial_distance: float,
         reactant_diffusion_rate: float = ...,
         radial_delta_T: float = ...,
         disp: bool = ...,
@@ -62,6 +61,9 @@ class CoatedWallReactor:
     P_Pa: float
     T: float
     T_K: float
+    axial_distance: float
+    reactant_diffusion_rate: float
+    radial_delta_T: float
 
     def flows(
         self,
@@ -89,17 +91,23 @@ class CoatedWallReactor:
     def reactant_diffusion(
         self, reactant_diffusion_rate: float = ..., disp: bool = ...
     ) -> None: ...
+
+    reactant_molec_velocity: float
+    reactant_mean_free_path: float
+    Pe: float
+    z_star_FT: float
+    N_eff_Shw_FT: float
+    Kn_FT: float
+
     def reactant_uptake(
         self,
         hypothetical_gamma: NDArray[np.float64] | float,
-        gamma_wall: float = ...,
         disp: bool = ...,
     ) -> None: ...
 
-    k: float
-    uptake: float
+    C_g: float
 
-    def calculate_gamma(
+    def calculate_gamma_effective(
         self,
         concentrations: NDArray[np.float64],
         exposure: NDArray[np.float64],
@@ -148,6 +156,7 @@ class BoatReactor:
         P: float,
         P_units: str,
         T: float,
+        axial_distance: float,
         reactant_diffusion_rate: float = ...,
         radial_delta_T: float = ...,
         disp: bool = ...,
@@ -161,6 +170,9 @@ class BoatReactor:
     P_Pa: float
     T: float
     T_K: float
+    axial_distance: float
+    reactant_diffusion_rate: float
+    radial_delta_T: float
 
     def flows(
         self,
@@ -191,7 +203,8 @@ class BoatReactor:
     def reactant_uptake(
         self,
         hypothetical_gamma: NDArray[np.float64] | float,
-        gamma_wall: float = 5e-6,
+        exposure_length: float,
+        gamma_wall: float = ...,
         disp: bool = True,
     ) -> None: ...
 
@@ -205,10 +218,6 @@ class BoatReactor:
         exposure: NDArray[np.float64],
         exposure_units: str,
     ) -> tuple[float, float, float, float, float]: ...
-    def diffusion_corrected_uptake_coefficient(
-        self,
-        effective_gamma: float,
-    ) -> float: ...
 
 __version__: str
 __author__: str
