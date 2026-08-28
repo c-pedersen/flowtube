@@ -239,7 +239,7 @@ class CoatedWallReactor:
             axial_distance (float): Axial distance of exposed reactant
                 surface (cm). Also referred to as z.
             reactant_diffusion_rate (float): Reactant diffusion rate
-                (cm2 s-1).
+                (cm2 s-1) (optional).
             radial_delta_T (float): Radial temperature gradient (K)
                 (default = 1 K).
             disp (bool): Display calculated calculated values.
@@ -323,7 +323,7 @@ class CoatedWallReactor:
         except ValueError:
             raise TypeError("Reactant diffusion rate must be a number")
 
-        # Check if the user has manually inputted a diffusion rate
+        # Check if the user has previously manually inputted a diffusion rate
         try:
             self.manually_inputted_diffusion_rate  # noqa: B018
         except AttributeError:
@@ -332,6 +332,9 @@ class CoatedWallReactor:
             else:
                 self.manually_inputted_diffusion_rate = False
             self.reactant_diffusion_rate = reactant_diffusion_rate
+        else:
+            if self.manually_inputted_diffusion_rate & ~np.isnan(reactant_diffusion_rate):
+                self.reactant_diffusion_rate = reactant_diffusion_rate
 
         # Perform calculations for flows, carrier gas transport, and reactant diffusion
         self.flows(disp=disp)
