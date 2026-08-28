@@ -205,7 +205,7 @@ def test_change_reactant_conc_type(Reactor, make_constructor_kwargs, make_init_k
 
 def test_cwr_change_insert_ID(make_constructor_kwargs, make_init_kwargs):
     new_val = 1.0
-    ctor_overrides = {"insert_ID": new_val, "insert_OD": 1.5, "insert_length": 50.0}
+    ctor_overrides = {"insert_ID": new_val, "insert_OD": 1.5}
     fresh = build_fresh(
         CoatedWallReactor, make_constructor_kwargs, make_init_kwargs, **ctor_overrides
     )
@@ -217,16 +217,16 @@ def test_cwr_change_insert_ID(make_constructor_kwargs, make_init_kwargs):
     assert_reactors_equal(CoatedWallReactor, fresh, obj)
 
 
-def test_cwr_change_insert_length(make_constructor_kwargs, make_init_kwargs):
-    new_val = 30.0
-    ctor_overrides = {"insert_ID": 1.0, "insert_OD": 1.5, "insert_length": new_val}
+def test_cwr_change_insert_OD(make_constructor_kwargs, make_init_kwargs):
+    new_val = 1.1111111
+    ctor_overrides = {"insert_ID": 1.0, "insert_OD": new_val}
     fresh = build_fresh(
         CoatedWallReactor, make_constructor_kwargs, make_init_kwargs, **ctor_overrides
     )
     ctor = make_constructor_kwargs(CoatedWallReactor, **ctor_overrides)
     obj = CoatedWallReactor(**ctor)
     obj.initialize(**make_init_kwargs(CoatedWallReactor))
-    obj.insert_length = new_val
+    obj.insert_OD = new_val
     assert_reactors_equal(CoatedWallReactor, fresh, obj)
 
 

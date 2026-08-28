@@ -22,16 +22,13 @@ Citations:
     International Reviews in Aerosol Physics and Chemistry. Pergamon,
     p. 1. https://doi.org/10.1016/B978-0-08-016674-2.50006-6
 
-    Ivanov, A.V., Molina, M.J., Park, J., 2021. Experimental study on
-    HCl uptake by MgCl2 and sea salt under humid conditions. J Mass
-    Spectrom 56, e4601. https://doi.org/10.1002/jms.4601
-
     Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and
     evaluation of gas phase diffusion coefficients of reactive trace
     gases in the atmosphere: volume 1. Inorganic compounds. Atmos. Chem.
     Phys. 14, 9233-9247. https://doi.org/10.5194/acp-14-9233-2014
 """
 
+from __future__ import annotations
 import numpy as np
 import molmass as mm
 from numpy.typing import NDArray, ArrayLike
@@ -52,7 +49,6 @@ _CTOR_ATTRS = frozenset(
         "reactant_conc",
         "insert_ID",
         "insert_OD",
-        "insert_length",
         "reactant_FR",
         "reactant_carrier_FR",
         "carrier_FR",
@@ -62,6 +58,7 @@ _CTOR_ATTRS = frozenset(
         "manually_inputted_diffusion_rate",
         "reactant_diffusion_rate",
         "radial_delta_T",
+        "axial_distance",
     }
 )
 
@@ -69,32 +66,30 @@ _CTOR_ATTRS = frozenset(
 class CoatedWallReactor:
     def _validate_init(self) -> None:
         # Check if the gases are supported
-        if self.reactant_gas not in diffusion_coef.sigmas.keys():
+        if self.reactant_gas not in diffusion_coef.sigmas:
             # Validate molecular formulas using molarmass
             try:
-                mm.Formula(self.reactant_gas).mass  # raises on invalid formula
-            except Exception:
+                mm.Formula(  # noqa: B018
+                    self.reactant_gas
+                ).mass  # raises on invalid formula
+            except Exception as e:
                 raise ValueError(
                     f"Invalid reactant gas molecular formula: {self.reactant_gas}. "
                     f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}, or "
                     f"other if manually inputting diffusion coefficient"
-                )
-        if self.carrier_gas not in viscosity_density.a.keys():
+                ) from e
+        if self.carrier_gas not in viscosity_density.a:
             raise ValueError(
                 f"Unsupported carrier gas. "
                 f"Supported gases: {', '.join(viscosity_density.a.keys())}"
             )
 
         # Check physicality of insert dimensions
-        if self.insert_ID < 0 or self.insert_length < 0 or self.insert_OD < 0:
-            raise ValueError("Insert ID, OD, and length must be positive")
+        if self.insert_ID < 0 or self.insert_OD < 0:
+            raise ValueError("Insert ID and OD must be positive")
         elif self.insert_ID > self.FT_ID or self.insert_OD > self.FT_ID:
             raise ValueError("Insert cannot be larger than flow tube ID")
-        elif self.insert_length > self.FT_length:
-            raise ValueError("Insert length cannot be larger than flow tube length")
-        elif np.isnan(self.insert_ID) != np.isnan(self.insert_OD) or np.isnan(
-            self.insert_ID
-        ) != (self.insert_length == 0):
+        elif np.isnan(self.insert_ID) != np.isnan(self.insert_OD):
             raise ValueError(
                 "Insert dimensions must all be specified or all be unspecified"
             )
@@ -141,7 +136,6 @@ class CoatedWallReactor:
         reactant_conc: float,
         insert_ID: float = np.nan,
         insert_OD: float = np.nan,
-        insert_length: float = 0,
     ) -> None:
         """
         Handles calculations relevant to flow rate, flow diagnostics,
@@ -169,7 +163,6 @@ class CoatedWallReactor:
             reactant_conc (float): Reactant concentration value.
             insert_ID (float, optional): Inner diameter (cm) of insert.
             insert_OD (float, optional): Outer diameter (cm) of insert.
-            insert_length (float, optional): Length (cm) of insert.
 
         Returns:
             None
@@ -188,7 +181,6 @@ class CoatedWallReactor:
         self.carrier_gas = carrier_gas
         self.insert_ID = insert_ID
         self.insert_OD = insert_OD
-        self.insert_length = insert_length
 
         # Validate inputs
         self._validate_init()
@@ -214,6 +206,7 @@ class CoatedWallReactor:
                 P=self.P,
                 P_units=self.P_units,
                 T=self.T,
+                axial_distance=self.axial_distance,
                 disp=False,
             )
 
@@ -225,6 +218,7 @@ class CoatedWallReactor:
         P: float,
         P_units: str,
         T: float,
+        axial_distance: float,
         reactant_diffusion_rate: float = np.nan,
         radial_delta_T: float = 1,
         disp: bool = True,
@@ -242,6 +236,8 @@ class CoatedWallReactor:
             P (float): Pressure.
             P_units (str): Pressure units.
             T (float): Temperature (C).
+            axial_distance (float): Axial distance of exposed reactant
+                surface (cm). Also referred to as z.
             reactant_diffusion_rate (float): Reactant diffusion rate
                 (cm2 s-1).
             radial_delta_T (float): Radial temperature gradient (K)
@@ -263,7 +259,7 @@ class CoatedWallReactor:
             raise ValueError("Flow rates must be positive or zero")
 
         # Check if the pressure units are supported
-        if P_units not in tools.P_CF.keys():
+        if P_units not in tools.P_CF:
             raise ValueError(
                 f"Unsupported pressure units. "
                 f"Supported units: {', '.join(tools.P_CF.keys())}"
@@ -301,6 +297,12 @@ class CoatedWallReactor:
                 "Mixing ratio must be between 0 and 1"
             )
 
+        ### Check for valid inputs ###
+        try:
+            float(axial_distance)
+        except TypeError:
+            raise TypeError("Axial distance must be castable to a float")
+
         # Flag to prevent calling __setattr__ before initialization is complete
         object.__setattr__(self, "_initializing", True)
 
@@ -313,6 +315,7 @@ class CoatedWallReactor:
         self.radial_delta_T = radial_delta_T
         self.P_Pa = tools.P_in_Pa(self.P, self.P_units)
         self.T_K = tools.T_in_K(self.T)
+        self.axial_distance = float(axial_distance)
 
         # Verify that the reactant diffusion rate is a number
         try:
@@ -333,7 +336,7 @@ class CoatedWallReactor:
         # Perform calculations for flows, carrier gas transport, and reactant diffusion
         self.flows(disp=disp)
         self.carrier_flow(disp=disp)
-        self.reactant_diffusion(disp=disp)
+        self.reactant_diffusion(axial_distance, disp=disp)
 
         # Turn flag off to allow __setattr__ to be used normally
         object.__setattr__(self, "_initializing", False)
@@ -366,7 +369,7 @@ class CoatedWallReactor:
             self.FT_ID
         ) - tools.cross_sectional_area(self.injector_OD)
         # If the insert is present, subtract the cross sectional area of the insert
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             cross_section_outside_insert = tools.cross_sectional_area(
                 self.FT_ID
             ) - tools.cross_sectional_area(self.insert_OD)
@@ -383,7 +386,7 @@ class CoatedWallReactor:
 
         # Postinjector net cross section is the area inside the FT,
         # minus the area of the insert if present
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             postinjector_net_cross_section = (
                 cross_section_outside_insert + cross_section_inside_insert  # pyright: ignore
             )
@@ -418,7 +421,7 @@ class CoatedWallReactor:
 
         ### Minimum Carrier Flow Velocity & Rate ###
         # to prevent effect mentioned in Li et al., ACP, 2020
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             var_names += ["Minimum Carrier Flow Rate (accounting for insert)"]
         else:
             var_names += ["Minimum Carrier Flow Rate"]
@@ -447,7 +450,7 @@ class CoatedWallReactor:
         units += ["sccm"]
 
         ### Flow Rate Through Insert ###
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             self.insert_FR = (
                 self.total_FR
                 * cross_section_inside_insert  # pyright: ignore[reportPossiblyUnboundVariable]
@@ -475,7 +478,7 @@ class CoatedWallReactor:
         # Concentration after the injector (ppb) - Insert
         # assumes the injector is inside the insert, and that the
         # reactant flow only mixes inside the insert
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             self.insert_conc = (
                 self.reactant_FR / self.insert_FR * self.reactant_MR * 1e9
             )
@@ -504,7 +507,7 @@ class CoatedWallReactor:
 
         ### Insert flow velocity ###
         # - accounts for flow around outside of insert and through inside of insert
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             self.insert_flow_velocity = (
                 flow_calc.sccm_to_ccm(self, self.total_FR)
                 / postinjector_net_cross_section  # pyright: ignore[reportPossiblyUnboundVariable]
@@ -522,12 +525,12 @@ class CoatedWallReactor:
         var_fmts += [".3g"]
         units += ["s"]
 
-        if self.insert_length > 0:
-            self.insert_residence_time = self.insert_length / self.insert_flow_velocity
-            var_names += ["Insert Residence Time"]
+        if not np.isnan(self.insert_OD):
+            self.insert_residence_time = 1 / self.insert_flow_velocity
+            var_names += ["Insert Residence Time per cm"]
             var += [self.insert_residence_time]
             var_fmts += [".3g"]
-            units += ["s"]
+            units += ["s cm-1"]
 
         ### Display Values ###
         if disp:
@@ -584,7 +587,7 @@ class CoatedWallReactor:
         if self.Re_FT > 1800:
             warnings.warn("Re > 1800. Flow in flow tube may not be laminar")
 
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             Re_insert = flow_calc.reynolds_number(self, self.total_FR, self.insert_ID)
             var_names += ["Insert Reynolds Number"]
             var += [Re_insert]
@@ -600,7 +603,7 @@ class CoatedWallReactor:
         var_fmts += [".1f"]
         units += ["cm"]
 
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             insert_length_to_laminar = flow_calc.length_to_laminar(
                 self.insert_ID,
                 Re_insert,  # pyright: ignore[reportPossiblyUnboundVariable]
@@ -612,7 +615,7 @@ class CoatedWallReactor:
 
         ### Pressure Gradient (%) - see flow_calc.py for details ###
         FT_conductance = flow_calc.conductance(self, self.FT_ID, self.FT_length)
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             insert_conductance = flow_calc.conductance(
                 self, self.insert_ID, self.FT_length
             )
@@ -668,11 +671,14 @@ class CoatedWallReactor:
 
     def reactant_diffusion(
         self,
+        axial_distance: float,
         disp: bool = True,
     ) -> None:
         """Performs and displays reactant diffusion calculations.
 
         Args:
+            axial_distance (float): Axial distance of exposed reactant
+                surface (cm). Also referred to as z.
             disp (bool): Display calculated calculated values.
 
         Returns:
@@ -693,8 +699,8 @@ class CoatedWallReactor:
             var_names += ["Manually Inputted Reactant Diffusion Rate"]
         else:
             if (
-                self.reactant_gas not in diffusion_coef.sigmas.keys()
-                and self.reactant_gas not in diffusion_coef.e_ks.keys()
+                self.reactant_gas not in diffusion_coef.sigmas
+                and self.reactant_gas not in diffusion_coef.e_ks
             ):
                 raise ValueError(
                     f"Must input reactant diffusion rate for {self.reactant_gas}"
@@ -720,7 +726,7 @@ class CoatedWallReactor:
         )
 
         ### Advection Rate (cm2 s-1) - eq. 1 from Knopf et al., Anal. Chem., 2015 ###
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             advection_rate = self.insert_flow_velocity * self.insert_ID
             var_names += ["Insert Advection Rate"]
         else:
@@ -741,7 +747,7 @@ class CoatedWallReactor:
             warnings.warn("Pe < 10. Axial diffusion is non-negligible")
 
         ### Mixing Time (s) - see flow_calc.py for details ###
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             mixing_time = flow_calc.mixing_time(self, self.insert_ID)
             var_names += ["Insert Mixing Time"]
         else:
@@ -752,7 +758,7 @@ class CoatedWallReactor:
         units += ["s"]
 
         ### Mixing Length (cm) ###
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             mixing_length = self.insert_flow_velocity * mixing_time
             var_names += ["Insert Mixing Length"]
         else:
@@ -764,27 +770,27 @@ class CoatedWallReactor:
 
         ### Axial Distance ###
         # - eq. 2 from Knopf et al., Anal. Chem., 2015
-        self.z_star = flow_calc.z_star(self, z=self.FT_length, FR=self.total_FR)
-        if self.insert_length > 0:
+        self.z_star_FT = flow_calc.z_star(self, z=self.axial_distance, FR=self.total_FR)
+        if not np.isnan(self.insert_OD):
             self.insert_z_star = flow_calc.z_star(
-                self, z=self.insert_length, FR=self.insert_FR
+                self, z=self.axial_distance, FR=self.insert_FR
             )
 
         ### Effective Sherwood Number (unitless) ###
         # - eq. 11 from Knopf et al., Anal. Chem., 2015
-        self.N_eff_Shw_FT = flow_calc.N_eff_Shw(z_star=self.z_star)
-        if self.insert_length > 0:
+        self.N_eff_Shw_FT = flow_calc.N_eff_Shw(z_star=self.z_star_FT)
+        if not np.isnan(self.insert_OD):
             self.N_eff_Shw_insert = flow_calc.N_eff_Shw(z_star=self.insert_z_star)
 
         ### Knudsen Number for reactant-wall/insert interaction ###
         # - eq. 8 from Knopf et al., Anal. Chem., 2015
         self.Kn_FT = flow_calc.Kn(self.reactant_mean_free_path, self.FT_ID)
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             self.Kn_insert = flow_calc.Kn(self.reactant_mean_free_path, self.insert_ID)
 
         ### Diffusion Limited Rate Constant (s-1) and Uptake Coefficient ###
         # - see kinetics.py for details
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             k_diff = kinetics.diffusion_limited_rate_constant(
                 self, self.N_eff_Shw_insert, self.insert_ID
             )
@@ -827,10 +833,10 @@ class CoatedWallReactor:
 
     def reactant_uptake(
         self,
-        hypothetical_gamma: ArrayLike | float | int,
+        hypothetical_gamma: ArrayLike | float,
+        wall_exposure_length: float = 1,
         exposure_length: float = 1,
         exposure_time: float = 10,
-        gamma_wall: float = 5e-6,
         disp: bool = True,
     ) -> None:
         """
@@ -838,17 +844,16 @@ class CoatedWallReactor:
         flow tube walls.
 
         Args:
-            hypothetical_gamma (ArrayLike or float or int): Hypothetical
+            hypothetical_gamma (ArrayLike or float): Hypothetical
                 uptake coefficient to calculate diffusion correction
                 factor.
-            gamma_wall (float): Wall uptake coefficient (default: 5e-6
-                for halocarbon wax coating - Ivanov et al., J. Mass
-                Spectrom., 2021).
+            wall_exposure_length (float): Length of the exposed wall in
+                cm to calculate wall loss over. Default is 1 cm.
             exposure_length (float): Length of the exposed surface in
-                cm. Default is 1.
+                cm. Default is 1 cm.
             exposure_time (float): Time in minutes over which the
-                surface is exposed to the reactant. Default is
-                10 minutes.
+                surface is exposed to the reactant. Default is 10
+                minutes.
             disp (bool): Display calculated values.
 
         Returns:
@@ -861,12 +866,22 @@ class CoatedWallReactor:
                 hypothetical_gamma = np.asarray(hypothetical_gamma, dtype=np.float64)
             except Exception as e:
                 raise TypeError(
-                    "Gamma input must be int, float, or Array-like of int "
-                    f"or float; got {type(hypothetical_gamma)}"
+                    "Gamma input must be float or Array-like of float; "
+                    f"got {type(hypothetical_gamma)}"
                 ) from e
 
             if hypothetical_gamma.ndim != 1:
                 raise ValueError("Gamma input must be 1-dimensional.")
+
+        # Verify that the exposure length is a positive number and that
+        # it is less than the axial distance of the flow tube or insert
+        if exposure_length <= 0:
+            raise ValueError("Exposure length must be a positive number.")
+        if exposure_length > self.axial_distance:
+            raise ValueError(
+                "Exposure length must be less than the axial distance. Set "
+                "object.axial_distance = ... with a larger axial_distance."
+            )
 
         # Check exposure time
         if exposure_time <= 0:
@@ -876,10 +891,6 @@ class CoatedWallReactor:
         if np.min(hypothetical_gamma) < 0 or np.max(hypothetical_gamma) > 1:
             raise ValueError("Hypothetical gamma must be between 0 and 1")
 
-        # Check if gamma_wall is between 0 and 1
-        if gamma_wall < 0 or gamma_wall > 1:
-            raise ValueError("Wall uptake coefficient must be between 0 and 1")
-
         ### Initialize lists for displaying values ###
         var_names: list[str] = []
         var: list[NDArray[np.float64] | float] = []
@@ -887,19 +898,19 @@ class CoatedWallReactor:
         units: list[str] = []
 
         ### Surface area of coated area ###
-        if self.insert_length > 0:
-            surface_area = 2 * np.pi * self.insert_ID * self.insert_length / 4
-            var_names += ["Insert surface area"]
+        if not np.isnan(self.insert_OD):
+            surface_area = 2 * np.pi * self.insert_ID / 4
+            var_names += ["Insert surface area per length"]
         else:
-            surface_area = 2 * np.pi * self.FT_ID * self.FT_length / 4
-            var_names += ["Coated wall surface area (1/4 length)"]
+            surface_area = 2 * np.pi * self.FT_ID / 4
+            var_names += ["Coated wall surface area per length"]
         var += [surface_area]
         var_fmts += [".1f"]
-        units += ["cm2"]
+        units += ["cm2/cm"]
 
         ### Diffusion Correction Factor - gamma_eff / gamma ###
         # - eq. 15 from Knopf et al., Anal. Chem., 2015
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             self.C_g = kinetics.correction_factor_from_gamma(
                 self.N_eff_Shw_insert, self.Kn_insert, hypothetical_gamma
             )
@@ -924,7 +935,7 @@ class CoatedWallReactor:
         units += ["unitless"]
 
         ### Observed Loss Rate (s-1) - see kinetics.py for details ###
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             k_obs = kinetics.observed_loss_rate(self, self.insert_ID, gamma_eff)
         else:
             k_obs = kinetics.observed_loss_rate(self, self.FT_ID, gamma_eff)
@@ -934,7 +945,7 @@ class CoatedWallReactor:
         units += ["s-1"]
 
         ### Uptake to coated region - see kinetics.py for details ###
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             self.uptake = kinetics.cylinder_loss(
                 self,
                 self.insert_ID,
@@ -958,23 +969,9 @@ class CoatedWallReactor:
         var_fmts += [".1f"]
         units += ["%"]
 
-        ### Reactant Wall Loss (entire FT minus insert) ###
-        reactant_wall_loss = kinetics.cylinder_loss(
-            self,
-            self.FT_ID,
-            self.N_eff_Shw_FT,
-            self.Kn_FT,
-            gamma_wall,
-            self.FT_residence_time * (1 - self.insert_length / self.FT_length),
-        )
-        var_names += ["Estimated Wall Loss"]
-        var += [reactant_wall_loss * 100]
-        var_fmts += [".2g"]
-        units += ["%"]
-
         ### Fraction of unreacted surface sites after exposure to reactant gas ###
         # - see Bertram et al., J. Phys. Chem. A, 2001
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             collision_frequency = (
                 self.insert_conc_molec * self.reactant_molec_velocity / 4
             )  # molecules cm-2 s-1
@@ -1030,7 +1027,7 @@ class CoatedWallReactor:
             gamma_effective_upper (float): Upper bound of 95% confidence interval for gamma_effective.
         """
         ### Check which inner diameter to use ###
-        if self.insert_length > 0:
+        if not np.isnan(self.insert_OD):
             diameter = self.insert_ID
         else:
             diameter = self.FT_ID

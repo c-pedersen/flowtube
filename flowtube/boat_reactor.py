@@ -17,16 +17,13 @@ Citations:
     International Reviews in Aerosol Physics and Chemistry. Pergamon,
     p. 1. https://doi.org/10.1016/B978-0-08-016674-2.50006-6
 
-    Ivanov, A.V., Molina, M.J., Park, J., 2021. Experimental study on
-    HCl uptake by MgCl2 and sea salt under humid conditions. J Mass
-    Spectrom 56, e4601. https://doi.org/10.1002/jms.4601
-
     Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and
     evaluation of gas phase diffusion coefficients of reactive trace
     gases in the atmosphere: volume 1. Inorganic compounds. Atmos. Chem.
     Phys. 14, 9233–9247. https://doi.org/10.5194/acp-14-9233-2014
 """
 
+from __future__ import annotations
 import numpy as np
 import molmass as mm
 from numpy.typing import NDArray, ArrayLike
@@ -56,6 +53,7 @@ _CTOR_ATTRS = frozenset(
         "T",
         "reactant_diffusion_rate",
         "radial_delta_T",
+        "axial_distance",
     }
 )
 
@@ -65,17 +63,19 @@ class BoatReactor:
 
         ### Check for valid inputs ###
         # Check if the gases are supported
-        if self.reactant_gas not in diffusion_coef.sigmas.keys():
+        if self.reactant_gas not in diffusion_coef.sigmas:
             # Validate molecular formulas using molarmass
             try:
-                mm.Formula(self.reactant_gas).mass  # raises on invalid formula
-            except Exception:
+                mm.Formula(  # noqa: B018
+                    self.reactant_gas
+                ).mass  # raises on invalid formula
+            except Exception as e:
                 raise ValueError(
                     f"Invalid reactant gas molecular formula: {self.reactant_gas}. "
                     f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}, or "
                     f"other if manually inputting diffusion coefficient"
-                )
-        if self.carrier_gas not in viscosity_density.a.keys():
+                ) from e
+        if self.carrier_gas not in viscosity_density.a:
             raise ValueError(
                 f"Unsupported carrier gas. "
                 f"Supported gases: {', '.join(viscosity_density.a.keys())}"
@@ -226,6 +226,7 @@ class BoatReactor:
                 P=self.P,
                 P_units=self.P_units,
                 T=self.T,
+                axial_distance=self.axial_distance,
                 disp=False,
             )
 
@@ -237,6 +238,7 @@ class BoatReactor:
         P: float,
         P_units: str,
         T: float,
+        axial_distance: float,
         reactant_diffusion_rate: float = np.nan,
         radial_delta_T: float = 1,
         disp: bool = True,
@@ -254,6 +256,8 @@ class BoatReactor:
             P (float): Pressure.
             P_units (str): Pressure units.
             T (float): Temperature (C).
+            axial_distance (float): Axial distance of exposed reactant
+                surface (cm). Also referred to as z.
             reactant_diffusion_rate (float, optional): Reactant
                 diffusion rate (cm2 s-1).
             radial_delta_T (float): Radial temperature gradient (K)
@@ -273,7 +277,7 @@ class BoatReactor:
             raise ValueError("Reactant flow rate must be positive and non-zero")
 
         # Check if the pressure units are supported
-        if P_units not in tools.P_CF.keys():
+        if P_units not in tools.P_CF:
             raise ValueError(
                 f"Unsupported pressure units. "
                 f"Supported units: {', '.join(tools.P_CF.keys())}"
@@ -311,6 +315,12 @@ class BoatReactor:
                 "Mixing ratio must be between 0 and 1"
             )
 
+        ### Check for valid inputs ###
+        try:
+            float(axial_distance)
+        except TypeError:
+            raise TypeError("Axial distance must be castable to a float")
+
         # Flag to prevent calling __setattr__ before initialization is complete
         object.__setattr__(self, "_initializing", True)
 
@@ -320,6 +330,7 @@ class BoatReactor:
         self.reactant_FR = reactant_FR
         self.reactant_carrier_FR = reactant_carrier_FR
         self.carrier_FR = carrier_FR
+        self.axial_distance = axial_distance
         self.radial_delta_T = radial_delta_T
 
         self.P_Pa = tools.P_in_Pa(self.P, self.P_units)
@@ -601,8 +612,8 @@ class BoatReactor:
             var_names += ["Manually Inputted Reactant Diffusion Rate"]
         else:
             if (
-                self.reactant_gas not in diffusion_coef.sigmas.keys()
-                and self.reactant_gas not in diffusion_coef.e_ks.keys()
+                self.reactant_gas not in diffusion_coef.sigmas
+                and self.reactant_gas not in diffusion_coef.e_ks
             ):
                 raise ValueError(
                     f"Must input reactant diffusion rate for {self.reactant_gas}"
@@ -664,7 +675,7 @@ class BoatReactor:
 
         ### Axial Distance ###
         # - eq. 2 from Knopf et al., Anal. Chem., 2015
-        self.z_star = flow_calc.z_star(self, z=self.FT_length, FR=self.total_FR)
+        self.z_star = flow_calc.z_star(self, z=self.axial_distance, FR=self.total_FR)
 
         # Effective Sherwood Number (unitless)
         # Note: the boat geometry is not considered and thus this value
@@ -688,8 +699,10 @@ class BoatReactor:
 
     def reactant_uptake(
         self,
-        hypothetical_gamma: ArrayLike | float | int,
-        gamma_wall: float = 5e-6,
+        hypothetical_gamma: ArrayLike | float,
+        gamma_wall: float = np.nan,
+        wall_exposure_length: float = 1,
+        exposure_length: float = 1,
         disp: bool = True,
     ) -> None:
         """
@@ -697,11 +710,14 @@ class BoatReactor:
         walls.
 
         Args:
-            hypothetical_gamma (ArrayLike or float or int): Hypothetical
+            hypothetical_gamma (ArrayLike or float): Hypothetical
                 uptake coefficient to calculate diffusion correction
                 factor.
-            gamma_wall (float): Wall uptake coefficient (default: 5e-6
-                for halocarbon wax coating - Ivanov et al., 2021).
+            gamma_wall (float): Wall uptake coefficient (optional).
+            wall_exposure_length (float): Length of the exposed wall in
+                cm to calculate wall loss over. Default is 1 cm.
+            exposure_length (float): Length of the exposed surface in
+                cm. Default is 1 cm.
             disp (bool): Display calculated values.
 
         Returns:
@@ -714,19 +730,29 @@ class BoatReactor:
                 hypothetical_gamma = np.asarray(hypothetical_gamma, dtype=np.float64)
             except Exception as e:
                 raise TypeError(
-                    "Gamma input must be int, float, or Array-like of int "
-                    f"or float; got {type(hypothetical_gamma)}"
+                    "Gamma input must be float or Array-like of float; "
+                    f"got {type(hypothetical_gamma)}"
                 ) from e
 
             if hypothetical_gamma.ndim != 1:
                 raise ValueError("Gamma input must be 1-dimensional.")
+
+        # Verify that the exposure length is a positive number and that
+        # it is less than the axial distance of the flow tube or insert
+        if exposure_length <= 0:
+            raise ValueError("Exposure length must be a positive number.")
+        if exposure_length > self.axial_distance:
+            raise ValueError(
+                "Exposure length must be less than the axial distance. Set "
+                "object.axial_distance = ... with a larger axial_distance."
+            )
 
         # Check if hypothetical_gamma is between 0 and 1
         if np.min(hypothetical_gamma) < 0 or np.max(hypothetical_gamma) > 1:  # pyright: ignore[reportUnknownMemberType]
             raise ValueError("Hypothetical gamma must be between 0 and 1")
 
         # Check if gamma_wall is between 0 and 1
-        if gamma_wall < 0 or gamma_wall > 1:
+        if not np.isnan(gamma_wall) and (gamma_wall < 0 or gamma_wall > 1):
             raise ValueError("Wall uptake coefficient must be between 0 and 1")
 
         # Lists for displaying values
@@ -746,15 +772,14 @@ class BoatReactor:
         diff_corr = 1 - kinetics.correction_factor_from_gamma(
             self.N_eff_Shw_FT, self.Kn_FT, hypothetical_gamma
         )
-        if not isinstance(diff_corr, np.ndarray):
-            if diff_corr > 0.05:
-                warnings.warn(
-                    "Diffusion correction is > 5%. "
-                    "Negligible diffusion may no longer be a valid assumption"
-                )
+        if not isinstance(diff_corr, np.ndarray) and diff_corr > 0.05:
+            warnings.warn(
+                "Diffusion correction is > 5%. "
+                "Negligible diffusion may no longer be a valid assumption"
+            )
         var_names += [
-            "Flow Tube Wall Diffusion Correction "
-            "\n(must be small to neglect for boat reactor)"
+            "Flow Tube Wall Diffusion Correction ",
+            "\n(must be small to neglect for boat reactor)",
         ]
         var += [diff_corr * 100]
         var_fmts += [".1f"]
@@ -789,18 +814,19 @@ class BoatReactor:
 
         # Reactant Wall Loss (fraction)
         # - calculated as if there is no boat, take as an upper limit
-        reactant_wall_loss = kinetics.cylinder_loss(
-            self,
-            self.FT_ID,
-            self.N_eff_Shw_FT,
-            self.Kn_FT,
-            gamma_wall,
-            self.residence_time,
-        )
-        var_names += ["Estimated Wall Loss (upper limit)"]
-        var += [reactant_wall_loss * 100]
-        var_fmts += [".2g"]
-        units += ["%"]
+        if not np.isnan(gamma_wall):
+            reactant_wall_loss = kinetics.cylinder_loss(
+                self,
+                self.FT_ID,
+                self.N_eff_Shw_FT,
+                self.Kn_FT,
+                gamma_wall,
+                self.residence_time,
+            )
+            var_names += ["Estimated Wall Loss (upper limit)"]
+            var += [reactant_wall_loss * 100]
+            var_fmts += [".2g"]
+            units += ["%"]
 
         ### Display Values ###
         if disp and not isinstance(hypothetical_gamma, np.ndarray):

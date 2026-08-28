@@ -127,7 +127,6 @@ def test_FT_insert_flow_velocity(make_constructor_kwargs, make_init_kwargs, buil
         carrier_gas="He",
         reactant_conc_type="ppm",
         reactant_conc=1e6,
-        insert_length=10,
         insert_ID=1,
         insert_OD=1,
     )
