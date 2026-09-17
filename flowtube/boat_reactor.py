@@ -31,6 +31,8 @@ import molmass as mm
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from flowtube import input_validation
+
 from . import diffusion_coef, flow_calc, kinetics, tools, viscosity_density
 
 _CTOR_ATTRS = frozenset(
@@ -61,79 +63,6 @@ _CTOR_ATTRS = frozenset(
 
 
 class BoatReactor:
-    def _validate_init(self):
-
-        ### Check for valid inputs ###
-        # Check if the gases are supported
-        if self.reactant_gas not in diffusion_coef.sigmas:
-            # Validate molecular formulas using molarmass
-            try:
-                mm.Formula(  # noqa: B018
-                    self.reactant_gas
-                ).mass  # raises on invalid formula
-            except Exception as e:
-                raise ValueError(
-                    f"Invalid reactant gas molecular formula: {self.reactant_gas}. "
-                    f"Supported gases: {', '.join(diffusion_coef.sigmas.keys())}, or "
-                    f"other if manually inputting diffusion coefficient"
-                ) from e
-        if self.carrier_gas not in viscosity_density.a:
-            raise ValueError(
-                f"Unsupported carrier gas. "
-                f"Supported gases: {', '.join(viscosity_density.a.keys())}"
-            )
-
-        # Check physicality of boat dimensions
-        if (
-            self.boat_length < 0
-            or self.boat_liquid_width < 0
-            or self.boat_cross_section < 0
-        ):
-            raise ValueError("Boat dimensions must be positive")
-        elif (
-            self.boat_liquid_width > self.FT_ID
-            or self.boat_cross_section > np.pi * (self.FT_ID / 2) ** 2
-        ):
-            raise ValueError(
-                "Boat liquid width cannot be larger than the flow tube ID, and "
-                "boat cross-sectional area cannot be larger than the flow tube "
-                "cross-sectional area"
-            )
-        elif self.boat_length > self.FT_length:
-            raise ValueError("Boat length cannot be larger than flow tube length")
-        if self.boat_perimeter is not None and self.boat_perimeter < 0:
-            raise ValueError("Boat perimeter must be positive")
-
-        # Check physicality of injector dimensions
-        if self.injector_ID < 0 or self.injector_OD < 0:
-            raise ValueError("Injector ID and OD must be positive")
-        elif self.injector_ID > self.FT_ID:
-            raise ValueError("Injector ID cannot be larger than flow tube ID")
-        elif self.injector_OD > self.FT_ID:
-            raise ValueError("Injector OD cannot be larger than flow tube ID")
-        elif self.injector_ID > self.injector_OD:
-            raise ValueError("Injector ID cannot be larger than injector OD")
-        elif self.injector_ID == 0 or self.injector_OD == 0:
-            raise ValueError("Injector dimensions must be non-zero")
-
-        # Check reactant concentration inputs
-        if self.reactant_conc < 0:
-            raise ValueError("Reactant concentration must be non-negative")
-        if self.reactant_conc_type not in [
-            "ppm",
-            "ppb",
-            "ng/min",
-            "Pa",
-            "hPa",
-            "Torr",
-            "bar",
-            "mbar",
-        ]:
-            raise ValueError(
-                "Unsupported reactant concentration type. "
-                "Supported types: 'ppm', 'ppb', 'ng/min', 'Pa', 'hPa', 'Torr', 'bar', 'mbar'"
-            )
-
     def __init__(
         self,
         FT_ID: float,
@@ -205,7 +134,7 @@ class BoatReactor:
         self.boat_perimeter = boat_perimeter
 
         # Validate inputs
-        self._validate_init()
+        input_validation.validate_init(self)
 
         # Turn flag off to allow __setattr__ to be used normally
         object.__setattr__(self, "_initializing", False)
@@ -213,7 +142,7 @@ class BoatReactor:
     def __setattr__(self, name, value):
         object.__setattr__(self, name, value)
         if name in _CTOR_ATTRS and not self.__dict__.get("_initializing", True):
-            self._validate_init()  # validate before re-init
+            input_validation.validate_init(self)
 
             missing = [a for a in _CTOR_ATTRS if not hasattr(self, a)]
             if missing:
@@ -269,60 +198,6 @@ class BoatReactor:
         Returns:
             None
         """
-        ### Check for valid inputs ###
-        # Check if flow rates are positive
-        if reactant_FR < 0 or reactant_carrier_FR < 0 or carrier_FR < 0:
-            raise ValueError("Flow rates must be positive")
-
-        # Check for non-zero reactant flow
-        if reactant_FR <= 0:
-            raise ValueError("Reactant flow rate must be positive and non-zero")
-
-        # Check if the pressure units are supported
-        if P_units not in tools.P_CF:
-            raise ValueError(
-                f"Unsupported pressure units. "
-                f"Supported units: {', '.join(tools.P_CF.keys())}"
-            )
-        elif P < 0:
-            raise ValueError("Pressure must be positive")
-
-        # Check if the temperature & temperature gradients are valid numbers
-        if T < -273.15:
-            raise ValueError("Temperature must be above absolute zero (-273.15 C)")
-        if radial_delta_T < 0:
-            raise ValueError("Temperature gradients must be positive")
-
-        # Calculate reactant mixing ratio from input concentration
-        if self.reactant_conc_type == "ppm":
-            self.reactant_MR = self.reactant_conc * 1e-6
-        elif self.reactant_conc_type == "ppb":
-            self.reactant_MR = self.reactant_conc * 1e-9
-        elif self.reactant_conc_type == "ng/min":
-            self.reactant_MR = tools.permeation_rate_to_MR(
-                flow_rate=reactant_FR,
-                permeation_rate=self.reactant_conc,
-                reactant_gas=self.reactant_gas,
-            )
-        elif self.reactant_conc_type in ["Pa", "Torr", "bar", "mbar"]:
-            self.reactant_MR = tools.vapor_pressure_to_MR(
-                vapor_pressure=self.reactant_conc,
-                P_units=self.reactant_conc_type,
-                system_pressure=P,
-                P_units_system=P_units,
-            )
-        if self.reactant_MR < 0 or self.reactant_MR > 1:
-            raise ValueError(
-                "Issue calculating reactant mixing ratio."
-                "Mixing ratio must be between 0 and 1"
-            )
-
-        ### Check for valid inputs ###
-        try:
-            float(axial_distance)
-        except TypeError:
-            raise TypeError("Axial distance must be castable to a float")
-
         # Flag to prevent calling __setattr__ before initialization is complete
         object.__setattr__(self, "_initializing", True)
 
@@ -335,9 +210,38 @@ class BoatReactor:
         self.axial_distance = axial_distance
         self.radial_delta_T = radial_delta_T
 
+        # Validate inputs
+        input_validation.validate_initialize(self)
+
+        ### Calculated Properties ###
         self.P_Pa = tools.P_in_Pa(self.P, self.P_units)
         self.T_K = tools.T_in_K(self.T)
 
+        # Calculate reactant mixing ratio from input concentration
+        if self.reactant_conc_type == "ppm":
+            self.reactant_MR = self.reactant_conc * 1e-6
+        elif self.reactant_conc_type == "ppb":
+            self.reactant_MR = self.reactant_conc * 1e-9
+        elif self.reactant_conc_type == "ng/min":
+            self.reactant_MR = tools.permeation_rate_to_MR(
+                flow_rate=self.reactant_FR,
+                permeation_rate=self.reactant_conc,
+                reactant_gas=self.reactant_gas,
+            )
+        elif self.reactant_conc_type in ["Pa", "Torr", "bar", "mbar"]:
+            self.reactant_MR = tools.vapor_pressure_to_MR(
+                vapor_pressure=self.reactant_conc,
+                P_units=self.reactant_conc_type,
+                system_pressure=self.P,
+                P_units_system=self.P_units,
+            )
+        if self.reactant_MR < 0 or self.reactant_MR > 1:
+            raise ValueError(
+                "Issue calculating reactant mixing ratio."
+                "Mixing ratio must be between 0 and 1"
+            )
+
+        ### Reactant Diffusion Rate ###
         # Verify that the reactant diffusion rate is a number
         try:
             float(reactant_diffusion_rate)

@@ -9,6 +9,108 @@ from . import kinetics as kinetics
 from . import tools as tools
 from . import viscosity_density as viscosity_density
 
+class AerosolFlowReactor:
+    """
+    Handles calculations relevant to flow rate, flow diagnostics,
+    transport, and uptake for an aerosol flow reactor.
+    """
+
+    FT_ID: float
+    FT_length: float
+    injector_ID: float
+    injector_OD: float
+    reactant_gas: str
+    carrier_gas: str
+    reactant_conc_type: str
+    reactant_conc: float
+
+    def __init__(
+        self,
+        FT_ID: float,
+        FT_length: float,
+        injector_ID: float,
+        injector_OD: float,
+        reactant_gas: str,
+        carrier_gas: str,
+        reactant_conc_type: str,
+        reactant_conc: float,
+    ) -> None: ...
+    def initialize(
+        self,
+        reactant_FR: float,
+        reactant_carrier_FR: float,
+        carrier_FR: float,
+        P: float,
+        P_units: str,
+        T: float,
+        axial_distance: float,
+        reactant_diffusion_rate: float = ...,
+        radial_delta_T: float = ...,
+        disp: bool = ...,
+    ) -> None: ...
+
+    reactant_FR: float
+    reactant_carrier_FR: float
+    carrier_FR: float
+    P: float
+    P_units: str
+    P_Pa: float
+    T: float
+    T_K: float
+    axial_distance: float
+    reactant_diffusion_rate: float
+    radial_delta_T: float
+
+    def flows(
+        self,
+        reactant_FR: float,
+        reactant_carrier_FR: float,
+        carrier_FR: float,
+        disp: bool = ...,
+    ) -> None: ...
+
+    total_FR: float
+    net_cross_section: float
+    flow_velocity: float
+    residence_time: float
+
+    def carrier_flow(
+        self,
+        radial_delta_T: float = ...,
+        disp: bool = ...,
+    ) -> None: ...
+
+    carrier_dynamic_viscosity: float
+    carrier_density: float
+    Re: float
+
+    def reactant_diffusion(
+        self, reactant_diffusion_rate: float = ..., disp: bool = ...
+    ) -> None: ...
+
+    reactant_molec_velocity: float
+    reactant_mean_free_path: float
+    Pe: float
+    z_star: float
+    N_eff_Shw: float
+    Kn_aerosol: float
+    Kn_wall: float
+
+    def reactant_uptake(
+        self,
+        hypothetical_gamma: NDArray[np.float64] | float,
+        disp: bool = ...,
+    ) -> None: ...
+
+    C_g: float
+
+    def calculate_gamma_effective(
+        self,
+        concentrations: NDArray[np.float64],
+        exposure: NDArray[np.float64],
+        exposure_units: str,
+    ) -> tuple[float, float, float, float, float]: ...
+
 class CoatedWallReactor:
     """
     Handles calculations relevant to flow rate, flow diagnostics,
@@ -128,10 +230,10 @@ class BoatReactor:
     carrier_gas: str
     reactant_conc_type: str
     reactant_conc: float
-    boat_width: float
-    boat_height: float
+    boat_liquid_width: float
     boat_length: float
-    boat_wall_thickness: float
+    boat_cross_section: float
+    boat_perimeter: float | None
 
     def __init__(
         self,
