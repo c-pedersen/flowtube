@@ -1,12 +1,14 @@
 # tests/test_vapor_pressure_to_MR.py
-"""Unit tests for tools.vapor_pressure_to_MR and its use in both reactor classes."""
+"""Unit tests for tools.vapor_pressure_to_MR and its use in all reactor classes."""
+
+import warnings
 
 import pytest
-import warnings
-from flowtube.tools import vapor_pressure_to_MR
-from flowtube import CoatedWallReactor, BoatReactor
 
-BOTH = [CoatedWallReactor, BoatReactor]
+from flowtube import AerosolFlowReactor, BoatReactor, CoatedWallReactor
+from flowtube.tools import vapor_pressure_to_MR
+
+ALL = [AerosolFlowReactor, BoatReactor, CoatedWallReactor]
 
 
 # ---------------------------------------------------------------------------
@@ -92,7 +94,7 @@ class TestVaporPressureToMR:
                 system_pressure=-100.0,
                 P_units_system="Pa",
             )
-            
+
     # --- Validation: vapor_pressure < 0 ---
     def test_negative_vapor_pressure_raises(self):
         with pytest.raises(ValueError, match=r"[Vv]apor pressure must be positive"):
@@ -102,7 +104,6 @@ class TestVaporPressureToMR:
                 system_pressure=1000.0,
                 P_units_system="Pa",
             )
-
 
     # --- Warning: vapor_pressure > 1 % of system_pressure ---
 
@@ -143,11 +144,11 @@ class TestVaporPressureToMR:
 
 
 # ---------------------------------------------------------------------------
-# Integration tests: vapor_pressure_to_MR through both reactor interfaces
+# Integration tests: vapor_pressure_to_MR through all reactor interfaces
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 class TestVaporPressureReactorIntegration:
     """Verify vapor_pressure_to_MR behavior when used via reactor initialize()."""
 
@@ -155,7 +156,9 @@ class TestVaporPressureReactorIntegration:
         self, Reactor, make_constructor_kwargs, make_init_kwargs
     ):
         """Reactor initializes without error when reactant_conc_type='Pa' and vapor < system."""
-        ctor = make_constructor_kwargs(Reactor, reactant_conc_type="Pa", reactant_conc=10.0)
+        ctor = make_constructor_kwargs(
+            Reactor, reactant_conc_type="Pa", reactant_conc=10.0
+        )
         obj = Reactor(**ctor)
         init = make_init_kwargs(Reactor, P=2000.0, P_units="Pa")
         obj.initialize(**init)  # should not raise
@@ -165,7 +168,9 @@ class TestVaporPressureReactorIntegration:
         self, Reactor, make_constructor_kwargs, make_init_kwargs
     ):
         """Reactor.initialize raises when vapor pressure > system pressure."""
-        ctor = make_constructor_kwargs(Reactor, reactant_conc_type="Pa", reactant_conc=5000.0)
+        ctor = make_constructor_kwargs(
+            Reactor, reactant_conc_type="Pa", reactant_conc=5000.0
+        )
         obj = Reactor(**ctor)
         init = make_init_kwargs(Reactor, P=2000.0, P_units="Pa")
         with pytest.raises(ValueError, match=r"cannot exceed"):
@@ -182,7 +187,9 @@ class TestVaporPressureReactorIntegration:
         from flowtube.tools import P_in_Pa
 
         warnings.filterwarnings("ignore")
-        ctor = make_constructor_kwargs(Reactor, reactant_conc=0.001, reactant_conc_type=vp_units)
+        ctor = make_constructor_kwargs(
+            Reactor, reactant_conc=0.001, reactant_conc_type=vp_units
+        )
         obj = Reactor(**ctor)
         init = make_init_kwargs(Reactor, P=101325.0, P_units="Pa")
         obj.initialize(**init)  # should not raise

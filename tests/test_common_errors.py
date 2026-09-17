@@ -1,20 +1,21 @@
 # tests/test_common_errors.py
-import pytest
-from flowtube import CoatedWallReactor, BoatReactor
 import numpy as np
+import pytest
+
+from flowtube import AerosolFlowReactor, BoatReactor, CoatedWallReactor
 
 """ Tests for common errors across Reactor classes. """
 
-BOTH = [CoatedWallReactor, BoatReactor]
+ALL = [AerosolFlowReactor, BoatReactor, CoatedWallReactor]
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_valid_constructor_and_init_no_errors(Reactor, build_reactor):
     # Passes if neither __init__ nor initialize raises
     build_reactor(Reactor)
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_injector_dimensions(Reactor, make_constructor_kwargs):
     # Test injector ID > OD
     kwargs = make_constructor_kwargs(Reactor, injector_ID=0.5, injector_OD=0.4)
@@ -29,14 +30,14 @@ def test_injector_dimensions(Reactor, make_constructor_kwargs):
         Reactor(**kwargs)
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_unsupported_carrier_gas(Reactor, make_constructor_kwargs):
     kwargs = make_constructor_kwargs(Reactor, carrier_gas="Xe")
     with pytest.raises(ValueError, match=r"Unsupported carrier gas"):
         Reactor(**kwargs)
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_negative_flows_initialize(Reactor, build_reactor, make_init_kwargs):
     # init error: negative flow in initialize
     obj, _, _ = build_reactor(Reactor, call_initialize=False)
@@ -55,7 +56,7 @@ def test_negative_flows_initialize(Reactor, build_reactor, make_init_kwargs):
         obj.initialize(**bad_init)
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_unsupported_pressure_units_initialize(
     Reactor,
     build_reactor,
@@ -67,7 +68,7 @@ def test_unsupported_pressure_units_initialize(
         obj.initialize(**bad_init)
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_manual_reactant_diffusion_coef(
     Reactor,
     build_reactor,
@@ -112,16 +113,19 @@ def test_manual_reactant_diffusion_coef(
     assert obj.reactant_diffusion_rate == 1.111  # cm2 s-1
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
-def test_manual_reactant_diffusion_coef_during_initialization(Reactor, build_reactor, make_init_kwargs):
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
+def test_manual_reactant_diffusion_coef_during_initialization(
+    Reactor, build_reactor, make_init_kwargs
+):
     obj, _, _ = build_reactor(Reactor, call_initialize=False)
-    init = make_init_kwargs(Reactor, reactant_diffusion_rate = 1.111)
+    init = make_init_kwargs(Reactor, reactant_diffusion_rate=1.111)
     obj.initialize(**init)
 
     assert obj.manually_inputted_diffusion_rate is True
     assert obj.reactant_diffusion_rate == 1.111  # cm2 s-1
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_manual_reactant_diffusion_coef_after_initialization(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
 
@@ -132,7 +136,7 @@ def test_manual_reactant_diffusion_coef_after_initialization(Reactor, build_reac
     assert obj.reactant_diffusion_rate == 1.111  # cm2 s-1
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_temperature_below_physical_limit(Reactor, build_reactor, make_init_kwargs):
     obj, _, _ = build_reactor(Reactor, call_initialize=False)
     bad_init = make_init_kwargs(Reactor, T=-273.16)
@@ -140,7 +144,7 @@ def test_temperature_below_physical_limit(Reactor, build_reactor, make_init_kwar
         obj.initialize(**bad_init)
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_mixing_ratio_bounds(Reactor, make_constructor_kwargs, build_reactor):
     # <0 is invalid
     kwargs = make_constructor_kwargs(Reactor, reactant_conc=-0.01)
@@ -150,7 +154,7 @@ def test_mixing_ratio_bounds(Reactor, make_constructor_kwargs, build_reactor):
         build_reactor(Reactor, constructor_overrides=kwargs)
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_fitting(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor, call_initialize=False)
     with pytest.raises(RuntimeError, match=r"Must call*"):
@@ -161,7 +165,7 @@ def test_fitting(Reactor, build_reactor):
         )
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_reactant_uptake_gammas(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
 
@@ -169,17 +173,13 @@ def test_reactant_uptake_gammas(Reactor, build_reactor):
     obj.reactant_uptake(hypothetical_gamma=[1e-7], disp=False)
     obj.reactant_uptake(hypothetical_gamma=[1e-7, 1e-8], disp=False)
 
-    with pytest.raises(
-        TypeError, match=r"Gamma input must be float or Array-like"
-    ):
+    with pytest.raises(TypeError, match=r"Gamma input must be float or Array-like"):
         obj.reactant_uptake(hypothetical_gamma="test", disp=False)
-    with pytest.raises(
-        TypeError, match=r"Gamma input must be float or Array-like"
-    ):
+    with pytest.raises(TypeError, match=r"Gamma input must be float or Array-like"):
         obj.reactant_uptake(hypothetical_gamma=["test", "test2"])
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_fitting_invalid_exposure_units(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
     obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
@@ -191,7 +191,7 @@ def test_fitting_invalid_exposure_units(Reactor, build_reactor):
         )
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_fitting_negative_concentrations(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
     obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
@@ -203,7 +203,7 @@ def test_fitting_negative_concentrations(Reactor, build_reactor):
         )
 
 
-@pytest.mark.parametrize("Reactor", BOTH, ids=["CoatedWall", "Boat"])
+@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
 def test_fitting_non_arraylike_inputs(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
     obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
@@ -220,5 +220,3 @@ def test_fitting_non_arraylike_inputs(Reactor, build_reactor):
             exposure=[0.1, 0.2, 0.3],
             exposure_units="s",
         )
-
-

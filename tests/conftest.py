@@ -1,13 +1,15 @@
 # tests/conftest.py
-import pytest
-from flowtube.coated_wall_reactor import CoatedWallReactor
-from flowtube.boat_reactor import BoatReactor
 import numpy as np
+import pytest
+
+from flowtube.aerosol_flow_reactor import AerosolFlowReactor
+from flowtube.boat_reactor import BoatReactor
+from flowtube.coated_wall_reactor import CoatedWallReactor
 
 
 @pytest.fixture
 def reactor_classes():
-    return [CoatedWallReactor, BoatReactor]
+    return [AerosolFlowReactor, BoatReactor, CoatedWallReactor]
 
 
 @pytest.fixture
@@ -25,10 +27,10 @@ def make_constructor_kwargs():
             "reactant_conc": 30,
         }
         # Class-specific reactor args
-        if Reactor is CoatedWallReactor:
-            base.update(
-                {"insert_ID": np.nan, "insert_OD": np.nan}
-            )
+        if Reactor is AerosolFlowReactor:
+            _dummy = 0  # place=holder for future AerosolFlowReactor-specific args
+        elif Reactor is CoatedWallReactor:
+            base.update({"insert_ID": np.nan, "insert_OD": np.nan})
         elif Reactor is BoatReactor:
             base.update(
                 {
