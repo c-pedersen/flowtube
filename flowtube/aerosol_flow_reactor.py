@@ -225,101 +225,104 @@ class AerosolFlowReactor:
         # Flag to prevent calling __setattr__ before initialization is complete
         object.__setattr__(self, "_initializing", True)
 
-        self.P = P
-        self.P_units = P_units
-        self.T = T
-        self.reactant_FR = reactant_FR
-        self.reactant_carrier_FR = reactant_carrier_FR
-        self.carrier_FR = carrier_FR
-        self.radial_delta_T = radial_delta_T
-        self.axial_distance = float(axial_distance)
-        self.aerosol_distribution = aerosol_distribution
-        self.aerosol_diameter = aerosol_diameter
-        self.aerosol_number_conc = aerosol_number_conc
-        self.aerosol_density = aerosol_density
-        self.aerosol_sigma = aerosol_sigma
-
-        # Validate inputs
-        input_validation.validate_initialize(self)
-
-        ### Calculated Properties ###
-        self.P_Pa = tools.P_in_Pa(self.P, self.P_units)
-        self.T_K = tools.T_in_K(self.T)
-
-        # Calculate reactant mixing ratio from input concentration
-        if self.reactant_conc_type == "ppm":
-            self.reactant_MR = self.reactant_conc * 1e-6
-        elif self.reactant_conc_type == "ppb":
-            self.reactant_MR = self.reactant_conc * 1e-9
-        elif self.reactant_conc_type == "ng/min":
-            self.reactant_MR = tools.permeation_rate_to_MR(
-                flow_rate=self.reactant_FR,
-                permeation_rate=self.reactant_conc,
-                reactant_gas=self.reactant_gas,
-            )
-        elif self.reactant_conc_type in ["Pa", "Torr", "bar", "mbar"]:
-            self.reactant_MR = tools.vapor_pressure_to_MR(
-                vapor_pressure=self.reactant_conc,
-                P_units=self.reactant_conc_type,
-                system_pressure=self.P,
-                P_units_system=self.P_units,
-            )
-        if self.reactant_MR < 0 or self.reactant_MR > 1:
-            raise ValueError(
-                "Issue calculating reactant mixing ratio."
-                "Mixing ratio must be between 0 and 1"
-            )
-
-        ### Reactant Diffusion Rate ###
-        # Verify that the reactant diffusion rate is a number
         try:
-            float(reactant_diffusion_rate)
-        except ValueError:
-            raise TypeError("Reactant diffusion rate must be a number")
+            self.P = P
+            self.P_units = P_units
+            self.T = T
+            self.reactant_FR = reactant_FR
+            self.reactant_carrier_FR = reactant_carrier_FR
+            self.carrier_FR = carrier_FR
+            self.radial_delta_T = radial_delta_T
+            self.axial_distance = float(axial_distance)
+            self.aerosol_distribution = aerosol_distribution
+            self.aerosol_diameter = aerosol_diameter
+            self.aerosol_number_conc = aerosol_number_conc
+            self.aerosol_density = aerosol_density
+            self.aerosol_sigma = aerosol_sigma
 
-        # Check if the user has previously manually inputted a diffusion rate
-        try:
-            self.manually_inputted_diffusion_rate  # noqa: B018
-        except AttributeError:
-            if not np.isnan(reactant_diffusion_rate):
-                self.manually_inputted_diffusion_rate = True
-            else:
-                self.manually_inputted_diffusion_rate = False
-            self.reactant_diffusion_rate = reactant_diffusion_rate
-        else:
-            if self.manually_inputted_diffusion_rate & ~np.isnan(
-                reactant_diffusion_rate
-            ):
+            # Validate inputs
+            input_validation.validate_initialize(self)
+
+            ### Calculated Properties ###
+            self.P_Pa = tools.P_in_Pa(self.P, self.P_units)
+            self.T_K = tools.T_in_K(self.T)
+
+            # Calculate reactant mixing ratio from input concentration
+            if self.reactant_conc_type == "ppm":
+                self.reactant_MR = self.reactant_conc * 1e-6
+            elif self.reactant_conc_type == "ppb":
+                self.reactant_MR = self.reactant_conc * 1e-9
+            elif self.reactant_conc_type == "ng/min":
+                self.reactant_MR = tools.permeation_rate_to_MR(
+                    flow_rate=self.reactant_FR,
+                    permeation_rate=self.reactant_conc,
+                    reactant_gas=self.reactant_gas,
+                )
+            elif self.reactant_conc_type in ["Pa", "Torr", "bar", "mbar"]:
+                self.reactant_MR = tools.vapor_pressure_to_MR(
+                    vapor_pressure=self.reactant_conc,
+                    P_units=self.reactant_conc_type,
+                    system_pressure=self.P,
+                    P_units_system=self.P_units,
+                )
+            if self.reactant_MR < 0 or self.reactant_MR > 1:
+                raise ValueError(
+                    "Issue calculating reactant mixing ratio."
+                    "Mixing ratio must be between 0 and 1"
+                )
+
+            ### Reactant Diffusion Rate ###
+            # Verify that the reactant diffusion rate is a number
+            try:
+                float(reactant_diffusion_rate)
+            except ValueError:
+                raise TypeError("Reactant diffusion rate must be a number")
+
+            # Check if the user has previously manually inputted a diffusion rate
+            try:
+                self.manually_inputted_diffusion_rate  # noqa: B018
+            except AttributeError:
+                if not np.isnan(reactant_diffusion_rate):
+                    self.manually_inputted_diffusion_rate = True
+                else:
+                    self.manually_inputted_diffusion_rate = False
                 self.reactant_diffusion_rate = reactant_diffusion_rate
-
-        ### Surface Area Density ###
-        # Verify that the aerosol surface area is a number
-        try:
-            float(aerosol_surface_area)
-        except ValueError:
-            raise TypeError("Aerosol surface area must be a number")
-
-        # Check if the user has previously manually inputted a surface area
-        try:
-            self.manually_inputted_surface_area  # noqa: B018
-        except AttributeError:
-            if not np.isnan(aerosol_surface_area):
-                self.manually_inputted_surface_area = True
             else:
-                self.manually_inputted_surface_area = False
-            self.aerosol_surface_area = aerosol_surface_area
-        else:
-            if self.manually_inputted_surface_area & ~np.isnan(aerosol_surface_area):
+                if self.manually_inputted_diffusion_rate & ~np.isnan(
+                    reactant_diffusion_rate
+                ):
+                    self.reactant_diffusion_rate = reactant_diffusion_rate
+
+            ### Surface Area Density ###
+            # Verify that the aerosol surface area is a number
+            try:
+                float(aerosol_surface_area)
+            except ValueError:
+                raise TypeError("Aerosol surface area must be a number")
+
+            # Check if the user has previously manually inputted a surface area
+            try:
+                self.manually_inputted_surface_area  # noqa: B018
+            except AttributeError:
+                if not np.isnan(aerosol_surface_area):
+                    self.manually_inputted_surface_area = True
+                else:
+                    self.manually_inputted_surface_area = False
                 self.aerosol_surface_area = aerosol_surface_area
+            else:
+                if self.manually_inputted_surface_area & ~np.isnan(
+                    aerosol_surface_area
+                ):
+                    self.aerosol_surface_area = aerosol_surface_area
 
-        # Perform calculations for flows, carrier gas transport, and reactant diffusion
-        self.flows(disp=disp)
-        self.carrier_flow(disp=disp)
-        self.aerosol_transport(disp=disp)
-        self.reactant_diffusion(disp=disp)
-
-        # Turn flag off to allow __setattr__ to be used normally
-        object.__setattr__(self, "_initializing", False)
+            # Perform calculations for flows, carrier gas transport, and reactant diffusion
+            self.flows(disp=disp)
+            self.carrier_flow(disp=disp)
+            self.aerosol_transport(disp=disp)
+            self.reactant_diffusion(disp=disp)
+        finally:
+            # Turn flag off to allow __setattr__ to be used normally
+            object.__setattr__(self, "_initializing", False)
 
     def flows(
         self,
