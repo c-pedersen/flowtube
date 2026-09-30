@@ -70,6 +70,7 @@ class AerosolFlowReactor:
     aerosol_density: float
     aerosol_sigma: float = ...
     aerosol_surface_area: float = ...
+    manually_inputted_surface_area: bool
     reactant_diffusion_rate: float
     radial_delta_T: float
 

@@ -381,6 +381,45 @@ def test_aerosol_reinit_preserves_optional_inputs(build_reactor, distribution, s
     assert obj._initializing is False
 
 
+@pytest.mark.parametrize("surface_area", [0.0, 1e-5])
+def test_aerosol_initialize_can_override_calculated_surface_area(
+    make_constructor_kwargs, make_init_kwargs, surface_area
+):
+    obj = AerosolFlowReactor(**make_constructor_kwargs(AerosolFlowReactor))
+    init = make_init_kwargs(AerosolFlowReactor)
+
+    # First call omits aerosol_surface_area and uses the calculated value.
+    assert "aerosol_surface_area" not in init
+    obj.initialize(**init)
+    assert obj.manually_inputted_surface_area is False
+    assert obj.aerosol_surface_area != surface_area
+    calculated_area = obj.aerosol_surface_area
+
+    # Second call supplies an explicit surface area on the same reactor.
+    obj.initialize(**init, aerosol_surface_area=surface_area)
+
+    assert obj.manually_inputted_surface_area is True
+    assert obj.aerosol_surface_area == surface_area
+
+    # Omitting the override on a later call restores the calculated value.
+    obj.initialize(**init)
+    assert obj.manually_inputted_surface_area is False
+    assert obj.aerosol_surface_area == pytest.approx(calculated_area)
+
+    obj.aerosol_number_conc *= 2
+    assert obj.aerosol_surface_area == pytest.approx(2 * calculated_area)
+
+
+def test_aerosol_auto_reinit_recalculates_surface_area(build_reactor):
+    obj, _, _ = build_reactor(AerosolFlowReactor)
+    original_area = obj.aerosol_surface_area
+
+    obj.aerosol_number_conc *= 2
+
+    assert obj.manually_inputted_surface_area is False
+    assert obj.aerosol_surface_area == pytest.approx(2 * original_area)
+
+
 def test_boat_invalid_dimensions_raises(make_constructor_kwargs, make_init_kwargs):
     mutated = build_and_mutate(
         BoatReactor, make_constructor_kwargs, make_init_kwargs, "FT_ID", 2.6

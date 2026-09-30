@@ -160,7 +160,12 @@ class AerosolFlowReactor:
                 aerosol_number_conc=self.aerosol_number_conc,
                 aerosol_density=self.aerosol_density,
                 aerosol_sigma=self.aerosol_sigma,
-                aerosol_surface_area=self.aerosol_surface_area,
+                aerosol_surface_area=(
+                    self.aerosol_surface_area
+                    if self.manually_inputted_surface_area
+                    or name == "aerosol_surface_area"
+                    else np.nan
+                ),
                 radial_delta_T=self.radial_delta_T,
                 disp=False,
             )
@@ -212,7 +217,8 @@ class AerosolFlowReactor:
             aerosol_surface_area (float): Aerosol surface area (cm2
                 cm-3), optional input if overriding the calculated value
                 from the aerosol distribution, diameter, and number
-                concentration.
+                concentration. If omitted, the surface area is calculated,
+                replacing any previous override.
             reactant_diffusion_rate (float): Reactant diffusion rate
                 (cm2 s-1) (optional).
             radial_delta_T (float): Radial temperature gradient (K)
@@ -300,20 +306,14 @@ class AerosolFlowReactor:
             except ValueError:
                 raise TypeError("Aerosol surface area must be a number")
 
-            # Check if the user has previously manually inputted a surface area
-            try:
-                self.manually_inputted_surface_area  # noqa: B018
-            except AttributeError:
-                if not np.isnan(aerosol_surface_area):
-                    self.manually_inputted_surface_area = True
-                else:
-                    self.manually_inputted_surface_area = False
+            # Explicit inputs override calculated values on any initialization.
+            # Omitting the input restores calculation from aerosol properties.
+            if not np.isnan(aerosol_surface_area):
+                self.manually_inputted_surface_area = True
                 self.aerosol_surface_area = aerosol_surface_area
             else:
-                if self.manually_inputted_surface_area & ~np.isnan(
-                    aerosol_surface_area
-                ):
-                    self.aerosol_surface_area = aerosol_surface_area
+                self.manually_inputted_surface_area = False
+                self.aerosol_surface_area = aerosol_surface_area
 
             # Perform calculations for flows, carrier gas transport, and reactant diffusion
             self.flows(disp=disp)
