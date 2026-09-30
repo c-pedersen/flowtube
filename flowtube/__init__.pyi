@@ -64,6 +64,12 @@ class AerosolFlowReactor:
     T: float
     T_K: float
     axial_distance: float
+    aerosol_distribution: str
+    aerosol_diameter: float
+    aerosol_number_conc: float
+    aerosol_density: float
+    aerosol_sigma: float = ...
+    aerosol_surface_area: float = ...
     reactant_diffusion_rate: float
     radial_delta_T: float
 
