@@ -105,17 +105,18 @@ class AerosolFlowReactor:
     def reactant_uptake(
         self,
         hypothetical_gamma: NDArray[np.float64] | float,
+        exposure_length: float = ...,
+        wall_gamma: float = ...,
         disp: bool = ...,
     ) -> None: ...
 
-    C_g: float
-
-    def calculate_gamma_effective(
-        self,
-        concentrations: NDArray[np.float64],
-        exposure: NDArray[np.float64],
-        exposure_units: str,
-    ) -> tuple[float, float, float, float, float]: ...
+    k_rxn: NDArray[np.float64] | float
+    k_obs: NDArray[np.float64] | float
+    k_diff: NDArray[np.float64] | float
+    aerosol_loss: NDArray[np.float64] | float
+    k_wall: NDArray[np.float64] | float = ...
+    k_total: NDArray[np.float64] | float = ...
+    total_loss: NDArray[np.float64] | float = ...
 
 class CoatedWallReactor:
     """
@@ -206,6 +207,9 @@ class CoatedWallReactor:
     z_star_FT: float
     N_eff_Shw_FT: float
     Kn_FT: float
+    z_star_insert: float = ...
+    N_eff_Shw_insert: float = ...
+    Kn_insert: float = ...
 
     def reactant_uptake(
         self,
@@ -331,6 +335,7 @@ __version__: str
 __author__: str
 __email__: str
 __all__ = [
+    "AerosolFlowReactor",
     "BoatReactor",
     "CoatedWallReactor",
     "diffusion_coef",

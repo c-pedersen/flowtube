@@ -880,11 +880,27 @@ class AerosolFlowReactor:
         # - eq. 6 from Hanson and Kosciuch, 2003
         k_c = self.aerosol_surface_area * self.reactant_molec_velocity / 4
 
-        ### First Order Rate Contant ###
+        ### Observed Rate Contant ###
         # - eq. 7 from Hanson and Kosciuch, 2003
-        self.k_rxn = hypothetical_gamma * k_c * (1 + hypothetical_gamma / Gamma_diff)
-        var_names += ["Aerosol Reaction Rate Constant"]
+        self.k_obs = hypothetical_gamma * k_c / (1 + hypothetical_gamma / Gamma_diff)
+        var_names += ["Observed Rate Constant (k_obs)"]
+        var += [self.k_obs]
+        var_fmts += [".3g"]
+        units += ["s-1"]
+
+        ### Reaction Rate Constant ###
+        # standard equation, can be seen in Huynh and McNeill, J. Phys. 
+        # Chem. A, 2021, for example
+        self.k_rxn = hypothetical_gamma * k_c
+        var_names += ["Reaction Rate Constant (k_rxn)"]
         var += [self.k_rxn]
+        var_fmts += [".3g"]
+        units += ["s-1"]
+
+        ### Diffusion Rate Constant ###
+        self.k_diff = 1 / (1 / self.k_obs - 1 / self.k_rxn)
+        var_names += ["Diffusion Rate Constant (k_diff)"]
+        var += [self.k_diff]
         var_fmts += [".3g"]
         units += ["s-1"]
 
@@ -896,7 +912,9 @@ class AerosolFlowReactor:
         units += ["s"]
 
         ### Loss to aerosol - see kinetics.py for details ###
-        self.aerosol_loss = 1 - np.exp(-self.k_rxn * exposure_length / self.flow_velocity)
+        self.aerosol_loss = 1 - np.exp(
+            -self.k_obs * exposure_length / self.flow_velocity
+        )
         var_names += [f"Loss to Aerosol per {exposure_length:.1f} cm Exposure"]
         var += [self.aerosol_loss * 100]
         var_fmts += [".1f"]
@@ -914,101 +932,36 @@ class AerosolFlowReactor:
                 wall_gamma,
                 exposure_length / self.flow_velocity,
             )
-            self.k_wall = -np.log(1 - wall_loss) / (exposure_length / self.flow_velocity)
+            self.k_wall = -np.log(1 - wall_loss) / (
+                exposure_length / self.flow_velocity
+            )
             var_names += [f"Wall Loss per {exposure_length:.1f} cm Exposure"]
             var += [wall_loss * 100]
             var_fmts += [".1f"]
             units += ["%"]
 
-            ### Total Reaction Rate Constant ###
-            self.k_total = self.k_rxn + self.k_wall
-            var_names += ["Total Reaction Rate Constant"]
+            ### Total Observed Rate Constant ###
+            self.k_total = self.k_obs + self.k_wall
+            var_names += ["Total Observed Rate Constant (k_obs + k_wall)"]
             var += [self.k_total]
             var_fmts += [".3g"]
             units += ["s-1"]
 
             ### Total Loss per Exposure Length ###
-            self.total_loss = 1 - np.exp(-self.k_total * exposure_length / self.flow_velocity)
+            self.total_loss = 1 - np.exp(
+                -self.k_total * exposure_length / self.flow_velocity
+            )
             var_names += [f"Total Loss per {exposure_length:.1f} cm Exposure"]
             var += [self.total_loss * 100]
             var_fmts += [".1f"]
             units += ["%"]
 
-            ### Display Values ###
-            if disp and not isinstance(hypothetical_gamma, np.ndarray):
-                tools.table(
-                    "Reactant Uptake",
-                    var_names,
-                    var,  # pyright: ignore[reportArgumentType]
-                    var_fmts,
-                    units,
-                )
-
-    def calculate_gamma_effective(
-        self,
-        concentrations: ArrayLike,
-        exposure: ArrayLike,
-        exposure_units: str,
-    ) -> tuple[ArrayLike, float, float, float, float, float, float]:
-        """
-        Fits the observed loss rate to a first order kinetic model to
-        extract the effective uptake coefficient.
-
-        Args:
-            concentrations (ArrayLike): Reactant concentrations
-                (arbitrary units).
-            exposure (ArrayLike): Reactant exposure (s or cm).
-            exposure_units (str): Units of exposure (s or cm).
-
-        Returns:
-            exposure_times (ArrayLike): Exposure times corresponding to input exposures.
-            k (float): First order loss rate (s-1).
-            intercept (float): y-intercept of the fit.
-            r_value (float): Correlation coefficient of the fit.
-            gamma_effective (float): Effective uptake coefficient.
-            gamma_effective_lower (float): Lower bound of 95% confidence interval for gamma_effective.
-            gamma_effective_upper (float): Upper bound of 95% confidence interval for gamma_effective.
-        """
-        ### Fit data to first order kinetics ###
-        exposure_times, slope, intercept, r_value, _, std_err = (
-            kinetics.fit_first_order_kinetics(
-                obj=self,
-                concentrations=concentrations,
-                exposure=exposure,
-                exposure_units=exposure_units,
+        ### Display Values ###
+        if disp and not isinstance(hypothetical_gamma, np.ndarray):
+            tools.table(
+                "Reactant Uptake",
+                var_names,
+                var,  # pyright: ignore[reportArgumentType]
+                var_fmts,
+                units,
             )
-        )
-        k = -slope
-
-        ### Calculate gamma and confidence intervals ###
-        gamma_effective = kinetics.gamma_from_k(
-            self,
-            k=k,
-            diameter=self.FT_ID,
-        )
-        gamma_effective_upper = kinetics.gamma_from_k(
-            self,
-            k=k + std_err * 1.96,
-            diameter=self.FT_ID,
-        )
-        gamma_effective_lower = kinetics.gamma_from_k(
-            self,
-            k=k - std_err * 1.96,
-            diameter=self.FT_ID,
-        )
-
-        if gamma_effective_lower < 0 or gamma_effective_upper > 1:
-            warnings.warn(
-                "Calculated confidence interval for gamma_effective is unphysical. "
-                "This is typically due to limited data or low correlation."
-            )
-
-        return (
-            exposure_times,
-            k,
-            intercept,
-            r_value,
-            gamma_effective,
-            gamma_effective_lower,
-            gamma_effective_upper,
-        )

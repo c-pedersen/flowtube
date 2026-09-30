@@ -154,7 +154,9 @@ def test_mixing_ratio_bounds(Reactor, make_constructor_kwargs, build_reactor):
         build_reactor(Reactor, constructor_overrides=kwargs)
 
 
-@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
+@pytest.mark.parametrize(
+    "Reactor", [BoatReactor, CoatedWallReactor], ids=["Boat", "CoatedWall"]
+)
 def test_fitting(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor, call_initialize=False)
     with pytest.raises(RuntimeError, match=r"Must call*"):
@@ -179,7 +181,9 @@ def test_reactant_uptake_gammas(Reactor, build_reactor):
         obj.reactant_uptake(hypothetical_gamma=["test", "test2"])
 
 
-@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
+@pytest.mark.parametrize(
+    "Reactor", [BoatReactor, CoatedWallReactor], ids=["Boat", "CoatedWall"]
+)
 def test_fitting_invalid_exposure_units(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
     obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
@@ -191,7 +195,9 @@ def test_fitting_invalid_exposure_units(Reactor, build_reactor):
         )
 
 
-@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
+@pytest.mark.parametrize(
+    "Reactor", [BoatReactor, CoatedWallReactor], ids=["Boat", "CoatedWall"]
+)
 def test_fitting_negative_concentrations(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
     obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
@@ -203,7 +209,9 @@ def test_fitting_negative_concentrations(Reactor, build_reactor):
         )
 
 
-@pytest.mark.parametrize("Reactor", ALL, ids=["AerosolFlow", "Boat", "CoatedWall"])
+@pytest.mark.parametrize(
+    "Reactor", [BoatReactor, CoatedWallReactor], ids=["Boat", "CoatedWall"]
+)
 def test_fitting_non_arraylike_inputs(Reactor, build_reactor):
     obj, _, _ = build_reactor(Reactor)
     obj.reactant_uptake(hypothetical_gamma=1e-7, disp=False)
