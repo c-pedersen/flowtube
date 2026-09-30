@@ -109,7 +109,7 @@ class AerosolFlowReactor:
         self,
         hypothetical_gamma: NDArray[np.float64] | float,
         exposure_length: float = ...,
-        wall_gamma: float = ...,
+        gamma_wall: float = ...,
         disp: bool = ...,
     ) -> None: ...
 
@@ -214,6 +214,8 @@ class CoatedWallReactor:
     def reactant_uptake(
         self,
         hypothetical_gamma: NDArray[np.float64] | float,
+        exposure_length: float = ...,
+        exposure_time: float = ...,
         disp: bool = ...,
     ) -> None: ...
 
@@ -224,7 +226,7 @@ class CoatedWallReactor:
         concentrations: NDArray[np.float64],
         exposure: NDArray[np.float64],
         exposure_units: str,
-    ) -> tuple[float, float, float, float, float]: ...
+    ) -> tuple[NDArray[np.float64], float, float, float, float, float, float]: ...
 
 class BoatReactor:
     """
@@ -326,7 +328,7 @@ class BoatReactor:
         concentrations: NDArray[np.float64],
         exposure: NDArray[np.float64],
         exposure_units: str,
-    ) -> tuple[float, float, float, float, float]: ...
+    ) -> tuple[NDArray[np.float64], float, float, float, float, float, float]: ...
 
 __version__: str
 __author__: str
