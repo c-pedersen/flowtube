@@ -329,5 +329,5 @@ def test_uptake_matches_Wagner_2008_with_exposure_length(
 
     # Note the gamma value is taken from Table 1. It's not clear if this is the same as 
     # the gamma calculated from Figure 6, but it seems to be the case.
-    afr.reactant_uptake(hypothetical_gamma=1.3e-2, exposure_length=exposure_distance, wall_gamma=1e-7, disp=False)
+    afr.reactant_uptake(hypothetical_gamma=1.3e-2, exposure_length=exposure_distance, gamma_wall=1e-7, disp=False)
     assert np.isclose(afr.aerosol_loss, 1-relative_signal, rtol=0.2)

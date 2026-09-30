@@ -821,7 +821,7 @@ class AerosolFlowReactor:
         self,
         hypothetical_gamma: ArrayLike | float,
         exposure_length: float = 1,
-        wall_gamma: float = np.nan,
+        gamma_wall: float = np.nan,
         disp: bool = True,
     ) -> None:
         """
@@ -834,7 +834,7 @@ class AerosolFlowReactor:
                 factor.
             exposure_length (float): Length of the exposed surface in
                 cm. Default is 1 cm.
-            wall_gamma (float): Uptake coefficient for the wall
+            gamma_wall (float): Uptake coefficient for the wall
                 (optional).
             disp (bool): Display calculated values.
 
@@ -846,7 +846,7 @@ class AerosolFlowReactor:
             obj=self,
             hypothetical_gamma=hypothetical_gamma,
             exposure_length=exposure_length,
-            gamma_wall=wall_gamma,
+            gamma_wall=gamma_wall,
         )
 
         ### Initialize lists for displaying values ###
@@ -924,7 +924,7 @@ class AerosolFlowReactor:
         units += ["%"]
 
         # If wall loss if included, calculate the wall loss and total loss
-        if ~np.isnan(wall_gamma):
+        if ~np.isnan(gamma_wall):
             ### Wall Loss per Exposure Length ###
             # see kinetics.py for details
             wall_loss = kinetics.cylinder_loss(
@@ -932,7 +932,7 @@ class AerosolFlowReactor:
                 self.FT_ID,
                 self.N_eff_Shw,
                 self.Kn_wall,
-                wall_gamma,
+                gamma_wall,
                 exposure_length / self.flow_velocity,
             )
             self.k_wall = -np.log(1 - wall_loss) / (
