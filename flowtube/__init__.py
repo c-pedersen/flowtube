@@ -10,7 +10,7 @@ calculations for atmospheric chemistry research.
 
 from typing import TYPE_CHECKING
 
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 __author__ = "Corey Pedersen"
 __email__ = "coreyped@gmail.com"
 
