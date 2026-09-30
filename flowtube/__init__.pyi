@@ -75,9 +75,6 @@ class AerosolFlowReactor:
 
     def flows(
         self,
-        reactant_FR: float,
-        reactant_carrier_FR: float,
-        carrier_FR: float,
         disp: bool = ...,
     ) -> None: ...
 
@@ -182,9 +179,6 @@ class CoatedWallReactor:
 
     def flows(
         self,
-        reactant_FR: float,
-        reactant_carrier_FR: float,
-        carrier_FR: float,
         disp: bool = ...,
     ) -> None: ...
 
@@ -294,9 +288,6 @@ class BoatReactor:
 
     def flows(
         self,
-        reactant_FR: float,
-        reactant_carrier_FR: float,
-        carrier_FR: float,
         disp: bool = ...,
     ) -> None: ...
 
