@@ -258,7 +258,7 @@ class AerosolFlowReactor:
                     permeation_rate=self.reactant_conc,
                     reactant_gas=self.reactant_gas,
                 )
-            elif self.reactant_conc_type in ["Pa", "Torr", "bar", "mbar"]:
+            elif self.reactant_conc_type in ["Pa", "hPa", "Torr", "bar", "mbar"]:
                 self.reactant_MR = tools.vapor_pressure_to_MR(
                     vapor_pressure=self.reactant_conc,
                     P_units=self.reactant_conc_type,
@@ -892,7 +892,7 @@ class AerosolFlowReactor:
         units += ["s-1"]
 
         ### Reaction Rate Constant ###
-        # standard equation, can be seen in Huynh and McNeill, J. Phys. 
+        # standard equation, can be seen in Huynh and McNeill, J. Phys.
         # Chem. A, 2021, for example
         self.k_rxn = hypothetical_gamma * k_c
         var_names += ["Reaction Rate Constant (k_rxn)"]

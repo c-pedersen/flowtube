@@ -229,7 +229,7 @@ class BoatReactor:
                     permeation_rate=self.reactant_conc,
                     reactant_gas=self.reactant_gas,
                 )
-            elif self.reactant_conc_type in ["Pa", "Torr", "bar", "mbar"]:
+            elif self.reactant_conc_type in ["Pa", "hPa", "Torr", "bar", "mbar"]:
                 self.reactant_MR = tools.vapor_pressure_to_MR(
                     vapor_pressure=self.reactant_conc,
                     P_units=self.reactant_conc_type,
