@@ -27,10 +27,15 @@ Apparatus, 4th ed. ed. Cambridge University Press, Leiden.
 
 Incropera, F.P., DeWitt, D.P., Bergman, T.L., Lavine, A.S. (Eds.), 2007.
 Fundamentals of heat and mass transfer, 6. ed. ed. Wiley, Hoboken, NJ.
+
+Seinfeld, J.H. and Pandis, S.N. (2016) Atmospheric chemistry and
+physics: from air pollution to climate change. Third edition. Hoboken,
+New Jersey: John Wiley & Sons.
 """
 
 from typing import Protocol
 
+import molmass as mm
 import numpy as np
 
 from . import tools
@@ -373,6 +378,39 @@ def mixing_time(
     return (diameter / 2) ** 2 / (5 * obj.reactant_diffusion_rate)
 
 
+def carrier_gas_mean_free_path(
+    obj: carrier_attrs,
+) -> float:
+    """
+    Calculate the mean free path of the carrier gas according to eq. 9.6
+    from Seinfeld and Pandis, 2016.
+
+    Args:
+        obj (carrier_attrs): Object with full attributes (P in Pa,
+            T in K, carrier_dynamic_viscosity in kg m-1 s-1,
+            carrier_density in kg m-3).
+
+    Returns:
+        float: Mean free path of the carrier gas (cm).
+    """
+    return (
+        2
+        * obj.carrier_dynamic_viscosity
+        / (
+            obj.P_Pa
+            * np.sqrt(
+                8
+                * float(mm.Formula(obj.carrier_gas).mass)  # g mol-1
+                * 1e-3
+                / np.pi
+                / tools.UNIVERSAL_GAS_CONSTANT  # kg m2 s-2 K-1 mol-1
+                / obj.T_K
+            )
+        )
+        * 100
+    )
+
+
 ### KPS Method Calculations ###
 def N_eff_Shw(
     z_star: float,
@@ -425,8 +463,8 @@ def Kn(
 
     Args:
         mean_free_path (float): Mean free path of the reactant (cm).
-        char_length (float): Characteristic length: diameter of cylinder
-            for a coated wall reactor (cm).
+        char_length (float): Characteristic length (cm) (e.g., diameter 
+            of cylinder for a coated wall reactor).
 
     Returns:
         float: Knudsen number.

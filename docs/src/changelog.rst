@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.5.0
+-------------------
+- Added support for aerosol flow reactors
+
 1.4.0
 -------------------
 - Removed functionality for calculating the diffusion corrected uptake coefficient

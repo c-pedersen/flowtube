@@ -1,8 +1,8 @@
 # tests/test_auto_reinit.py
 """
 Tests to verify that modifying a constructor attribute on an already-initialized
-CoatedWallReactor or BoatReactor produces the same result as building a fresh
-reactor with that attribute set from the start.
+AerosolFlowReactor, CoatedWallReactor, or BoatReactor produces the same result
+as building a fresh reactor with that attribute set from the start.
 """
 
 import numpy as np
@@ -54,6 +54,12 @@ AFR_COMPUTED_ATTRS = [
     "Kn_wall",
     "FT_conc",
     "FT_conc_molec",
+    "aerosol_distribution",
+    "aerosol_diameter",
+    "aerosol_number_conc",
+    "aerosol_density",
+    "aerosol_sigma",
+    "aerosol_surface_area",
 ]
 
 BOAT_COMPUTED_ATTRS = [
@@ -99,7 +105,12 @@ def assert_reactors_equal(Reactor, fresh, mutated):
     for attr in COMPUTED_ATTRS[Reactor]:
         fresh_val = getattr(fresh, attr)
         mutated_val = getattr(mutated, attr)
-        assert np.isclose(fresh_val, mutated_val), (
+        equal = (
+            fresh_val == mutated_val
+            if isinstance(fresh_val, str)
+            else np.isclose(fresh_val, mutated_val, equal_nan=True)
+        )
+        assert equal, (
             f"Mismatch on '{attr}': fresh={fresh_val}, mutated={mutated_val}"
         )
 
@@ -345,6 +356,29 @@ def test_manual_reactant_diffusion_coef(Reactor, build_reactor, make_init_kwargs
 
     assert obj.manually_inputted_diffusion_rate is True
     assert obj.reactant_diffusion_rate == 1.111  # cm2 s-1
+
+
+@pytest.mark.parametrize(
+    "distribution, sigma", [("lognormal", 1.7), ("monodisperse", np.nan)]
+)
+def test_aerosol_reinit_preserves_optional_inputs(build_reactor, distribution, sigma):
+    obj, _, _ = build_reactor(
+        AerosolFlowReactor,
+        init_overrides={
+            "aerosol_distribution": distribution,
+            "aerosol_sigma": sigma,
+            "aerosol_surface_area": 1e-5,
+            "radial_delta_T": 0.0,
+        },
+    )
+
+    obj.FT_ID *= 1.1
+
+    assert obj.aerosol_distribution == distribution
+    assert np.isclose(obj.aerosol_sigma, sigma, equal_nan=True)
+    assert obj.aerosol_surface_area == 1e-5
+    assert obj.radial_delta_T == 0.0
+    assert obj._initializing is False
 
 
 def test_boat_invalid_dimensions_raises(make_constructor_kwargs, make_init_kwargs):

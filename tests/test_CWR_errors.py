@@ -1,5 +1,6 @@
-from flowtube import CoatedWallReactor, tools, flow_calc
 import numpy as np
+
+from flowtube import CoatedWallReactor, flow_calc, tools
 
 
 def test_Knopf_et_al_2015_parameters_do_not_raise(
@@ -126,7 +127,7 @@ def test_FT_insert_flow_velocity(
         injector_ID=0.2,
         injector_OD=0.5,
         reactant_gas="HCl",
-        carrier_gas="He",
+        carrier_gas="N2",
         reactant_conc_type="ppm",
         reactant_conc=1e6,
         insert_ID=1,
