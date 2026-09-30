@@ -775,37 +775,13 @@ class CoatedWallReactor:
         Returns:
             None.
         """
-
         ### Check for valid inputs ###
-        if not isinstance(hypothetical_gamma, (int, float)):
-            try:
-                hypothetical_gamma = np.asarray(hypothetical_gamma, dtype=np.float64)
-            except Exception as e:
-                raise TypeError(
-                    "Gamma input must be float or Array-like of float; "
-                    f"got {type(hypothetical_gamma)}"
-                ) from e
-
-            if hypothetical_gamma.ndim != 1:
-                raise ValueError("Gamma input must be 1-dimensional.")
-
-        # Verify that the exposure length is a positive number and that
-        # it is less than the axial distance of the flow tube or insert
-        if exposure_length <= 0:
-            raise ValueError("Exposure length must be a positive number.")
-        if exposure_length > self.axial_distance:
-            raise ValueError(
-                "Exposure length must be less than the axial distance. Set "
-                "object.axial_distance = ... with a larger axial_distance."
-            )
-
-        # Check exposure time
-        if exposure_time <= 0:
-            raise ValueError("Exposure time must be a positive number.")
-
-        # Check if hypothetical_gamma is between 0 and 1
-        if np.min(hypothetical_gamma) < 0 or np.max(hypothetical_gamma) > 1:
-            raise ValueError("Hypothetical gamma must be between 0 and 1")
+        hypothetical_gamma = input_validation.validate_reactant_uptake(
+            obj=self,
+            hypothetical_gamma=hypothetical_gamma,
+            exposure_length=exposure_length,
+            exposure_time=exposure_time,
+        )
 
         ### Initialize lists for displaying values ###
         var_names: list[str] = []

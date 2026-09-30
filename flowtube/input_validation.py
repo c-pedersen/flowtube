@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from warnings import warn
 
 import molmass as mm
 import numpy as np
@@ -76,19 +77,6 @@ def validate_init(obj: AerosolFlowReactor | CoatedWallReactor | BoatReactor) -> 
         )
 
     ### Check Reactor specific inputs ###
-    if isinstance(obj, CoatedWallReactor):
-        # Check physicality of insert dimensions
-        if np.isnan(obj.insert_ID) != np.isnan(obj.insert_OD):
-            raise ValueError(
-                "Insert dimensions must all be specified or all be unspecified"
-            )
-        elif obj.insert_ID <= 0 or obj.insert_OD <= 0:
-            raise ValueError("Insert ID and OD must be non-zero and positive")
-        elif obj.insert_ID > obj.FT_ID or obj.insert_OD > obj.FT_ID:
-            raise ValueError("Insert cannot be larger than flow tube ID")
-        elif not np.isnan(obj.insert_ID) and obj.insert_ID > obj.insert_OD:
-            raise ValueError("Insert ID cannot be larger than insert OD")
-
     if isinstance(obj, BoatReactor):
         # Check physicality of boat dimensions
         if (
@@ -110,6 +98,18 @@ def validate_init(obj: AerosolFlowReactor | CoatedWallReactor | BoatReactor) -> 
             raise ValueError("Boat length cannot be larger than flow tube length")
         if obj.boat_perimeter is not None and obj.boat_perimeter < 0:
             raise ValueError("Boat perimeter must be positive")
+    elif isinstance(obj, CoatedWallReactor):
+        # Check physicality of insert dimensions
+        if np.isnan(obj.insert_ID) != np.isnan(obj.insert_OD):
+            raise ValueError(
+                "Insert dimensions must all be specified or all be unspecified"
+            )
+        elif obj.insert_ID <= 0 or obj.insert_OD <= 0:
+            raise ValueError("Insert ID and OD must be non-zero and positive")
+        elif obj.insert_ID > obj.FT_ID or obj.insert_OD > obj.FT_ID:
+            raise ValueError("Insert cannot be larger than flow tube ID")
+        elif not np.isnan(obj.insert_ID) and obj.insert_ID > obj.insert_OD:
+            raise ValueError("Insert ID cannot be larger than insert OD")
 
 
 def validate_initialize(
@@ -124,6 +124,8 @@ def validate_initialize(
     Returns:
         None. Raises errors if any validation checks fail.
     """
+    from .aerosol_flow_reactor import AerosolFlowReactor
+
     # Check if flow rates are positive
     if obj.reactant_FR < 0 or obj.reactant_carrier_FR < 0 or obj.carrier_FR < 0:
         raise ValueError("Flow rates must be positive")
@@ -156,9 +158,47 @@ def validate_initialize(
     if obj.axial_distance < 0:
         raise ValueError("Axial distance must be positive")
 
+    if isinstance(obj, AerosolFlowReactor):
+        # Check physicality of aerosol inputs
+        if obj.aerosol_distribution not in ["monodisperse", "lognormal"]:
+            raise ValueError(
+                "Unsupported aerosol distribution. "
+                "Supported distributions: 'monodisperse', 'lognormal'"
+            )
+        if obj.aerosol_diameter <= 0:
+            raise ValueError("Aerosol diameter must be positive")
+        if obj.aerosol_diameter < 1:
+            warn("Aerosol diameter is <1 nm. Verify that aerosol diameter is in nm.")
+        if obj.aerosol_diameter > 1e5:
+            warn(
+                "Aerosol diameter is >10,000 nm. Verify that aerosol diameter is in nm."
+            )
+        if obj.aerosol_number_conc < 0:
+            raise ValueError("Aerosol number concentration must be non-negative")
+        if obj.aerosol_density <= 0:
+            raise ValueError("Aerosol density must be positive")
+        if obj.aerosol_density > 3 or obj.aerosol_density < 0.5:
+            warn(
+                "Aerosol density is outside the typical range of 0.5-3 g/cm^3. "
+                "Verify that aerosol density is in g/cm^3."
+            )
+        if obj.aerosol_distribution == "lognormal":
+            if np.isnan(obj.aerosol_sigma):
+                raise ValueError(
+                    "Aerosol geometric standard deviation must be specified for lognormal distribution"
+                )
+            if obj.aerosol_sigma <= 0:
+                raise ValueError(
+                    "Aerosol geometric standard deviation must be positive"
+                )
+
 
 def validate_reactant_uptake(
-    obj, hypothetical_gamma, exposure_length, exposure_time
+    obj,
+    hypothetical_gamma,
+    exposure_length,
+    exposure_time=None,
+    gamma_wall=None,
 ) -> np.ndarray | float:
     """Validate inputs for the reactant_uptake method.
 
@@ -172,7 +212,9 @@ def validate_reactant_uptake(
             cm. Default is 1 cm.
         exposure_time (float): Time in minutes over which the
             surface is exposed to the reactant. Default is 10
-            minutes.
+            minutes (optional).
+        gamma_wall (float): Uptake coefficient for the wall
+            (optional).
 
     Returns:
         hypothetical_gamma (np.ndarray or float): Validated hypothetical uptake coefficient.
@@ -200,8 +242,12 @@ def validate_reactant_uptake(
         )
 
     # Check exposure time
-    if exposure_time <= 0:
+    if exposure_time is not None and exposure_time <= 0:
         raise ValueError("Exposure time must be a positive number.")
+
+    # Check wall gamma
+    if gamma_wall is not None and (gamma_wall < 0 or gamma_wall > 1):
+        raise ValueError("Wall gamma must be between 0 and 1")
 
     # Check if hypothetical_gamma is between 0 and 1
     if np.min(hypothetical_gamma) < 0 or np.max(hypothetical_gamma) > 1:
