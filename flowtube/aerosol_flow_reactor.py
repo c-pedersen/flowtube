@@ -111,7 +111,8 @@ class AerosolFlowReactor:
                 (supported: Ar, He, N2, O2).
             reactant_conc_type (str): Type of reactant concentration
                 input. Options: "ppm" or "ppb" for mixing ratio,
-                "ng/min" for permeation rate, "Pa" for vapor pressure.
+                "ng/min" for permeation rate, or "Pa", "hPa", "Torr",
+                "bar", or "mbar" for vapor pressure.
             reactant_conc (float): Reactant concentration value.
 
         Returns:
