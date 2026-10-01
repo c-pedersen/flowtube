@@ -56,6 +56,7 @@ class carrier_attrs(
         float  # Dynamic viscosity of the carrier gas (kg m-1 s-1)
     )
     carrier_density: float  # Density of the carrier gas (kg m-3)
+    carrier_gas: str  # Name of the carrier gas (e.g., "N2", "O2", "Air")
 
 
 class full_attrs(
@@ -463,7 +464,7 @@ def Kn(
 
     Args:
         mean_free_path (float): Mean free path of the reactant (cm).
-        char_length (float): Characteristic length (cm) (e.g., diameter 
+        char_length (float): Characteristic length (cm) (e.g., diameter
             of cylinder for a coated wall reactor).
 
     Returns:

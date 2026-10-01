@@ -80,13 +80,11 @@ class AerosolFlowReactor:
     ) -> None: ...
 
     total_FR: float
-    net_cross_section: float
     flow_velocity: float
     residence_time: float
 
     def carrier_flow(
         self,
-        radial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
 
@@ -95,7 +93,7 @@ class AerosolFlowReactor:
     Re: float
 
     def reactant_diffusion(
-        self, reactant_diffusion_rate: float = ..., disp: bool = ...
+        self, disp: bool = ...
     ) -> None: ...
 
     reactant_molec_velocity: float
@@ -190,7 +188,6 @@ class CoatedWallReactor:
 
     def carrier_flow(
         self,
-        radial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
 
@@ -199,7 +196,7 @@ class CoatedWallReactor:
     Re: float
 
     def reactant_diffusion(
-        self, reactant_diffusion_rate: float = ..., disp: bool = ...
+        self, disp: bool = ...
     ) -> None: ...
 
     reactant_molec_velocity: float
@@ -301,7 +298,6 @@ class BoatReactor:
 
     def carrier_flow(
         self,
-        radial_delta_T: float = ...,
         disp: bool = True,
     ) -> None: ...
 
@@ -310,7 +306,7 @@ class BoatReactor:
     Re: float
 
     def reactant_diffusion(
-        self, reactant_diffusion_rate: float = ..., disp: bool = ...
+        self, disp: bool = ...
     ) -> None: ...
     def reactant_uptake(
         self,
