@@ -1,5 +1,6 @@
-import pytest
 import numpy as np
+import pytest
+
 from flowtube import BoatReactor
 
 """ Tests for errors specific to BoatReactor. """

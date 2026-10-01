@@ -1,13 +1,15 @@
 # tests/conftest.py
-import pytest
-from flowtube.coated_wall_reactor import CoatedWallReactor
-from flowtube.boat_reactor import BoatReactor
 import numpy as np
+import pytest
+
+from flowtube.aerosol_flow_reactor import AerosolFlowReactor
+from flowtube.boat_reactor import BoatReactor
+from flowtube.coated_wall_reactor import CoatedWallReactor
 
 
 @pytest.fixture
 def reactor_classes():
-    return [CoatedWallReactor, BoatReactor]
+    return [AerosolFlowReactor, BoatReactor, CoatedWallReactor]
 
 
 @pytest.fixture
@@ -26,9 +28,7 @@ def make_constructor_kwargs():
         }
         # Class-specific reactor args
         if Reactor is CoatedWallReactor:
-            base.update(
-                {"insert_ID": np.nan, "insert_OD": np.nan}
-            )
+            base.update({"insert_ID": np.nan, "insert_OD": np.nan})
         elif Reactor is BoatReactor:
             base.update(
                 {
@@ -58,6 +58,16 @@ def make_init_kwargs():
             "axial_distance": 2.0,
             "disp": False,
         }
+        if Reactor is AerosolFlowReactor:
+            base.update(
+                {
+                    "aerosol_distribution": "lognormal",
+                    "aerosol_diameter": 100,
+                    "aerosol_number_conc": 1e4,
+                    "aerosol_density": 1.0,
+                    "aerosol_sigma": 1.5,
+                }
+            )
         base.update(overrides)
         return base
 

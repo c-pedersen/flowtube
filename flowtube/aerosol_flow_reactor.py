@@ -1,31 +1,35 @@
 """
-Main coated wall reactor class and associated calculations.
+Main aerosol flow reactor class and associated calculations.
 
 Citations:
-    Bertram, A.K., Ivanov, A.V., Hunter, M., Molina, L.T., Molina, M.J.,
-    2001. The Reaction Probability of OH on Organic Surfaces of
-    Tropospheric Interest. J. Phys. Chem. A 105, 9415-9421.
-    https://doi.org/10.1021/jp0114034
+Bertram, A.K., Ivanov, A.V., Hunter, M., Molina, L.T., Molina, M.J.,
+2001. The Reaction Probability of OH on Organic Surfaces of Tropospheric
+Interest. J. Phys. Chem. A 105, 9415-9421.
+https://doi.org/10.1021/jp0114034
 
-    Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
-    Penetration of Gas Molecules and Aerosol Particles through Laminar
-    Flow Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87,
-    3746-3754. https://doi.org/10.1021/ac5042395
+Hanson, D., Kosciuch, E., 2003. The NH3 Mass Accommodation Coefficient
+for Uptake onto Sulfuric Acid Solutions. J. Phys. Chem. A 107,
+2199–2208. https://doi.org/10.1021/jp021570j
 
-    Hanson, D.R., Ravishankara, A.R., 1993. Uptake of hydrochloric acid
-    and hypochlorous acid onto sulfuric acid: solubilities,
-    diffusivities, and reaction. J. Phys. Chem. 97, 12309-12319.
-    https://doi.org/10.1021/j100149a035
+Knopf, D.A., Pöschl, U., Shiraiwa, M., 2015. Radial Diffusion and
+Penetration of Gas Molecules and Aerosol Particles through Laminar Flow
+Reactors, Denuders, and Sampling Tubes. Anal. Chem. 87, 3746-3754.
+https://doi.org/10.1021/ac5042395
 
-    Fuchs, N.A., Sutugin, A.G., 1971. HIGH-DISPERSED AEROSOLS, in: Hidy,
-    G.M., Brock, J.R. (Eds.), Topics in Current Aerosol Research,
-    International Reviews in Aerosol Physics and Chemistry. Pergamon,
-    p. 1. https://doi.org/10.1016/B978-0-08-016674-2.50006-6
+Hanson, D.R., Ravishankara, A.R., 1993. Uptake of hydrochloric acid and
+hypochlorous acid onto sulfuric acid: solubilities, diffusivities, and
+reaction. J. Phys. Chem. 97, 12309-12319.
+https://doi.org/10.1021/j100149a035
 
-    Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and
-    evaluation of gas phase diffusion coefficients of reactive trace
-    gases in the atmosphere: volume 1. Inorganic compounds. Atmos. Chem.
-    Phys. 14, 9233-9247. https://doi.org/10.5194/acp-14-9233-2014
+Fuchs, N.A., Sutugin, A.G., 1971. HIGH-DISPERSED AEROSOLS, in: Hidy,
+G.M., Brock, J.R. (Eds.), Topics in Current Aerosol Research,
+International Reviews in Aerosol Physics and Chemistry. Pergamon, p. 1.
+https://doi.org/10.1016/B978-0-08-016674-2.50006-6
+
+Tang, M.J., Cox, R.A., Kalberer, M., 2014. Compilation and evaluation of
+gas phase diffusion coefficients of reactive trace gases in the
+atmosphere: volume 1. Inorganic compounds. Atmos. Chem. Phys. 14,
+9233-9247. https://doi.org/10.5194/acp-14-9233-2014
 """
 
 from __future__ import annotations
@@ -36,9 +40,14 @@ import molmass as mm
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from flowtube import input_validation
-
-from . import diffusion_coef, flow_calc, kinetics, tools, viscosity_density
+from . import (
+    diffusion_coef,
+    flow_calc,
+    input_validation,
+    kinetics,
+    tools,
+    viscosity_density,
+)
 
 # Attributes than can be updated after initialization and will trigger a re-initialization of the reactor
 _CTOR_ATTRS = frozenset(
@@ -51,8 +60,6 @@ _CTOR_ATTRS = frozenset(
         "carrier_gas",
         "reactant_conc_type",
         "reactant_conc",
-        "insert_ID",
-        "insert_OD",
         "reactant_FR",
         "reactant_carrier_FR",
         "carrier_FR",
@@ -63,11 +70,18 @@ _CTOR_ATTRS = frozenset(
         "reactant_diffusion_rate",
         "radial_delta_T",
         "axial_distance",
+        "aerosol_distribution",
+        "aerosol_diameter",
+        "aerosol_number_conc",
+        "aerosol_density",
+        "aerosol_sigma",
+        "aerosol_surface_area",
+        "manually_inputted_surface_area",
     }
 )
 
 
-class CoatedWallReactor:
+class AerosolFlowReactor:
     def __init__(
         self,
         FT_ID: float,
@@ -78,16 +92,10 @@ class CoatedWallReactor:
         carrier_gas: str,
         reactant_conc_type: str,
         reactant_conc: float,
-        insert_ID: float = np.nan,
-        insert_OD: float = np.nan,
     ) -> None:
         """
         Handles calculations relevant to flow rate, flow diagnostics,
-        transport, and uptake for a coated wall reactor. By default
-        assumes no insert and a fully coated flow tube. To calculate
-        terms for a fully-coated cylindrical insert or for a partially
-        coated flow tube, simply pass values for the insert length and
-        ID.
+        transport, and uptake for a aerosol flow reactor.
 
         Args:
             FT_ID (float): Inner diameter (cm) of flow tube.
@@ -103,10 +111,9 @@ class CoatedWallReactor:
                 (supported: Ar, He, N2, O2).
             reactant_conc_type (str): Type of reactant concentration
                 input. Options: "ppm" or "ppb" for mixing ratio,
-                "ng/min" for permeation rate, "Pa" for vapor pressure.
+                "ng/min" for permeation rate, or "Pa", "hPa", "Torr",
+                "bar", or "mbar" for vapor pressure.
             reactant_conc (float): Reactant concentration value.
-            insert_ID (float, optional): Inner diameter (cm) of insert.
-            insert_OD (float, optional): Outer diameter (cm) of insert.
 
         Returns:
             None
@@ -123,8 +130,6 @@ class CoatedWallReactor:
         self.reactant_conc_type = reactant_conc_type
         self.reactant_conc = reactant_conc
         self.carrier_gas = carrier_gas
-        self.insert_ID = insert_ID
-        self.insert_OD = insert_OD
 
         # Validate inputs
         input_validation.validate_init(self)
@@ -135,7 +140,7 @@ class CoatedWallReactor:
     def __setattr__(self, name, value):
         object.__setattr__(self, name, value)
         if name in _CTOR_ATTRS and not self.__dict__.get("_initializing", True):
-            input_validation.validate_init(self)
+            input_validation.validate_init(self)  # validate before re-init
 
             missing = [a for a in _CTOR_ATTRS if not hasattr(self, a)]
             if missing:
@@ -151,6 +156,18 @@ class CoatedWallReactor:
                 P_units=self.P_units,
                 T=self.T,
                 axial_distance=self.axial_distance,
+                aerosol_distribution=self.aerosol_distribution,
+                aerosol_diameter=self.aerosol_diameter,
+                aerosol_number_conc=self.aerosol_number_conc,
+                aerosol_density=self.aerosol_density,
+                aerosol_sigma=self.aerosol_sigma,
+                aerosol_surface_area=(
+                    self.aerosol_surface_area
+                    if self.manually_inputted_surface_area
+                    or name == "aerosol_surface_area"
+                    else np.nan
+                ),
+                radial_delta_T=self.radial_delta_T,
                 disp=False,
             )
 
@@ -163,13 +180,21 @@ class CoatedWallReactor:
         P_units: str,
         T: float,
         axial_distance: float,
+        aerosol_distribution: str,
+        aerosol_diameter: float,
+        aerosol_number_conc: float,
+        aerosol_density: float,
+        aerosol_sigma: float = np.nan,
+        aerosol_surface_area: float = np.nan,
         reactant_diffusion_rate: float = np.nan,
         radial_delta_T: float = 1,
         disp: bool = True,
     ) -> None:
         """
         Sets experimental conditions and calls calculation functions for
-        numerous flow and diffusion parameters.
+        numerous flow and diffusion parameters. The aerosol is assumed
+        to be mixed with the carrier gas so the inputted concentrations
+        should reflect that.
 
         Args:
             reactant_FR (float): Reactant flow rate (sccm).
@@ -182,6 +207,19 @@ class CoatedWallReactor:
             T (float): Temperature (C).
             axial_distance (float): Axial distance of exposed reactant
                 surface (cm). Also referred to as z.
+            aerosol_distribution (str): Aerosol distribution type.
+                Options: lognormal or monodisperse.
+            aerosol_diameter (float): Aerosol diameter (nm).
+            aerosol_number_conc (float): Aerosol number concentration
+                (cm-3).
+            aerosol_density (float): Aerosol density (g cm-3).
+            aerosol_sigma (float): Aerosol geometric standard deviation
+                (unitless), required for lognormal distribution.
+            aerosol_surface_area (float): Aerosol surface area (cm2
+                cm-3), optional input if overriding the calculated value
+                from the aerosol distribution, diameter, and number
+                concentration. If omitted, the surface area is calculated,
+                replacing any previous override.
             reactant_diffusion_rate (float): Reactant diffusion rate
                 (cm2 s-1) (optional).
             radial_delta_T (float): Radial temperature gradient (K)
@@ -203,6 +241,11 @@ class CoatedWallReactor:
             self.carrier_FR = carrier_FR
             self.radial_delta_T = radial_delta_T
             self.axial_distance = float(axial_distance)
+            self.aerosol_distribution = aerosol_distribution
+            self.aerosol_diameter = aerosol_diameter
+            self.aerosol_number_conc = aerosol_number_conc
+            self.aerosol_density = aerosol_density
+            self.aerosol_sigma = aerosol_sigma
 
             # Validate inputs
             input_validation.validate_initialize(self)
@@ -257,11 +300,27 @@ class CoatedWallReactor:
                 ):
                     self.reactant_diffusion_rate = reactant_diffusion_rate
 
+            ### Surface Area Density ###
+            # Verify that the aerosol surface area is a number
+            try:
+                float(aerosol_surface_area)
+            except ValueError:
+                raise TypeError("Aerosol surface area must be a number")
+
+            # Explicit inputs override calculated values on any initialization.
+            # Omitting the input restores calculation from aerosol properties.
+            if not np.isnan(aerosol_surface_area):
+                self.manually_inputted_surface_area = True
+                self.aerosol_surface_area = aerosol_surface_area
+            else:
+                self.manually_inputted_surface_area = False
+                self.aerosol_surface_area = aerosol_surface_area
+
             # Perform calculations for flows, carrier gas transport, and reactant diffusion
             self.flows(disp=disp)
             self.carrier_flow(disp=disp)
+            self.aerosol_transport(disp=disp)
             self.reactant_diffusion(disp=disp)
-
         finally:
             # Turn flag off to allow __setattr__ to be used normally
             object.__setattr__(self, "_initializing", False)
@@ -278,8 +337,6 @@ class CoatedWallReactor:
         Returns:
             None
         """
-        ### Check for valid inputs ###
-
         ### Initialize Lists for displaying values ###
         var_names: list[str] = []
         var: list[float] = []
@@ -288,37 +345,10 @@ class CoatedWallReactor:
 
         ### Calculate Cross Sectional Areas ###
         # Preinjector net cross section is the area between the FT wall
-        # and the injector OD, minus the cross sectional area of the
-        # insert if present
+        # and the injector OD
         preinjector_net_cross_section = tools.cross_sectional_area(
             self.FT_ID
         ) - tools.cross_sectional_area(self.injector_OD)
-        # If the insert is present, subtract the cross sectional area of the insert
-        if not np.isnan(self.insert_OD):
-            cross_section_outside_insert = tools.cross_sectional_area(
-                self.FT_ID
-            ) - tools.cross_sectional_area(self.insert_OD)
-            cross_section_inside_insert = tools.cross_sectional_area(self.insert_ID)
-
-            preinjector_net_cross_section -= tools.cross_sectional_area(
-                self.insert_OD
-            ) - tools.cross_sectional_area(self.insert_ID)
-
-            if preinjector_net_cross_section <= 0:
-                raise ValueError(
-                    "Invalid insert geometry: insert dimensions must leave a positive net flow cross-section."
-                )
-
-        # Postinjector net cross section is the area inside the FT,
-        # minus the area of the insert if present
-        if not np.isnan(self.insert_OD):
-            postinjector_net_cross_section = (
-                cross_section_outside_insert + cross_section_inside_insert  # pyright: ignore
-            )
-            if postinjector_net_cross_section <= 0:
-                raise ValueError(
-                    "Invalid insert geometry: insert dimensions must leave a positive net flow cross-section."
-                )
 
         ### Flow Rates ###
         # Flow Rate Setpoints
@@ -346,15 +376,11 @@ class CoatedWallReactor:
 
         ### Minimum Carrier Flow Velocity & Rate ###
         # to prevent effect mentioned in Li et al., ACP, 2020
-        if not np.isnan(self.insert_OD):
-            var_names += ["Minimum Carrier Flow Rate (accounting for insert)"]
-        else:
-            var_names += ["Minimum Carrier Flow Rate"]
-
         min_carrier_flow_velocity = total_reactant_flow_velocity * 1.33
         min_carrier_FR = flow_calc.ccm_to_sccm(
             self, min_carrier_flow_velocity * preinjector_net_cross_section * 60
         )
+        var_names += ["Minimum Carrier Flow Rate"]
         var += [min_carrier_FR]
         var_fmts += [".1f"]
         units += ["sccm"]
@@ -374,22 +400,6 @@ class CoatedWallReactor:
         var_fmts += [".1f"]
         units += ["sccm"]
 
-        ### Flow Rate Through Insert ###
-        if not np.isnan(self.insert_OD):
-            self.insert_FR = (
-                self.total_FR
-                * cross_section_inside_insert  # pyright: ignore[reportPossiblyUnboundVariable]
-                / (cross_section_inside_insert + cross_section_outside_insert)  # pyright: ignore
-            )
-            var_names += ["Total Flow Rate Through Insert"]
-            var += [self.insert_FR]
-            var_fmts += [".1f"]
-            units += ["sccm"]
-            if self.insert_FR > (self.total_FR + 1e-6):
-                raise ValueError(
-                    "Error: insert flow rate is larger than total flow rate."
-                )
-
         ### Reactant Concentrations ###
         # Concentration inside of the injector (ppb)
         self.injector_conc = (
@@ -400,19 +410,6 @@ class CoatedWallReactor:
         var_fmts += [".3g"]
         units += ["ppb"]
 
-        # Concentration after the injector (ppb) - Insert
-        # assumes the injector is inside the insert, and that the
-        # reactant flow only mixes inside the insert
-        if not np.isnan(self.insert_OD):
-            self.insert_conc = (
-                self.reactant_FR / self.insert_FR * self.reactant_MR * 1e9
-            )
-            self.insert_conc_molec = flow_calc.MR_to_molec(self, self.insert_conc)
-            var_names += 2 * [f"Insert {self.reactant_gas} Concentration"]
-            var += [self.insert_conc, self.insert_conc_molec]
-            var_fmts += [".3g", ".2e"]
-            units += ["ppb", "molec. cm-3"]
-
         # Concentration after the injector (ppb) - FT
         self.FT_conc = self.reactant_FR / self.total_FR * self.reactant_MR * 1e9
         self.FT_conc_molec = flow_calc.MR_to_molec(self, self.FT_conc)
@@ -422,40 +419,18 @@ class CoatedWallReactor:
         units += ["ppb", "molec. cm-3"]
 
         ### Flow Tube Flow Velocity ###
-        self.FT_flow_velocity = flow_calc.sccm_to_velocity(
-            self, self.total_FR, self.FT_ID
-        )
-        var_names += ["Flow Tube Velocity"]
-        var += [self.FT_flow_velocity]
+        self.flow_velocity = flow_calc.sccm_to_velocity(self, self.total_FR, self.FT_ID)
+        var_names += ["Flow Tube Flow Velocity"]
+        var += [self.flow_velocity]
         var_fmts += [".3g"]
         units += ["cm s-1"]
 
-        ### Insert flow velocity ###
-        # - accounts for flow around outside of insert and through inside of insert
-        if not np.isnan(self.insert_OD):
-            self.insert_flow_velocity = (
-                flow_calc.sccm_to_ccm(self, self.total_FR)
-                / postinjector_net_cross_section  # pyright: ignore[reportPossiblyUnboundVariable]
-                / 60
-            )
-            var_names += ["Insert Velocity"]
-            var += [self.insert_flow_velocity]
-            var_fmts += [".3g"]
-            units += ["cm s-1"]
-
         ### Residence Times ###
-        self.FT_residence_time = self.FT_length / self.FT_flow_velocity
+        self.residence_time = self.FT_length / self.flow_velocity
         var_names += ["Flow Tube Residence Time"]
-        var += [self.FT_residence_time]
+        var += [self.residence_time]
         var_fmts += [".3g"]
         units += ["s"]
-
-        if not np.isnan(self.insert_OD):
-            self.insert_residence_time = 1 / self.insert_flow_velocity
-            var_names += ["Insert Residence Time per cm"]
-            var += [self.insert_residence_time]
-            var_fmts += [".3g"]
-            units += ["s cm-1"]
 
         ### Display Values ###
         if disp:
@@ -504,75 +479,34 @@ class CoatedWallReactor:
         units += ["kg m-3"]
 
         ### Reynolds Number - laminar flow if Re < 1800 ###
-        self.Re_FT = flow_calc.reynolds_number(self, self.total_FR, self.FT_ID)
+        self.Re = flow_calc.reynolds_number(self, self.total_FR, self.FT_ID)
         var_names += ["Flow Tube Reynolds Number"]
-        var += [self.Re_FT]
+        var += [self.Re]
         var_fmts += [".0f"]
         units += ["unitless"]
-        if self.Re_FT > 1800:
+        if self.Re > 1800:
             warnings.warn("Re > 1800. Flow in flow tube may not be laminar")
 
-        if not np.isnan(self.insert_OD):
-            Re_insert = flow_calc.reynolds_number(self, self.total_FR, self.insert_ID)
-            var_names += ["Insert Reynolds Number"]
-            var += [Re_insert]
-            var_fmts += [".0f"]
-            units += ["unitless"]
-            if Re_insert > 1800:
-                warnings.warn("Re > 1800. Flow in insert may not be laminar")
-
         ### Entrance length (cm) - see flow_calc.py for details ###
-        length_to_laminar = flow_calc.length_to_laminar(self.FT_ID, self.Re_FT)
+        length_to_laminar = flow_calc.length_to_laminar(self.FT_ID, self.Re)
         var_names += ["Flow Tube Entrance length"]
         var += [length_to_laminar]
         var_fmts += [".1f"]
         units += ["cm"]
 
-        if not np.isnan(self.insert_OD):
-            insert_length_to_laminar = flow_calc.length_to_laminar(
-                self.insert_ID,
-                Re_insert,  # pyright: ignore[reportPossiblyUnboundVariable]
-            )
-            var_names += ["Insert Entrance length"]
-            var += [insert_length_to_laminar]
-            var_fmts += [".1f"]
-            units += ["cm"]
-
         ### Pressure Gradient (%) - see flow_calc.py for details ###
-        FT_conductance = flow_calc.conductance(self, self.FT_ID, self.FT_length)
-        if not np.isnan(self.insert_OD):
-            insert_conductance = flow_calc.conductance(
-                self, self.insert_ID, self.FT_length
-            )
-            total_conductance = 1 / (1 / insert_conductance + 1 / FT_conductance)
-
-            insert_pressure_gradient = flow_calc.pressure_gradient(
-                self, insert_conductance, self.total_FR
-            )
-            var_names += ["Insert Pressure Gradient"]
-            var += [insert_pressure_gradient * 100]
-            var_fmts += [".2f"]
-            units += ["%"]
-
-            total_pressure_gradient = flow_calc.pressure_gradient(
-                self, total_conductance, self.total_FR
-            )
-            var_names += ["Total Pressure Gradient"]
-            var += [total_pressure_gradient * 100]
-            var_fmts += [".2f"]
-            units += ["%"]
-        else:
-            FT_pressure_gradient = flow_calc.pressure_gradient(
-                self, FT_conductance, self.total_FR
-            )
-            var_names += ["Flow Tube Pressure Gradient"]
-            var += [FT_pressure_gradient * 100]
-            var_fmts += [".2f"]
-            units += ["%"]
+        conductance = flow_calc.conductance(self, self.FT_ID, self.FT_length)
+        pressure_gradient = flow_calc.pressure_gradient(
+            self, conductance, self.total_FR
+        )
+        var_names += ["Flow Tube Pressure Gradient"]
+        var += [pressure_gradient * 100]
+        var_fmts += [".2f"]
+        units += ["%"]
 
         ### Buoyancy Parameters - see flow_calc.py for details ###
         radial_buoyancy = flow_calc.buoyancy_parameters(
-            self, self.radial_delta_T, self.FT_ID, self.Re_FT
+            self, self.radial_delta_T, self.FT_ID, self.Re
         )
         var_names += [f"Radial Buoyancy Parameter (ΔT={self.radial_delta_T:.1f} C)"]
         var += [radial_buoyancy]
@@ -588,6 +522,181 @@ class CoatedWallReactor:
         if disp:
             tools.table(
                 "Fluid Dynamics of Carrier Gas",
+                var_names,
+                var,
+                var_fmts,
+                units,
+            )
+
+    def aerosol_transport(
+        self,
+        disp: bool = True,
+    ) -> None:
+        """Calculates the transport of aerosols in the flow tube.
+
+        Args:
+            disp (bool): Display calculated calculated values.
+
+        Returns:
+            None
+        """
+        ### Initialize Lists for displaying values ###
+        var_names: list[str] = []
+        var: list[float] = []
+        var_fmts: list[str] = []
+        units: list[str] = []
+
+        ### Aerosol Surface Area Density (SAD) (cm2 cm-3) ###
+        # eq. 6 from Hanson and Kosciuch, 2003
+        if self.aerosol_distribution == "monodisperse":
+            calculated_aerosol_surface_area = (
+                4
+                * np.pi
+                * (self.aerosol_diameter * 1e-7 / 2) ** 2
+                * self.aerosol_number_conc
+            )
+        elif self.aerosol_distribution == "lognormal":
+            calculated_aerosol_surface_area = (
+                4
+                * np.pi
+                * (self.aerosol_diameter * 1e-7 / 2) ** 2
+                * self.aerosol_number_conc
+                * np.exp(2 * np.log(self.aerosol_sigma) ** 2)
+            )
+        var_names += ["Calculated Surface Area Density"]
+        var += [calculated_aerosol_surface_area]  # pyright: ignore[reportPossiblyUnboundVariable]
+        var_fmts += [".3g"]
+        units += ["cm2 cm-3"]
+        # Check if the user has previously manually inputted an SAD
+        if self.manually_inputted_surface_area:
+            if self.aerosol_surface_area < 0:
+                raise ValueError("Aerosol surface area must be non-negative")
+            var_names += [
+                "Manually Inputted Surface Area Density \n(used in calculations)"
+            ]
+            var += [self.aerosol_surface_area]
+            var_fmts += [".3g"]
+            units += ["cm2 cm-3"]
+        else:
+            self.aerosol_surface_area = calculated_aerosol_surface_area  # pyright: ignore[reportPossiblyUnboundVariable]
+
+        ### Surface Area Weighted Diameter (nm) ###
+        # eq. 8 from Hanson and Kosciuch, 2003
+        if self.aerosol_distribution == "lognormal":
+            self.surface_area_weighted_diameter = self.aerosol_diameter * np.exp(
+                2.5 * np.log(self.aerosol_sigma) ** 2
+            )
+            var_names += ["Surface Area Weighted Diameter"]
+            var += [self.surface_area_weighted_diameter]
+            var_fmts += [".3g"]
+            units += ["nm"]
+
+        ### Knudsen Number for carrier gas-aerosol interaction ###
+        # - eq. 8 from Knopf et al., Anal. Chem., 2015
+        Kn_carrier_aerosol = flow_calc.Kn(
+            flow_calc.carrier_gas_mean_free_path(self), self.aerosol_diameter * 1e-7
+        )
+        var_names += ["Knudsen Number (carrier-aerosol)"]
+        var += [Kn_carrier_aerosol]
+        var_fmts += [".3g"]
+        units += ["unitless"]
+
+        ### Slip Correction Factor (unitless) ###
+        # eq. 9.34 from Seinfeld and Pandis, 2016
+        self.slip_correction = 1 + Kn_carrier_aerosol * (
+            1.257 + 0.4 * np.exp(-1.1 / Kn_carrier_aerosol)
+        )
+        var_names += ["Slip Correction Factor"]
+        var += [self.slip_correction]
+        var_fmts += [".3g"]
+        units += ["unitless"]
+
+        ### Aerosol Diffusion Rate (cm2 s-1) ###
+        # - eq. 9.73 from Seinfeld and Pandis, 2016
+        self.aerosol_diffusion_rate = (
+            tools.BOLTZMANN_CONSTANT
+            * self.T_K
+            / (
+                3
+                * np.pi
+                * self.carrier_dynamic_viscosity
+                * (self.aerosol_diameter * 1e-9)
+            )
+            * self.slip_correction
+            * 100**2
+        )
+        var_names += ["Aerosol Diffusion Rate"]
+        var += [self.aerosol_diffusion_rate]
+        var_fmts += [".3g"]
+        units += ["cm2 s-1"]
+
+        ### Axial Distance, z* (unitless) ###
+        # - eq. 2 from Knopf et al., Anal. Chem., 2015
+        z_star = (
+            self.axial_distance
+            * np.pi
+            / 2
+            * self.aerosol_diffusion_rate
+            / (flow_calc.sccm_to_ccm(self, self.total_FR) / 60)
+        )
+        var_names += ["Axial Distance, z*"]
+        var += [z_star]
+        var_fmts += [".3g"]
+        units += ["unitless"]
+
+        ### Effective Sherwood Number (unitless) ###
+        # see flow_calc.py for details
+        N_eff_Shw = flow_calc.N_eff_Shw(z_star=z_star)
+
+        ### Thermal Particle Velocity (cm s-1) ###
+        # eq. 9.87 from Seinfeld and Pandis, 2016
+        mean_particle_mass = (
+            self.aerosol_density
+            * (4 / 3)
+            * np.pi
+            * (self.aerosol_diameter * 1e-7 / 2) ** 3
+            / 1000
+        )  # kg
+        self.thermal_particle_velocity = 100 * np.sqrt(
+            8 / np.pi * tools.BOLTZMANN_CONSTANT * self.T_K / mean_particle_mass
+        )
+
+        ### Mean Free Path (cm) ###
+        # eq. 9.88 from Seinfeld and Pandis, 2016
+        self.aerosol_mean_free_path = (
+            2 * self.aerosol_diffusion_rate / self.thermal_particle_velocity
+        )
+        var_names += ["Mean Free Path"]
+        var += [self.aerosol_mean_free_path]
+        var_fmts += [".3g"]
+        units += ["cm"]
+
+        ### Knudsen Number (aerosol-wall) ###
+        Kn_aerosol_wall = flow_calc.Kn(self.aerosol_mean_free_path, self.FT_ID)
+        var_names += ["Knudsen Number (aerosol-wall)"]
+        var += [Kn_aerosol_wall]
+        var_fmts += [".3g"]
+        units += ["unitless"]
+
+        ### Tube Transmission (%) ###
+        # eq. 21 from Knopf et al., Anal. Chem., 2015 - assuming the
+        # sticking paramter, gamma is 1
+        tube_transmission = np.exp(
+            -1
+            / (1 + 1 * 3 / (2 * N_eff_Shw * Kn_aerosol_wall))
+            * self.thermal_particle_velocity
+            / self.FT_ID
+            * self.residence_time
+        )
+        var_names += ["Tube Transmission"]
+        var += [tube_transmission * 100]
+        var_fmts += [".1f"]
+        units += ["%"]
+
+        ### Display Values ###
+        if disp:
+            tools.table(
+                "Aerosol Transport in Flow Tube",
                 var_names,
                 var,
                 var_fmts,
@@ -640,7 +749,7 @@ class CoatedWallReactor:
         # formula matched to values from Knopf et al., Anal. Chem., 2015
         self.reactant_molec_velocity = flow_calc.molec_velocity(
             self, float(mm.Formula(self.reactant_gas).mass)
-        )  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+        )
 
         ### Reactant Mean Free Path (cm) - Fuchs and Sutugin, 1971 ###
         self.reactant_mean_free_path = (
@@ -648,12 +757,8 @@ class CoatedWallReactor:
         )
 
         ### Advection Rate (cm2 s-1) - eq. 1 from Knopf et al., Anal. Chem., 2015 ###
-        if not np.isnan(self.insert_OD):
-            advection_rate = self.insert_flow_velocity * self.insert_ID
-            var_names += ["Insert Advection Rate"]
-        else:
-            advection_rate = self.FT_flow_velocity * self.FT_ID
-            var_names += ["Flow Tube Advection Rate"]
+        advection_rate = self.flow_velocity * self.FT_ID
+        var_names += ["Advection Rate"]
         var += [advection_rate]
         var_fmts += [".3g"]
         units += ["cm2 s-1"]
@@ -669,79 +774,39 @@ class CoatedWallReactor:
             warnings.warn("Pe < 10. Axial diffusion is non-negligible")
 
         ### Mixing Time (s) - see flow_calc.py for details ###
-        if not np.isnan(self.insert_OD):
-            mixing_time = flow_calc.mixing_time(self, self.insert_ID)
-            var_names += ["Insert Mixing Time"]
-        else:
-            mixing_time = flow_calc.mixing_time(self, self.FT_ID)
-            var_names += ["Flow Tube Mixing Time"]
+        mixing_time = flow_calc.mixing_time(self, self.FT_ID)
+        var_names += ["Mixing Time"]
         var += [mixing_time]
         var_fmts += [".2g"]
         units += ["s"]
 
         ### Mixing Length (cm) ###
-        if not np.isnan(self.insert_OD):
-            mixing_length = self.insert_flow_velocity * mixing_time
-            var_names += ["Insert Mixing Length"]
-        else:
-            mixing_length = self.FT_flow_velocity * mixing_time
-            var_names += ["Flow Tube Mixing Length"]
+        mixing_length = self.flow_velocity * mixing_time
+        var_names += ["Mixing Length"]
         var += [mixing_length]
         var_fmts += [".2g"]
         units += ["cm"]
 
         ### Axial Distance ###
         # - eq. 2 from Knopf et al., Anal. Chem., 2015
-        self.z_star_FT = flow_calc.z_star(self, z=self.axial_distance, FR=self.total_FR)
-        if not np.isnan(self.insert_OD):
-            self.insert_z_star = flow_calc.z_star(
-                self, z=self.axial_distance, FR=self.insert_FR
-            )
+        self.z_star = flow_calc.z_star(self, z=self.axial_distance, FR=self.total_FR)
 
         ### Effective Sherwood Number (unitless) ###
         # - eq. 11 from Knopf et al., Anal. Chem., 2015
-        self.N_eff_Shw_FT = flow_calc.N_eff_Shw(z_star=self.z_star_FT)
-        if not np.isnan(self.insert_OD):
-            self.N_eff_Shw_insert = flow_calc.N_eff_Shw(z_star=self.insert_z_star)
+        self.N_eff_Shw = flow_calc.N_eff_Shw(z_star=self.z_star)
 
-        ### Knudsen Number for reactant-wall/insert interaction ###
+        ### Knudsen Number for reactant-wall and reactant-aerosol interaction ###
         # - eq. 8 from Knopf et al., Anal. Chem., 2015
-        self.Kn_FT = flow_calc.Kn(self.reactant_mean_free_path, self.FT_ID)
-        if not np.isnan(self.insert_OD):
-            self.Kn_insert = flow_calc.Kn(self.reactant_mean_free_path, self.insert_ID)
-
-        ### Diffusion Limited Rate Constant (s-1) and Uptake Coefficient ###
-        # - see kinetics.py for details
-        if not np.isnan(self.insert_OD):
-            k_diff = kinetics.diffusion_limited_rate_constant(
-                self, self.N_eff_Shw_insert, self.insert_ID
+        self.Kn_wall = flow_calc.Kn(self.reactant_mean_free_path, self.FT_ID)
+        # - and eq. 8 from  Hanson and Kosciuch, 2003
+        if self.aerosol_distribution == "monodisperse":
+            self.Kn_aerosol = flow_calc.Kn(
+                self.reactant_mean_free_path, self.aerosol_diameter * 1e-7
             )
-            gamma_eff_diff = kinetics.diffusion_limited_uptake_coefficient(
-                self, self.insert_ID, k_diff
+        elif self.aerosol_distribution == "lognormal":
+            self.Kn_aerosol = flow_calc.Kn(
+                self.reactant_mean_free_path, self.surface_area_weighted_diameter * 1e-7
             )
-        else:
-            k_diff = kinetics.diffusion_limited_rate_constant(
-                self, self.N_eff_Shw_FT, self.FT_ID
-            )
-            gamma_eff_diff = kinetics.diffusion_limited_uptake_coefficient(
-                self, self.FT_ID, k_diff
-            )
-        var_names += ["Diffusion Limited Rate Constant"]
-        var += [k_diff]
-        var_fmts += [".3g"]
-        units += ["s-1"]
-        var_names += ["Diffusion Limited Effective Uptake Coefficient"]
-        var += [gamma_eff_diff]
-        var_fmts += [".2g"]
-        units += ["unitless"]
-
-        ### Diffusion Limited Uptake Coefficient ###
-        # – diffusion correction limit from Tang et al., Atmos. Chem. Phys., 2014.
-        gamma_diff = gamma_eff_diff / 0.1
-        var_names += ["Approx. Diffusion Limited Uptake Coefficient"]
-        var += [gamma_diff]
-        var_fmts += [".2g"]
-        units += ["unitless"]
 
         ### Display Values ###
         if disp:
@@ -757,11 +822,12 @@ class CoatedWallReactor:
         self,
         hypothetical_gamma: ArrayLike | float,
         exposure_length: float = 1,
-        exposure_time: float = 10,
+        gamma_wall: float = np.nan,
         disp: bool = True,
     ) -> None:
         """
-        Calculates reactant uptake to coated wall or insert.
+        Calculates reactant uptake to aerosol and loss to flow tube
+        walls.
 
         Args:
             hypothetical_gamma (ArrayLike or float): Hypothetical
@@ -769,20 +835,19 @@ class CoatedWallReactor:
                 factor.
             exposure_length (float): Length of the exposed surface in
                 cm. Default is 1 cm.
-            exposure_time (float): Time in minutes over which the
-                surface is exposed to the reactant. Default is 10
-                minutes.
+            gamma_wall (float): Uptake coefficient for the wall
+                (optional).
             disp (bool): Display calculated values.
 
         Returns:
             None.
         """
-        ### Check for valid inputs ###
+        ### Validate inputs ###
         hypothetical_gamma = input_validation.validate_reactant_uptake(
             obj=self,
             hypothetical_gamma=hypothetical_gamma,
             exposure_length=exposure_length,
-            exposure_time=exposure_time,
+            gamma_wall=gamma_wall,
         )
 
         ### Initialize lists for displaying values ###
@@ -791,99 +856,109 @@ class CoatedWallReactor:
         var_fmts: list[str] = []
         units: list[str] = []
 
-        ### Surface area of coated area ###
-        if not np.isnan(self.insert_OD):
-            surface_area = 2 * np.pi * self.insert_ID / 4
-            var_names += ["Insert surface area per length"]
-        else:
-            surface_area = 2 * np.pi * self.FT_ID / 4
-            var_names += ["Coated wall surface area per length"]
-        var += [surface_area]
-        var_fmts += [".1f"]
-        units += ["cm2/cm"]
-
-        ### Diffusion Correction Factor - gamma_eff / gamma ###
-        # - eq. 15 from Knopf et al., Anal. Chem., 2015
-        if not np.isnan(self.insert_OD):
-            self.C_g = kinetics.correction_factor_from_gamma(
-                self.N_eff_Shw_insert, self.Kn_insert, hypothetical_gamma
-            )
-            var_names += ["Insert Diffusion Correction Factor (γ_eff/γ)"]
-            var_names += ["Insert Diffusion Correction Factor (γ/γ_eff)"]
-        else:
-            self.C_g = kinetics.correction_factor_from_gamma(
-                self.N_eff_Shw_FT, self.Kn_FT, hypothetical_gamma
-            )
-            var_names += ["Flow Tube Diffusion Correction Factor (γ_eff/γ)"]
-            var_names += ["Flow Tube Diffusion Correction Factor (γ/γ_eff)"]
-        var += [self.C_g, 1 / self.C_g]
-        var_fmts += [".3g", ".3g"]
-        units += ["unitless", "unitless"]
+        ### Diffusion Resistance ###
+        # Fuchs and Sutugin, 1971
+        Gamma_diff = (self.Kn_aerosol * (1 + self.Kn_aerosol)) / (
+            0.75 + 0.283 * self.Kn_aerosol
+        )
+        var_names += ["Diffusion Resistance (Γ_diff)"]
+        var += [Gamma_diff]
+        var_fmts += [".3g"]
+        units += ["unitless"]
 
         ### Effective Uptake Coefficient ###
-        # - eq. 15 from Knopf et al., Anal. Chem., 2015
-        gamma_eff = hypothetical_gamma * self.C_g
+        gamma_eff = 1 / (1 / hypothetical_gamma + 1 / Gamma_diff)
         var_names += ["Effective Uptake Coefficient"]
         var += [gamma_eff]
         var_fmts += [".2e"]
         units += ["unitless"]
 
-        ### Observed Loss Rate (s-1) - see kinetics.py for details ###
-        if not np.isnan(self.insert_OD):
-            k_obs = kinetics.observed_loss_rate(self, self.insert_ID, gamma_eff)
-        else:
-            k_obs = kinetics.observed_loss_rate(self, self.FT_ID, gamma_eff)
-        var_names += ["Observed Loss Rate"]
-        var += [k_obs]
+        ### Diffusion Correction Mangitude ###
+        diffusion_correction = (hypothetical_gamma - gamma_eff) / hypothetical_gamma
+        var_names += ["Diffusion Correction"]
+        var += [diffusion_correction * 100]
+        var_fmts += [".3g"]
+        units += ["%"]
+
+        ### Reactant-Particle Collision Rate (cm-3 s-1) ###
+        # - eq. 6 from Hanson and Kosciuch, 2003
+        k_c = self.aerosol_surface_area * self.reactant_molec_velocity / 4
+
+        ### Observed Rate Contant ###
+        # - eq. 7 from Hanson and Kosciuch, 2003
+        self.k_obs = hypothetical_gamma * k_c / (1 + hypothetical_gamma / Gamma_diff)
+        var_names += ["Observed Rate Constant (k_obs)"]
+        var += [self.k_obs]
         var_fmts += [".3g"]
         units += ["s-1"]
 
-        ### Uptake to coated region - see kinetics.py for details ###
-        if not np.isnan(self.insert_OD):
-            uptake = kinetics.cylinder_loss(
-                self,
-                self.insert_ID,
-                self.N_eff_Shw_insert,
-                self.Kn_insert,
-                hypothetical_gamma,
-                exposure_length / self.insert_flow_velocity,
-            )
-            var_names += [f"Insert Loss per {exposure_length:.1f} cm Exposure"]
-        else:
-            uptake = kinetics.cylinder_loss(
-                self,
-                self.FT_ID,
-                self.N_eff_Shw_FT,
-                self.Kn_FT,
-                hypothetical_gamma,
-                exposure_length / self.FT_flow_velocity,
-            )
-            var_names += [f"Flow Tube Loss per {exposure_length:.1f} cm Exposure"]
-        var += [uptake * 100]
+        ### Reaction Rate Constant ###
+        # standard equation, can be seen in Huynh and McNeill, J. Phys.
+        # Chem. A, 2021, for example
+        self.k_rxn = hypothetical_gamma * k_c
+        var_names += ["Reaction Rate Constant (k_rxn)"]
+        var += [self.k_rxn]
+        var_fmts += [".3g"]
+        units += ["s-1"]
+
+        ### Diffusion Rate Constant ###
+        self.k_diff = 1 / (1 / self.k_obs - 1 / self.k_rxn)
+        var_names += ["Diffusion Rate Constant (k_diff)"]
+        var += [self.k_diff]
+        var_fmts += [".3g"]
+        units += ["s-1"]
+
+        ### Reaction Time (s) ###
+        reaction_time = exposure_length / self.flow_velocity
+        var_names += [f"Reaction Time per {exposure_length:.1f} cm Exposure"]
+        var += [reaction_time]
+        var_fmts += [".3g"]
+        units += ["s"]
+
+        ### Loss to aerosol - see kinetics.py for details ###
+        self.aerosol_loss = 1 - np.exp(
+            -self.k_obs * exposure_length / self.flow_velocity
+        )
+        var_names += [f"Loss to Aerosol per {exposure_length:.1f} cm Exposure"]
+        var += [self.aerosol_loss * 100]
         var_fmts += [".1f"]
         units += ["%"]
 
-        ### Fraction of unreacted surface sites after exposure to reactant gas ###
-        # - see Bertram et al., J. Phys. Chem. A, 2001
-        if not np.isnan(self.insert_OD):
-            collision_frequency = (
-                self.insert_conc_molec * self.reactant_molec_velocity / 4
-            )  # molecules cm-2 s-1
-        else:
-            collision_frequency = (
-                self.FT_conc_molec * self.reactant_molec_velocity / 4
-            )  # molecules cm-2 s-1
-        N_tot = 1e15  # number of reaction sites per cm2, assumed
-        F = np.exp(-gamma_eff * collision_frequency * exposure_time * 60 / N_tot)
-        var_names += [
-            (
-                f"Fraction of unreacted surface sites after a {exposure_time:.1f} \n"
-                "minute exposure (assumes a solid surface)"
+        # If wall loss if included, calculate the wall loss and total loss
+        if ~np.isnan(gamma_wall):
+            ### Wall Loss per Exposure Length ###
+            # see kinetics.py for details
+            wall_loss = kinetics.cylinder_loss(
+                self,
+                self.FT_ID,
+                self.N_eff_Shw,
+                self.Kn_wall,
+                gamma_wall,
+                exposure_length / self.flow_velocity,
             )
-        ]
-        var += [F * 100]
-        var_fmts += [".2g"]
-        units += ["%"]
+            self.k_wall = -np.log(1 - wall_loss) / (
+                exposure_length / self.flow_velocity
+            )
+            var_names += [f"Wall Loss per {exposure_length:.1f} cm Exposure"]
+            var += [wall_loss * 100]
+            var_fmts += [".1f"]
+            units += ["%"]
+
+            ### Total Observed Rate Constant ###
+            self.k_total = self.k_obs + self.k_wall
+            var_names += ["Total Observed Rate Constant (k_obs + k_wall)"]
+            var += [self.k_total]
+            var_fmts += [".3g"]
+            units += ["s-1"]
+
+            ### Total Loss per Exposure Length ###
+            self.total_loss = 1 - np.exp(
+                -self.k_total * exposure_length / self.flow_velocity
+            )
+            var_names += [f"Total Loss per {exposure_length:.1f} cm Exposure"]
+            var += [self.total_loss * 100]
+            var_fmts += [".1f"]
+            units += ["%"]
 
         ### Display Values ###
         if disp and not isinstance(hypothetical_gamma, np.ndarray):
@@ -894,78 +969,3 @@ class CoatedWallReactor:
                 var_fmts,
                 units,
             )
-
-    def calculate_gamma_effective(
-        self,
-        concentrations: ArrayLike,
-        exposure: ArrayLike,
-        exposure_units: str,
-    ) -> tuple[ArrayLike, float, float, float, float, float, float]:
-        """
-        Fits the observed loss to the coated wall to a first order kinetic
-        model to extract the effective uptake coefficient.
-
-        Args:
-            concentrations (ArrayLike): Reactant concentrations
-                (arbitrary units).
-            exposure (ArrayLike): Reactant exposure (s or cm).
-            exposure_units (str): Units of exposure (s or cm).
-
-        Returns:
-            exposure_times (ArrayLike): Exposure times corresponding to input exposures.
-            k (float): First order loss rate (s-1).
-            intercept (float): y-intercept of the fit.
-            r_value (float): Correlation coefficient of the fit.
-            gamma_effective (float): Effective uptake coefficient.
-            gamma_effective_lower (float): Lower bound of 95% confidence interval for gamma_effective.
-            gamma_effective_upper (float): Upper bound of 95% confidence interval for gamma_effective.
-        """
-        ### Check which inner diameter to use ###
-        if not np.isnan(self.insert_OD):
-            diameter = self.insert_ID
-        else:
-            diameter = self.FT_ID
-
-        ### Fit data to first order kinetics ###
-        exposure_times, slope, intercept, r_value, _, std_err = (
-            kinetics.fit_first_order_kinetics(
-                obj=self,
-                concentrations=concentrations,
-                exposure=exposure,
-                exposure_units=exposure_units,
-            )
-        )
-        k = -slope
-
-        ### Calculate gamma and confidence intervals ###
-        gamma_effective = kinetics.gamma_from_k(
-            self,
-            k=k,
-            diameter=diameter,
-        )
-        gamma_effective_upper = kinetics.gamma_from_k(
-            self,
-            k=k + std_err * 1.96,
-            diameter=diameter,
-        )
-        gamma_effective_lower = kinetics.gamma_from_k(
-            self,
-            k=k - std_err * 1.96,
-            diameter=diameter,
-        )
-
-        if gamma_effective_lower < 0 or gamma_effective_upper > 1:
-            warnings.warn(
-                "Calculated confidence interval for gamma_effective is unphysical. "
-                "This is typically due to limited data or low correlation."
-            )
-
-        return (
-            exposure_times,
-            k,
-            intercept,
-            r_value,
-            gamma_effective,
-            gamma_effective_lower,
-            gamma_effective_upper,
-        )

@@ -9,6 +9,117 @@ from . import kinetics as kinetics
 from . import tools as tools
 from . import viscosity_density as viscosity_density
 
+class AerosolFlowReactor:
+    """
+    Handles calculations relevant to flow rate, flow diagnostics,
+    transport, and uptake for an aerosol flow reactor.
+    """
+
+    FT_ID: float
+    FT_length: float
+    injector_ID: float
+    injector_OD: float
+    reactant_gas: str
+    carrier_gas: str
+    reactant_conc_type: str
+    reactant_conc: float
+
+    def __init__(
+        self,
+        FT_ID: float,
+        FT_length: float,
+        injector_ID: float,
+        injector_OD: float,
+        reactant_gas: str,
+        carrier_gas: str,
+        reactant_conc_type: str,
+        reactant_conc: float,
+    ) -> None: ...
+    def initialize(
+        self,
+        reactant_FR: float,
+        reactant_carrier_FR: float,
+        carrier_FR: float,
+        P: float,
+        P_units: str,
+        T: float,
+        axial_distance: float,
+        aerosol_distribution: str,
+        aerosol_diameter: float,
+        aerosol_number_conc: float,
+        aerosol_density: float,
+        aerosol_sigma: float = ...,
+        aerosol_surface_area: float = ...,
+        reactant_diffusion_rate: float = ...,
+        radial_delta_T: float = ...,
+        disp: bool = ...,
+    ) -> None: ...
+
+    reactant_FR: float
+    reactant_carrier_FR: float
+    carrier_FR: float
+    P: float
+    P_units: str
+    P_Pa: float
+    T: float
+    T_K: float
+    axial_distance: float
+    aerosol_distribution: str
+    aerosol_diameter: float
+    aerosol_number_conc: float
+    aerosol_density: float
+    aerosol_sigma: float = ...
+    aerosol_surface_area: float = ...
+    manually_inputted_surface_area: bool
+    reactant_diffusion_rate: float
+    radial_delta_T: float
+
+    def flows(
+        self,
+        disp: bool = ...,
+    ) -> None: ...
+
+    total_FR: float
+    flow_velocity: float
+    residence_time: float
+
+    def carrier_flow(
+        self,
+        disp: bool = ...,
+    ) -> None: ...
+
+    carrier_dynamic_viscosity: float
+    carrier_density: float
+    Re: float
+
+    def reactant_diffusion(
+        self, disp: bool = ...
+    ) -> None: ...
+
+    reactant_molec_velocity: float
+    reactant_mean_free_path: float
+    Pe: float
+    z_star: float
+    N_eff_Shw: float
+    Kn_aerosol: float
+    Kn_wall: float
+
+    def reactant_uptake(
+        self,
+        hypothetical_gamma: NDArray[np.float64] | float,
+        exposure_length: float = ...,
+        gamma_wall: float = ...,
+        disp: bool = ...,
+    ) -> None: ...
+
+    k_rxn: NDArray[np.float64] | float
+    k_obs: NDArray[np.float64] | float
+    k_diff: NDArray[np.float64] | float
+    aerosol_loss: NDArray[np.float64] | float
+    k_wall: NDArray[np.float64] | float = ...
+    k_total: NDArray[np.float64] | float = ...
+    total_loss: NDArray[np.float64] | float = ...
+
 class CoatedWallReactor:
     """
     Handles calculations relevant to flow rate, flow diagnostics,
@@ -67,9 +178,6 @@ class CoatedWallReactor:
 
     def flows(
         self,
-        reactant_FR: float,
-        reactant_carrier_FR: float,
-        carrier_FR: float,
         disp: bool = ...,
     ) -> None: ...
 
@@ -80,7 +188,6 @@ class CoatedWallReactor:
 
     def carrier_flow(
         self,
-        radial_delta_T: float = ...,
         disp: bool = ...,
     ) -> None: ...
 
@@ -89,7 +196,7 @@ class CoatedWallReactor:
     Re: float
 
     def reactant_diffusion(
-        self, reactant_diffusion_rate: float = ..., disp: bool = ...
+        self, disp: bool = ...
     ) -> None: ...
 
     reactant_molec_velocity: float
@@ -98,10 +205,15 @@ class CoatedWallReactor:
     z_star_FT: float
     N_eff_Shw_FT: float
     Kn_FT: float
+    z_star_insert: float = ...
+    N_eff_Shw_insert: float = ...
+    Kn_insert: float = ...
 
     def reactant_uptake(
         self,
         hypothetical_gamma: NDArray[np.float64] | float,
+        exposure_length: float = ...,
+        exposure_time: float = ...,
         disp: bool = ...,
     ) -> None: ...
 
@@ -112,7 +224,7 @@ class CoatedWallReactor:
         concentrations: NDArray[np.float64],
         exposure: NDArray[np.float64],
         exposure_units: str,
-    ) -> tuple[float, float, float, float, float]: ...
+    ) -> tuple[NDArray[np.float64], float, float, float, float, float, float]: ...
 
 class BoatReactor:
     """
@@ -128,10 +240,10 @@ class BoatReactor:
     carrier_gas: str
     reactant_conc_type: str
     reactant_conc: float
-    boat_width: float
-    boat_height: float
+    boat_liquid_width: float
     boat_length: float
-    boat_wall_thickness: float
+    boat_cross_section: float
+    boat_perimeter: float | None
 
     def __init__(
         self,
@@ -176,9 +288,6 @@ class BoatReactor:
 
     def flows(
         self,
-        reactant_FR: float,
-        reactant_carrier_FR: float,
-        carrier_FR: float,
         disp: bool = ...,
     ) -> None: ...
 
@@ -189,7 +298,6 @@ class BoatReactor:
 
     def carrier_flow(
         self,
-        radial_delta_T: float = ...,
         disp: bool = True,
     ) -> None: ...
 
@@ -198,7 +306,7 @@ class BoatReactor:
     Re: float
 
     def reactant_diffusion(
-        self, reactant_diffusion_rate: float = ..., disp: bool = ...
+        self, disp: bool = ...
     ) -> None: ...
     def reactant_uptake(
         self,
@@ -217,12 +325,13 @@ class BoatReactor:
         concentrations: NDArray[np.float64],
         exposure: NDArray[np.float64],
         exposure_units: str,
-    ) -> tuple[float, float, float, float, float]: ...
+    ) -> tuple[NDArray[np.float64], float, float, float, float, float, float]: ...
 
 __version__: str
 __author__: str
 __email__: str
 __all__ = [
+    "AerosolFlowReactor",
     "BoatReactor",
     "CoatedWallReactor",
     "diffusion_coef",
