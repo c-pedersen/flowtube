@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.5.1
+-------------------
+- Fixed surface area calculation for coated wall reactors (not used in any calculations—for reference only)
+
 1.5.0
 -------------------
 - Added support for aerosol flow reactors

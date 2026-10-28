@@ -793,10 +793,10 @@ class CoatedWallReactor:
 
         ### Surface area of coated area ###
         if not np.isnan(self.insert_OD):
-            surface_area = 2 * np.pi * self.insert_ID / 4
+            surface_area = np.pi * self.insert_ID
             var_names += ["Insert surface area per length"]
         else:
-            surface_area = 2 * np.pi * self.FT_ID / 4
+            surface_area = np.pi * self.FT_ID
             var_names += ["Coated wall surface area per length"]
         var += [surface_area]
         var_fmts += [".1f"]
